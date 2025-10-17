@@ -1,5 +1,4 @@
 import React from 'react';
-import ImagePlaceholder from './ImagePlaceholder';
 
 const Footer: React.FC = () => {
   return (
