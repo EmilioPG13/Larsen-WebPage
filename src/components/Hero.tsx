@@ -61,16 +61,6 @@ const Hero: React.FC<HeroProps> = ({ onProductInterest }) => {
               </div>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-8 py-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
-                Ver Catálogo Completo
-              </button>
-              <button className="border-2 border-larsen-blue text-larsen-blue hover:bg-larsen-blue hover:text-white font-semibold px-8 py-4 rounded-lg transition-colors duration-200">
-                Solicitar Cotización
-              </button>
-            </div>
-
             {/* Special offer */}
             <SeasonalOffer />
           </div>
