@@ -10,9 +10,9 @@ const Header: React.FC = () => {
           <div className="flex items-center">
             <div className="flex items-center">
               <img 
-                src="/images/larsenlogo.svg" 
-                alt="Larsen Industrial Machines" 
-                className="h-12 w-auto"
+                src="/images/larsen-logo-1.png" 
+                alt="Larsen Italiana" 
+                className="h-12 w-auto object-contain"
               />
             </div>
           </div>

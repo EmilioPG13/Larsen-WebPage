@@ -49,9 +49,9 @@ const Footer: React.FC = () => {
             <div>
               <div className="mb-6 flex justify-center md:justify-start">
                 <img 
-                  src="/images/larsenlogo.svg" 
-                  alt="Larsen Industrial Machines" 
-                  className="h-16 w-auto"
+                  src="/images/larsen-logo-2.png" 
+                  alt="Larsen Italiana SRL" 
+                  className="h-12 w-auto object-contain brightness-0 invert"
                 />
               </div>
               <p className="text-gray-400 mb-4">
@@ -121,7 +121,7 @@ const Footer: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>Via Novembre<br />Moglia, Italia</span>
+                  <span>Moglia, Italia</span>
                 </div>
               </div>
             </div>
