@@ -129,12 +129,12 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, onProductIn
             ))}
           </div>
 
-          <button 
-            onClick={() => onProductInterest(currentProduct)}
-            className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-8 py-3 rounded-full transition-colors duration-200 shadow-md hover:shadow-lg"
-          >
-            💬 Me interesa
-          </button>
+            <button 
+              onClick={() => onProductInterest(currentProduct)}
+              className="bg-larsen-red text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-2 hover:brightness-110"
+            >
+              💬 Me interesa
+            </button>
 
           {/* Product indicator dots */}
           <div className="flex justify-center mt-6 space-x-2">
