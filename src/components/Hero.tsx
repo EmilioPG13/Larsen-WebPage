@@ -1,4 +1,5 @@
 import React from 'react';
+import SeasonalOffer from './SeasonalOffer';
 
 const Hero: React.FC = () => {
   return (
@@ -64,19 +65,7 @@ const Hero: React.FC = () => {
             </div>
 
             {/* Special offer */}
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-6 mt-8">
-              <div className="flex items-center mb-3">
-                <span className="text-2xl mr-3">🍂</span>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">Ofertas de temporada</h3>
-                  <p className="text-sm text-orange-600 font-medium">Hasta 25% de descuento</p>
-                </div>
-              </div>
-              <p className="text-gray-700">
-                Aprovecha nuestras ofertas especiales en máquinas industriales y accesorios. 
-                <strong> ¡Solo por tiempo limitado!</strong>
-              </p>
-            </div>
+            <SeasonalOffer />
           </div>
 
           {/* Right content - Product showcase */}
