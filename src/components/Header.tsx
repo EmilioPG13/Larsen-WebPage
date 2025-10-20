@@ -16,19 +16,19 @@ const Header: React.FC = () => {
 
           {/* Navigation menu - centered */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-colors py-2 px-3 rounded-md hover:bg-gray-50">
+            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Máquinas Industriales
             </a>
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-colors py-2 px-3 rounded-md hover:bg-gray-50">
+            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Overlock
             </a>
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-colors py-2 px-3 rounded-md hover:bg-gray-50">
+            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Accesorios
             </a>
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-colors py-2 px-3 rounded-md hover:bg-gray-50">
+            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Ofertas
             </a>
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-colors py-2 px-3 rounded-md hover:bg-gray-50">
+            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Soporte
             </a>
           </div>
