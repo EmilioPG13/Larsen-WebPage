@@ -19,10 +19,10 @@ const Footer: React.FC = () => {
                 garantía completa. Todas nuestras máquinas pasan por un riguroso proceso de inspección y renovación.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-8 py-3 rounded-full transition-colors duration-200 shadow-md hover:shadow-lg">
                   Ver Máquinas Reacondicionadas
                 </button>
-                <button className="border-2 border-larsen-blue text-larsen-blue hover:bg-larsen-blue hover:text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200">
+                <button className="border-2 border-larsen-blue text-larsen-blue hover:bg-larsen-blue hover:text-white font-semibold px-8 py-3 rounded-full transition-colors duration-200">
                   Catálogo de Accesorios
                 </button>
               </div>

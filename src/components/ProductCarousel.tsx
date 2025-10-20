@@ -131,7 +131,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, onProductIn
 
           <button 
             onClick={() => onProductInterest(currentProduct)}
-            className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+            className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-8 py-3 rounded-full transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             💬 Me interesa
           </button>

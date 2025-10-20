@@ -54,7 +54,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductInterest }
 
         {/* View All Button */}
         <div className="text-center">
-          <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-lg px-10 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+          <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
             Ver todas las máquinas
           </button>
           <p className="text-gray-500 mt-4">
