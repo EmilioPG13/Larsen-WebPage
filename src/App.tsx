@@ -26,7 +26,7 @@ function App() {
     <div className="min-h-screen bg-white">
       <TopBanner />
       <Header />
-      <Hero />
+      <Hero onProductInterest={handleProductInterest} />
       <ProductGrid 
         products={productsData as Product[]} 
         onProductInterest={handleProductInterest}

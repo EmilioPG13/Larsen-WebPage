@@ -1,7 +1,14 @@
 import React from 'react';
 import SeasonalOffer from './SeasonalOffer';
+import ProductCarousel from './ProductCarousel';
+import type { Product } from '../types';
+import productsData from '../data/products.json';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onProductInterest: (product: Product) => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onProductInterest }) => {
   return (
     <section className="relative bg-gradient-to-br from-gray-50 to-white overflow-hidden">
       {/* Subtle background pattern */}
@@ -70,40 +77,10 @@ const Hero: React.FC = () => {
 
           {/* Right content - Product showcase */}
           <div className="relative">
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-12 text-center relative">
-                {/* Product illustration placeholder */}
-                <div className="w-32 h-32 bg-white rounded-xl shadow-lg flex items-center justify-center mx-auto mb-6 border-2 border-gray-200">
-                  <div className="text-6xl text-larsen-blue opacity-80">🏭</div>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">LARSEN SQ3100</h3>
-                <p className="text-larsen-red font-semibold mb-2">Máquina Industrial Premium</p>
-                <div className="text-xs text-gray-500 bg-white/80 px-3 py-1 rounded-full inline-block mb-4">
-                  Imagen próximamente
-                </div>
-                
-                {/* Specs */}
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-6">
-                  <div className="bg-white rounded-lg p-3">
-                    <div className="font-semibold text-gray-900">5000 PPM</div>
-                    <div>Velocidad máxima</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <div className="font-semibold text-gray-900">1000W</div>
-                    <div>Motor potente</div>
-                  </div>
-                </div>
-
-                <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                  💬 Me interesa
-                </button>
-              </div>
-              
-              {/* Badge */}
-              <div className="absolute -top-3 -right-3 bg-larsen-red text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                ⭐ NUEVO 2024
-              </div>
-            </div>
+            <ProductCarousel 
+              products={productsData as Product[]} 
+              onProductInterest={onProductInterest}
+            />
           </div>
         </div>
       </div>
