@@ -4,7 +4,7 @@ const Header: React.FC = () => {
   return (
     <header className="bg-white shadow-lg">
       {/* Main navigation - cleaner layout */}
-      <nav className="container mx-auto px-4 py-6">
+      <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo - simplified */}
           <div className="flex items-center">
@@ -34,25 +34,20 @@ const Header: React.FC = () => {
           </div>
 
           {/* Right side - simplified */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             {/* Search */}
-            <div className="relative hidden lg:block">
+            <div className="relative hidden lg:block focus-within:translate-y-[-2px] transition-transform duration-200">
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
+                className="pl-5 pr-12 py-3 border border-gray-200 rounded-full w-80 bg-gray-50 focus:outline-none focus:bg-white transition-colors duration-200"
               />
-              <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-larsen-red transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
             </div>
-
-            {/* Contact button */}
-            <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-medium px-6 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-              Contacto
-            </button>
           </div>
         </div>
       </nav>
