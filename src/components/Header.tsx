@@ -3,21 +3,6 @@ import React from 'react';
 const Header: React.FC = () => {
   return (
     <header className="bg-white shadow-lg">
-      {/* Top bar - simplified */}
-      <div className="bg-larsen-blue py-3">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between text-sm text-white">
-            <div className="flex items-center space-x-8">
-              <span className="font-bold text-white">LARSEN ITALIANA</span>
-              <span className="text-larsen-pink font-medium">INDUSTRIAL QUALITY SINCE 2004</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-white">🇮🇹 Milano, Italia</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main navigation - cleaner layout */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">

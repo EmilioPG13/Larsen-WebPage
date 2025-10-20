@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import TopBanner from './components/TopBanner';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
+      <TopBanner />
       <Header />
       <Hero />
       <ProductGrid 
