@@ -8,9 +8,12 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Logo - simplified */}
           <div className="flex items-center">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-larsen-blue tracking-wide">LARSEN</h1>
-              <p className="text-sm text-larsen-red font-semibold">INDUSTRIAL MACHINES</p>
+            <div className="flex items-center">
+              <img 
+                src="/images/larsenlogo.svg" 
+                alt="Larsen Industrial Machines" 
+                className="h-12 w-auto"
+              />
             </div>
           </div>
 

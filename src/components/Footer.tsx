@@ -19,10 +19,10 @@ const Footer: React.FC = () => {
                 garantía completa. Todas nuestras máquinas pasan por un riguroso proceso de inspección y renovación.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold px-8 py-3 rounded-full transition-colors duration-200 shadow-md hover:shadow-lg">
+                <button className="bg-larsen-red text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:brightness-105 hover:scale-105">
                   Ver Máquinas Reacondicionadas
                 </button>
-                <button className="border-2 border-larsen-blue text-larsen-blue hover:bg-larsen-blue hover:text-white font-semibold px-8 py-3 rounded-full transition-colors duration-200">
+                <button className="border-2 border-larsen-blue text-larsen-blue hover:bg-larsen-blue hover:text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105">
                   Catálogo de Accesorios
                 </button>
               </div>
@@ -48,8 +48,11 @@ const Footer: React.FC = () => {
             {/* Company Info */}
             <div>
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-larsen-red mb-2">LARSEN</h3>
-                <p className="text-larsen-pink font-medium">ITALIANA</p>
+                <img 
+                  src="/images/larsenlogo.svg" 
+                  alt="Larsen Industrial Machines" 
+                  className="h-16 w-auto"
+                />
               </div>
               <p className="text-gray-400 mb-4">
                 Especialistas en máquinas de coser industriales de alta calidad. 
@@ -79,10 +82,10 @@ const Footer: React.FC = () => {
               <h4 className="text-lg font-semibold mb-4">Productos</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Máquinas Industriales</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Accesorios</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Overlock</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Bordadoras</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Cortadoras</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Accesorios</a></li>
               </ul>
             </div>
 
@@ -119,7 +122,7 @@ const Footer: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>Via Roma 123<br />Milano, Italia</span>
+                  <span>Via Novembre<br />Moglia, Italia</span>
                 </div>
               </div>
             </div>
@@ -132,7 +135,7 @@ const Footer: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
             <div>
-              <p>&copy; 2024 Larsen Italiana. Todos los derechos reservados.</p>
+              <p>&copy; 2025 Larsen Italiana. Todos los derechos reservados.</p>
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="hover:text-white transition-colors">Política de Privacidad</a>
