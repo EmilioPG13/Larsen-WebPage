@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company Info */}
             <div>
-              <div className="mb-6">
+              <div className="mb-6 flex justify-center md:justify-start">
                 <img 
                   src="/images/larsenlogo.svg" 
                   alt="Larsen Industrial Machines" 
@@ -83,7 +83,6 @@ const Footer: React.FC = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Máquinas Industriales</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Accesorios</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Overlock</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Bordadoras</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Cortadoras</a></li>
               </ul>
