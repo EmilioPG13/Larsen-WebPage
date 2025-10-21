@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
             <div>
               <div className="mb-6 flex justify-center md:justify-start">
                 <img 
-                  src="/images/larsen-logo-2.png" 
+                  src="/images/logo/larsen-logo-2.png" 
                   alt="Larsen Italiana SRL" 
                   className="h-12 w-auto object-contain brightness-0 invert"
                 />

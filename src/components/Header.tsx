@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   return (
@@ -9,11 +10,13 @@ const Header: React.FC = () => {
           {/* Logo - simplified */}
           <div className="flex items-center">
             <div className="flex items-center">
-              <img 
-                src="/images/larsen-logo-1.png" 
-                alt="Larsen Italiana" 
-                className="h-12 w-auto object-contain"
-              />
+              <Link to="/">
+                <img 
+                  src="/images/logo/larsen-logo-1.png" 
+                  alt="Larsen Italiana" 
+                  className="h-12 w-auto object-contain"
+                />
+              </Link>
             </div>
           </div>
 
@@ -22,6 +25,9 @@ const Header: React.FC = () => {
             <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Máquinas Industriales
             </a>
+            <Link to="/marcas" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
+              Nuestras Marcas
+            </Link>
             <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Accesorios
             </a>
