@@ -29,14 +29,14 @@ const Header: React.FC = () => {
               Nuestras Marcas
             </Link>
             <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
-              Accesorios
+              Reacondicionamiento
             </a>
             <Link to="/cotizacion" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Cotización
             </Link>
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
-              Soporte
-            </a>
+            <Link to="/nosotros" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
+              Acerca de nosotros
+            </Link>
           </div>
 
           {/* Right side - simplified */}
