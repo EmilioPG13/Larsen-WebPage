@@ -21,7 +21,7 @@ const TopBanner: React.FC = () => {
                 <div className="flex items-center justify-between text-sm text-white">
                     <div className="flex items-center space-x-8">
                         <span className="font-black text-white tracking-wide">LARSEN ITALIANA</span>
-                        <span className="text-larsen-pink font-bold tracking-wide">INDUSTRIAL QUALITY SINCE 2004</span>
+                        <span className="text-larsen-pink font-bold tracking-wide">CALIDAD INDUSTRIAL DESDE 1964</span>
                     </div>
                     <div className="flex items-center space-x-4">
                         <span className="text-white font-semibold">🇮🇹 Moglia, Italia</span>
