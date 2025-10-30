@@ -26,43 +26,21 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, onProductIn
 
   const currentProduct = products[currentIndex];
 
-  // Get category icon
-  const getCategoryIcon = (category: string) => {
-    const icons = {
-      'Industrial': '🏭',
-      'Overlock': '✂️',
-      'Recta': '📏',
-      'Bordado': '🎨',
-      'Corte': '🔪',
-      'Planchado': '🔥'
-    };
-    return icons[category as keyof typeof icons] || '🏭';
-  };
-
   // Get main specs from features
   const getMainSpecs = (features: string[]) => {
     const specs = [];
     
-    // Look for power/motor info
-    const powerFeature = features.find(f => f.toLowerCase().includes('w') || f.toLowerCase().includes('motor'));
-    if (powerFeature) {
-      const powerMatch = powerFeature.match(/(\d+)W/);
-      if (powerMatch) {
-        specs.push({ value: powerMatch[1] + 'W', label: 'Motor potente' });
-      }
+    // For knitting machines, prioritize speed and width
+    if (features.length >= 1) {
+      specs.push({ value: features[0], label: 'Velocidad' });
     }
     
-    // Look for speed info
-    const speedFeature = features.find(f => f.toLowerCase().includes('ppm') || f.toLowerCase().includes('velocidad'));
-    if (speedFeature) {
-      const speedMatch = speedFeature.match(/(\d+)\s*ppm/i);
-      if (speedMatch) {
-        specs.push({ value: speedMatch[1] + ' PPM', label: 'Velocidad máxima' });
-      }
+    if (features.length >= 2) {
+      specs.push({ value: features[1], label: 'Ancho' });
     }
     
-    // If we don't have 2 specs, add generic ones
-    if (specs.length < 2) {
+    // If we don't have enough specs, add generic ones
+    while (specs.length < 2) {
       if (specs.length === 0) {
         specs.push({ value: 'Premium', label: 'Calidad industrial' });
         specs.push({ value: '2 años', label: 'Garantía' });
@@ -106,18 +84,17 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, onProductIn
             </svg>
           </button>
 
-          {/* Product illustration placeholder */}
-          <div className="w-32 h-32 bg-white rounded-xl shadow-lg flex items-center justify-center mx-auto mb-6 border-2 border-gray-200">
-            <div className="text-6xl opacity-80">
-              {getCategoryIcon(currentProduct.category)}
-            </div>
+          {/* Product image */}
+          <div className="w-64 h-64 bg-white rounded-xl shadow-lg flex items-center justify-center mx-auto mb-6 border-2 border-gray-200 overflow-hidden">
+            <img
+              src={currentProduct.image}
+              alt={currentProduct.name}
+              className="max-w-full max-h-full object-contain"
+            />
           </div>
           
           <h3 className="text-2xl font-bold text-gray-900 mb-2">{currentProduct.name}</h3>
           <p className="text-larsen-red font-semibold mb-2">Máquina Industrial Premium</p>
-          <div className="text-xs text-gray-500 bg-white/80 px-3 py-1 rounded-full inline-block mb-4">
-            Imagen próximamente
-          </div>
           
           {/* Specs */}
           <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-6">

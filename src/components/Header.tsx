@@ -22,9 +22,9 @@ const Header: React.FC = () => {
 
           {/* Navigation menu - centered */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
+            <Link to="/maquinas" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Máquinas Industriales
-            </a>
+            </Link>
             <Link to="/marcas" className="text-gray-700 hover:text-larsen-red font-medium transition-all duration-200 py-2 px-3 border-b-2 border-transparent hover:border-larsen-blue">
               Nuestras Marcas
             </Link>
