@@ -1,0 +1,54 @@
+[
+  {
+    "id": "steiger-aries-3",
+    "name": "Steiger Aries.3",
+    "brand": "Steiger",
+    "description": "Máquina de tejer rectilínea compacta y versátil, ideal para producciones flexibles que requieren alta calidad y detalle.",
+    "type": "Máquina de tejer rectilínea",
+    "knittingSystems": "1 carro con 3 sistemas de tejido",
+    "width": "52 pulgadas (132 cm)",
+    "speed": "1.6 m/s",
+    "gauge": "Galgas puras (5, 7, 10, 12, 14, 16) y multigalga (5/7, 7.2)",
+    "yarnGuides": "16 guía-hilos motorizados independientes",
+    "capabilities": ["Intarsia", "Jacquard", "Calados", "Menguados (shaping)", "Tejido full fashion"],
+    "software": "Sistema de programación Logica",
+    "power": "220V (monofásica y trifásica) o 380V (trifásica)",
+    "category": "Tejido Rectilíneo",
+    "image": "/images/machines/ARIES3.png"
+  },
+  {
+    "id": "steiger-aries-6",
+    "name": "Steiger Aries.6",
+    "brand": "Steiger",
+    "description": "Máquina de alta producción, diseñada para prendas más grandes o para producir múltiples piezas simultáneamente.",
+    "type": "Máquina de tejer rectilínea de alta producción",
+    "knittingSystems": "1 carro con 3 sistemas de tejido",
+    "width": "72 pulgadas (182 cm) hasta 92 pulgadas (232 cm)",
+    "speed": "1.6 m/s a 1.9 m/s",
+    "gauge": "Múltiples configuraciones de galga y multigalga (12, 5/10, 7/14)",
+    "yarnGuides": "16 o 24 guía-hilos",
+    "capabilities": ["Intarsia", "Jacquard", "Calados", "Menguados (shaping)", "Prendas completas (whole garment)"],
+    "software": "Sistema de programación Logica",
+    "power": "220V (monofásica y trifásica) o 380V (trifásica)",
+    "category": "Tejido Rectilíneo",
+    "image": "/images/machines/ARIES6.png"
+  },
+  {
+    "id": "vesta-multi",
+    "name": "Vesta Multi",
+    "brand": "Steiger / Sangiacomo",
+    "description": "Máquina con múltiples cabezales de tejido, extremadamente eficiente para producir piezas pequeñas como cuellos, puños, tiras y pretinas.",
+    "type": "Máquina de tejer rectilínea multi-cabezal",
+    "knittingSystems": "4 cabezales (carros) que trabajan sobre la misma frontura",
+    "width": "Ancho total dividido entre los cabezales (ej: 4 secciones de 106 cm)",
+    "speed": "1.3 m/s por cabezal",
+    "gauge": "Galgas 8 y 12",
+    "yarnGuides": "24 guía-hilos en total",
+    "capabilities": ["Jacquard", "Intarsia", "Menguados", "Producción en masa de piezas (cuellos, puños, pretinas, cintas)"],
+    "software": "Sistema de programación especializado",
+    "power": "220V (monofásica y trifásica) o 380V (trifásica)",
+    "category": "Tejido Rectilíneo",
+    "image": "/images/machines/VESTAMULTI.png"
+  }
+]
+

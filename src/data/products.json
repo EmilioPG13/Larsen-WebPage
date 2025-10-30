@@ -1,98 +1,41 @@
 [
   {
-    "id": "industrial-heavy-duty",
-    "name": "Máquina Industrial Heavy Duty",
-    "description": "Máquina de coser industrial de alta resistencia, perfecta para trabajos pesados y producción continua.",
+    "id": "steiger-aries-3",
+    "name": "Steiger Aries.3",
+    "description": "Máquina de tejer rectilínea compacta y versátil, ideal para producciones flexibles que requieren alta calidad y detalle.",
     "price": "Consultar precio",
-    "image": "/images/machine-1.jpg",
+    "image": "/images/machines/ARIES3.png",
     "features": [
-      "Motor de alta potencia 1000W",
-      "Velocidad hasta 5000 ppm",
-      "Mesa de trabajo amplia",
-      "Sistema de lubricación automática",
-      "Garantía 2 años"
+      "Velocidad 1.6 m/s",
+      "Ancho 52 pulgadas"
     ],
-    "category": "Industrial",
-    "discount": "Hasta 40% de descuento"
+    "category": "Tejido Rectilíneo",
+    "discount": "Máquina Premium"
   },
   {
-    "id": "overlock-professional",
-    "name": "Overlock Profesional 5 Hilos",
-    "description": "Máquina overlock profesional con sistema de 5 hilos para acabados perfectos en prendas industriales.",
+    "id": "steiger-aries-6",
+    "name": "Steiger Aries.6",
+    "description": "Máquina de alta producción para prendas grandes o múltiples piezas simultáneamente con velocidad superior.",
     "price": "Consultar precio",
-    "image": "/images/machine-2.jpg",
+    "image": "/images/machines/ARIES6.png",
     "features": [
-      "Sistema de 5 hilos",
-      "Corte automático",
-      "Velocidad 7000 ppm",
-      "Enhebrado automático",
-      "Control de tensión digital"
+      "Velocidad hasta 1.9 m/s",
+      "Ancho hasta 92 pulgadas"
     ],
-    "category": "Overlock",
-    "discount": "Ahorre $300"
+    "category": "Tejido Rectilíneo",
+    "discount": "Alta Producción"
   },
   {
-    "id": "recta-industrial",
-    "name": "Recta Industrial Automática",
-    "description": "Máquina recta industrial con sistema automático de corte y enhebrado para máxima productividad.",
+    "id": "vesta-multi",
+    "name": "Vesta Multi",
+    "description": "Máquina multi-cabezal extremadamente eficiente para producción en masa de cuellos, puños, tiras y pretinas.",
     "price": "Consultar precio",
-    "image": "/images/machine-3.jpg",
+    "image": "/images/machines/VESTAMULTI.png",
     "features": [
-      "Puntada recta perfecta",
-      "Sistema automático",
-      "Velocidad 6000 ppm",
-      "Control computarizado",
-      "Bajo mantenimiento"
+      "4 cabezales de tejido",
+      "Producción en masa"
     ],
-    "category": "Recta",
-    "discount": "Ahorre hasta 50%"
-  },
-  {
-    "id": "bordadora-computerizada",
-    "name": "Bordadora Computarizada",
-    "description": "Máquina bordadora computarizada con múltiples diseños preinstalados y conectividad USB.",
-    "price": "Consultar precio",
-    "image": "/images/machine-4.jpg",
-    "features": [
-      "200+ diseños incluidos",
-      "Pantalla táctil 7\"",
-      "Conectividad USB",
-      "Área de bordado 20x30cm",
-      "Software incluido"
-    ],
-    "category": "Bordado",
-    "discount": "¡Nuevas exclusivas en Internet!"
-  },
-  {
-    "id": "cortadora-industrial",
-    "name": "Cortadora Industrial Vertical",
-    "description": "Cortadora industrial vertical para cortes precisos en múltiples capas de tela simultáneamente.",
-    "price": "Consultar precio",
-    "image": "/images/machine-5.jpg",
-    "features": [
-      "Corte vertical preciso",
-      "Hasta 50 capas",
-      "Cuchilla autoafilable",
-      "Sistema de aspiración",
-      "Control de velocidad"
-    ],
-    "category": "Corte",
-    "discount": "Cantidades limitadas"
-  },
-  {
-    "id": "plancha-industrial",
-    "name": "Plancha Industrial a Vapor",
-    "description": "Sistema de planchado industrial con generador de vapor continuo para acabados profesionales.",
-    "price": "Consultar precio",
-    "image": "/images/machine-6.jpg",
-    "features": [
-      "Vapor continuo",
-      "Temperatura regulable",
-      "Base antiadherente",
-      "Sistema de seguridad",
-      "Ahorro energético"
-    ],
-    "category": "Planchado",
-    "discount": "10% de descuento en tarjetas regalo"
+    "category": "Tejido Rectilíneo",
+    "discount": "Multi-Cabezal"
   }
 ]
