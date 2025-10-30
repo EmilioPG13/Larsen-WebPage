@@ -1,14 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import SeasonalOffer from './SeasonalOffer';
-import ProductCarousel from './ProductCarousel';
-import type { Product } from '../types';
-import productsData from '../data/products.json';
 
-interface HeroProps {
-  onProductInterest: (product: Product) => void;
-}
-
-const Hero: React.FC<HeroProps> = ({ onProductInterest }) => {
+const Hero: React.FC = () => {
   return (
     <section className="relative bg-gradient-to-br from-gray-50 to-white overflow-hidden">
       {/* Subtle background pattern */}
@@ -65,12 +59,55 @@ const Hero: React.FC<HeroProps> = ({ onProductInterest }) => {
             <SeasonalOffer />
           </div>
 
-          {/* Right content - Product showcase */}
+          {/* Right content - Brands showcase */}
           <div className="relative">
-            <ProductCarousel 
-              products={productsData as Product[]} 
-              onProductInterest={onProductInterest}
-            />
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Marcas de <span className="text-larsen-red">Confianza Mundial</span>
+                </h3>
+                <p className="text-gray-600">Trabajamos con los mejores fabricantes</p>
+              </div>
+              
+              {/* Brands Grid */}
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                {[
+                  { name: "PROTTI", image: "/images/brands/PROTTI.png" },
+                  { name: "Scheller", image: "/images/brands/Scheller.png" },
+                  { name: "SHIMA SEIKI", image: "/images/brands/SHIMA SEIKI.png" },
+                  { name: "Steiger ZAMARK", image: "/images/brands/Steiger ZAMARK.png" },
+                  { name: "STOLL", image: "/images/brands/STOLL.png" }
+                ].map((brand, index) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 flex items-center justify-center hover:shadow-lg transition-all duration-300 group border border-gray-200 hover:border-larsen-red"
+                  >
+                    <img
+                      src={brand.image}
+                      alt={brand.name}
+                      className="max-w-full max-h-20 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                    />
+                  </div>
+                ))}
+                
+                {/* Last cell - CTA */}
+                <Link
+                  to="/marcas"
+                  className="bg-gradient-to-br from-larsen-red to-red-600 rounded-xl p-6 flex flex-col items-center justify-center hover:shadow-xl transition-all duration-300 group text-white"
+                >
+                  <span className="text-3xl mb-2">+</span>
+                  <span className="font-semibold text-sm">Ver todas</span>
+                </Link>
+              </div>
+              
+              {/* CTA Button */}
+              <Link
+                to="/marcas"
+                className="block w-full bg-larsen-blue text-white font-semibold py-3 px-6 rounded-full text-center transition-all duration-300 hover:brightness-110 hover:shadow-lg"
+              >
+                Explorar Marcas
+              </Link>
+            </div>
           </div>
         </div>
       </div>

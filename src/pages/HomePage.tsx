@@ -21,7 +21,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Hero onProductInterest={handleProductInterest} />
+      <Hero />
       <ProductGrid 
         products={productsData as Product[]} 
         onProductInterest={handleProductInterest}

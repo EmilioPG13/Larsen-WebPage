@@ -84,8 +84,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products, onProductIn
             </svg>
           </button>
 
-          {/* Product image */}
-          <div className="w-64 h-64 bg-white rounded-xl shadow-lg flex items-center justify-center mx-auto mb-6 border-2 border-gray-200 overflow-hidden">
+          {/* Product image - larger, no distorsión */}
+          <div className="w-64 h-64 bg-white rounded-xl shadow-lg flex items-center justify-center mx-auto mb-6 border-2 border-gray-200 p-4">
             <img
               src={currentProduct.image}
               alt={currentProduct.name}

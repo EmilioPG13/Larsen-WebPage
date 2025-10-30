@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import type { Product } from '../types';
 import ProductCard from './ProductCard';
 
@@ -36,7 +37,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductInterest }
             </div>
             <div className="flex items-center bg-purple-50 text-purple-700 px-4 py-2 rounded-lg">
               <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-              <span className="font-medium">Envío gratuito</span>
+              <span className="font-medium">Envío rapido</span>
             </div>
           </div>
         </div>
@@ -54,11 +55,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductInterest }
 
         {/* View All Button */}
         <div className="text-center">
-          <button className="bg-larsen-red text-white font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:brightness-105 hover:-translate-y-1">
-            Ver todas las máquinas
-          </button>
+          <Link 
+            to="/maquinas"
+            className="inline-block bg-larsen-red text-white font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:brightness-105 hover:-translate-y-1"
+          >
+            Saber más
+          </Link>
           <p className="text-gray-500 mt-4">
-            Más de 50 modelos disponibles • Financiamiento disponible
+            Más de 60 años de experiencia en el sector textil
           </p>
         </div>
       </div>
