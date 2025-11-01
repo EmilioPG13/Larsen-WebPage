@@ -65,26 +65,46 @@ const Hero: React.FC = () => {
                 <p className="text-gray-600">Trabajamos con los mejores fabricantes</p>
               </div>
               
-              {/* Brands Grid */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                {[
-                  { name: "PROTTI", image: "/images/brands/PROTTI.png" },
-                  { name: "Scheller", image: "/images/brands/Scheller.png" },
-                  { name: "SHIMA SEIKI", image: "/images/brands/SHIMA SEIKI.png" },
-                  { name: "Steiger ZAMARK", image: "/images/brands/Steiger ZAMARK.png" },
-                  { name: "STOLL", image: "/images/brands/STOLL.png" }
-                ].map((brand, index) => (
-                  <div
-                    key={index}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 flex items-center justify-center hover:shadow-lg transition-all duration-300 group border border-gray-200 hover:border-larsen-red"
-                  >
-                    <img
-                      src={brand.image}
-                      alt={brand.name}
-                      className="max-w-full max-h-16 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
-                    />
-                  </div>
-                ))}
+              {/* Brands Grid - 3 arriba, 2 abajo centradas */}
+              <div className="space-y-4 mb-8">
+                {/* Primera fila: 3 marcas */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { name: "PROTTI", image: "/images/brands/PROTTI.png" },
+                    { name: "Scheller", image: "/images/brands/Scheller.png" },
+                    { name: "SHIMA SEIKI", image: "/images/brands/SHIMA SEIKI.png" }
+                  ].map((brand, index) => (
+                    <div
+                      key={index}
+                      className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 flex items-center justify-center hover:shadow-lg transition-all duration-300 group border border-gray-200 hover:border-larsen-red"
+                    >
+                      <img
+                        src={brand.image}
+                        alt={brand.name}
+                        className="max-w-full max-h-24 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Segunda fila: 2 marcas centradas */}
+                <div className="flex justify-center gap-4">
+                  {[
+                    { name: "Steiger ZAMARK", image: "/images/brands/Steiger ZAMARK.png" },
+                    { name: "STOLL", image: "/images/brands/STOLL.png" }
+                  ].map((brand, index) => (
+                    <div
+                      key={index + 3}
+                      className="w-full max-w-[calc(33.333%-0.667rem)] bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 flex items-center justify-center hover:shadow-lg transition-all duration-300 group border border-gray-200 hover:border-larsen-red"
+                    >
+                      <img
+                        src={brand.image}
+                        alt={brand.name}
+                        className="max-w-full max-h-24 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
               
               {/* CTA Button */}
