@@ -71,9 +71,9 @@ const MachinesPage = () => {
                   className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
                 >
                   <div className="grid lg:grid-cols-2 gap-8 p-8">
-                    {/* Image */}
+                    {/* Image - White background */}
                     <div className="relative">
-                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 flex items-center justify-center min-h-[300px]">
+                      <div className="bg-white rounded-xl p-8 flex items-center justify-center min-h-[300px]">
                         <img
                           src={machine.image}
                           alt={machine.name}
