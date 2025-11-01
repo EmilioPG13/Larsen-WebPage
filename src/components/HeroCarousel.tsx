@@ -152,22 +152,6 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ products, onProductInterest
             />
           ))}
         </div>
-
-        {/* Features badges below carousel */}
-        <div className="flex flex-wrap justify-center gap-6 mt-12">
-          <div className="flex items-center bg-green-50 text-green-700 px-5 py-3 rounded-lg shadow-sm">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-            <span className="font-semibold">Garantía 2 años</span>
-          </div>
-          <div className="flex items-center bg-blue-50 text-blue-700 px-5 py-3 rounded-lg shadow-sm">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-            <span className="font-semibold">Soporte técnico 24/7</span>
-          </div>
-          <div className="flex items-center bg-purple-50 text-purple-700 px-5 py-3 rounded-lg shadow-sm">
-            <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-            <span className="font-semibold">Envío rápido</span>
-          </div>
-        </div>
       </div>
     </section>
   );
