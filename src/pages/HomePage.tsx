@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Hero from '../components/Hero';
-import ProductGrid from '../components/ProductGrid';
+import HeroCarousel from '../components/HeroCarousel';
 import ContactModal from '../components/ContactModal';
 import type { Product } from '../types';
 import productsData from '../data/products.json';
@@ -21,11 +21,11 @@ const HomePage = () => {
 
   return (
     <>
-      <Hero />
-      <ProductGrid 
+      <HeroCarousel 
         products={productsData as Product[]} 
         onProductInterest={handleProductInterest}
       />
+      <Hero />
       
       <ContactModal
         isOpen={isModalOpen}

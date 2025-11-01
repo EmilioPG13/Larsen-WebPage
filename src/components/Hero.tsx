@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import SeasonalOffer from './SeasonalOffer';
 
 const Hero: React.FC = () => {
   return (
@@ -54,9 +53,6 @@ const Hero: React.FC = () => {
                 <p className="text-sm font-medium text-gray-700">Envío gratuito</p>
               </div>
             </div>
-
-            {/* Special offer */}
-            <SeasonalOffer />
           </div>
 
           {/* Right content - Brands showcase */}
@@ -70,7 +66,7 @@ const Hero: React.FC = () => {
               </div>
               
               {/* Brands Grid */}
-              <div className="grid grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-3 gap-4 mb-8">
                 {[
                   { name: "PROTTI", image: "/images/brands/PROTTI.png" },
                   { name: "Scheller", image: "/images/brands/Scheller.png" },
@@ -80,24 +76,15 @@ const Hero: React.FC = () => {
                 ].map((brand, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 flex items-center justify-center hover:shadow-lg transition-all duration-300 group border border-gray-200 hover:border-larsen-red"
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 flex items-center justify-center hover:shadow-lg transition-all duration-300 group border border-gray-200 hover:border-larsen-red"
                   >
                     <img
                       src={brand.image}
                       alt={brand.name}
-                      className="max-w-full max-h-20 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                      className="max-w-full max-h-16 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
                     />
                   </div>
                 ))}
-                
-                {/* Last cell - CTA */}
-                <Link
-                  to="/marcas"
-                  className="bg-gradient-to-br from-larsen-red to-red-600 rounded-xl p-6 flex flex-col items-center justify-center hover:shadow-xl transition-all duration-300 group text-white"
-                >
-                  <span className="text-3xl mb-2">+</span>
-                  <span className="font-semibold text-sm">Ver todas</span>
-                </Link>
               </div>
               
               {/* CTA Button */}
