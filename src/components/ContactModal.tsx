@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import type { Product, ContactFormData } from '../types';
 
@@ -9,6 +9,9 @@ interface ContactModalProps {
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -20,6 +23,56 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  // Handle close with animation
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300); // Match animation duration
+  };
+
+  // Center modal in viewport when opened
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      // Reset closing state when modal opens
+      setIsClosing(false);
+      
+      // Prevent body scroll when modal is open
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      
+      // Ensure modal is centered - scroll to top of viewport then the modal will be centered
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // After a brief delay, ensure modal is visible (for mobile especially)
+      setTimeout(() => {
+        const modalElement = modalRef.current;
+        if (modalElement) {
+          const rect = modalElement.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const modalHeight = rect.height;
+          
+          // If modal is not fully visible, scroll it into view
+          if (rect.top < 0 || rect.bottom > viewportHeight) {
+            modalElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+        }
+      }, 100);
+
+      return () => {
+        document.body.style.overflow = originalOverflow || 'unset';
+      };
+    } else {
+      // Restore body scroll when modal is closed
+      document.body.style.overflow = 'unset';
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -67,7 +120,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
           productName: product?.name || '',
         });
         setSubmitStatus('idle');
-        onClose();
+        handleClose();
       }, 2000);
 
     } catch (error) {
@@ -81,8 +134,38 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      ref={backdropRef}
+      className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 ${
+        isClosing ? 'animate-modal-backdrop-exit' : 'animate-modal-backdrop-enter'
+      }`}
+      style={{ 
+        scrollBehavior: 'smooth',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        display: 'flex',
+        position: 'fixed',
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
+      <div 
+        ref={modalRef}
+        className={`bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl ${
+          isClosing ? 'animate-modal-exit' : 'animate-modal-enter'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          margin: 'auto',
+          maxHeight: 'calc(100vh - 2rem)',
+        }}
+      >
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -90,8 +173,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
               Solicitar Información
             </h2>
             <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 group"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -201,8 +284,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
           <div className="flex space-x-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
+              onClick={handleClose}
+              className="flex-1 px-6 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95"
             >
               Cancelar
             </button>

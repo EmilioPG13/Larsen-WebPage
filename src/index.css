@@ -109,4 +109,64 @@
   .duration-400 {
     transition-duration: 400ms;
   }
+
+  /* Modal enter animation */
+  @keyframes modalEnter {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .animate-modal-enter {
+    animation: modalEnter 0.3s ease-out;
+  }
+
+  /* Modal exit animation */
+  @keyframes modalExit {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+  }
+
+  .animate-modal-exit {
+    animation: modalExit 0.3s ease-in;
+  }
+
+  /* Backdrop enter animation */
+  @keyframes modalBackdropEnter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-modal-backdrop-enter {
+    animation: modalBackdropEnter 0.3s ease-out;
+  }
+
+  /* Backdrop exit animation */
+  @keyframes modalBackdropExit {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  .animate-modal-backdrop-exit {
+    animation: modalBackdropExit 0.3s ease-in;
+  }
 }

@@ -5,7 +5,27 @@ import ContactAlternatives from '../components/ContactAlternatives';
 
 const QuotePage: React.FC = () => {
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Check if there's a hash in the URL
+    const hasHash = window.location.hash === '#quote-form';
+    
+    // If no hash, check if we should scroll to form (e.g., coming from a button)
+    // This will center the form in the viewport
+    const timeoutId = setTimeout(() => {
+      const formElement = document.getElementById('quote-form');
+      if (formElement) {
+        // Calculate position to center form in viewport
+        const formRect = formElement.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const scrollPosition = window.scrollY + formRect.top - (viewportHeight / 2) + (formRect.height / 2);
+        
+        window.scrollTo({
+          top: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        });
+      }
+    }, hasHash ? 0 : 500); // Faster if hash present, slight delay if navigating from button
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   return (
@@ -54,7 +74,7 @@ const QuotePage: React.FC = () => {
       <QuoteSteps />
 
       {/* Interactive Quote Form */}
-      <section className="py-12">
+      <section id="quote-form" className="py-12 scroll-mt-20">
         <div className="container mx-auto px-4">
           <InteractiveQuoteForm />
         </div>
