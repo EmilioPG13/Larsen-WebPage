@@ -72,7 +72,7 @@ const BrandsPage: React.FC = () => {
       <section className="pt-4 pb-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-            {brands.map((brand, index) => (
+            {brands.map((brand) => (
               <div
                 key={brand.name}
                 className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2"

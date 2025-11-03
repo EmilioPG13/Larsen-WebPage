@@ -52,7 +52,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
         if (modalElement) {
           const rect = modalElement.getBoundingClientRect();
           const viewportHeight = window.innerHeight;
-          const modalHeight = rect.height;
           
           // If modal is not fully visible, scroll it into view
           if (rect.top < 0 || rect.bottom > viewportHeight) {
