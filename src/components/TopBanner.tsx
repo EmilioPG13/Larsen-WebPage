@@ -9,13 +9,13 @@ const TopBanner: React.FC = () => {
         // Delay the actual removal to allow animation to complete
         setTimeout(() => {
             setIsVisible(false);
-        }, 1000);
+        }, 300);
     };
 
     if (!isVisible) return null;
 
     return (
-        <div className={`bg-larsen-blue py-3 transition-all duration-1000 ease-out transform ${!isClosing ? 'translate-y-0 opacity-100 scale-y-100' : '-translate-y-full opacity-0 scale-y-0'
+        <div className={`bg-larsen-blue py-3 transition-all duration-300 ease-in-out transform ${!isClosing ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
             }`}>
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center justify-between text-sm text-white">
