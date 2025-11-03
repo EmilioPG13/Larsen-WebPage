@@ -1,7 +1,7 @@
 [
   {
-    "id": "steiger-aries-3",
-    "name": "Steiger Aries.3",
+    "id": "aries-3",
+    "name": "Aries.3",
     "brand": "Steiger",
     "description": "Máquina de tejer rectilínea compacta y versátil, ideal para producciones flexibles que requieren alta calidad y detalle.",
     "type": "Máquina de tejer rectilínea",
@@ -17,8 +17,8 @@
     "image": "/images/machines/ARIES3.png"
   },
   {
-    "id": "steiger-aries-6",
-    "name": "Steiger Aries.6",
+    "id": "aries-6",
+    "name": "Aries.6",
     "brand": "Steiger",
     "description": "Máquina de alta producción, diseñada para prendas más grandes o para producir múltiples piezas simultáneamente.",
     "type": "Máquina de tejer rectilínea de alta producción",
