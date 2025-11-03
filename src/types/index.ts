@@ -36,3 +36,15 @@ export interface ContactFormData {
   productId?: string;
   productName?: string;
 }
+
+export type SearchResultType = 'machine' | 'product' | 'page';
+
+export interface SearchResult {
+  type: SearchResultType;
+  id: string;
+  title: string;
+  subtitle?: string;
+  image?: string;
+  route: string;
+  data?: Machine | Product;
+}
