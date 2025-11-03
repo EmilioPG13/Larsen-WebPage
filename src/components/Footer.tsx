@@ -4,37 +4,29 @@ import { Link } from 'react-router-dom';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-white">
-      {/* Special offers section */}
+      {/* Warranty section */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-900 py-16">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center bg-larsen-red/10 text-larsen-red px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                🛒 OFERTAS ESPECIALES
+                🛡️ GARANTÍA COMPLETA
               </div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Máquinas Reacondicionadas
+                365 Días de Garantía
               </h2>
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Ahorre hasta un <span className="font-bold text-larsen-red">30% en máquinas reacondicionadas</span> con 
-                garantía completa. Todas nuestras máquinas pasan por un riguroso proceso de inspección y renovación.
+                Todas nuestras máquinas reacondicionadas incluyen <span className="font-bold text-larsen-red">365 días de garantía completa</span>,
+                respaldadas por nuestro equipo de técnicos especializados y servicio postventa.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-larsen-red text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:brightness-105 hover:scale-105">
-                  Ver Máquinas Reacondicionadas
-                </button>
-                <button className="border-2 border-larsen-blue text-larsen-blue hover:bg-larsen-blue hover:text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105">
-                  Catálogo de Accesorios
-                </button>
-              </div>
             </div>
             <div className="relative">
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="text-6xl mb-4 text-larsen-blue">🔧</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Garantía Extendida</h3>
-                <p className="text-gray-600 mb-4">Todas las máquinas reacondicionadas incluyen garantía de 1 año</p>
+                <div className="text-6xl mb-4 text-larsen-blue">🛡️</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Cobertura Total</h3>
+                <p className="text-gray-600 mb-4">Reparaciones, piezas y asistencia técnica incluida durante todo el período de garantía</p>
                 <div className="bg-larsen-red/10 text-larsen-red px-4 py-2 rounded-lg text-sm font-semibold">
-                  Certificado de Calidad
+                  Servicio 24/7 Disponible
                 </div>
               </div>
             </div>
