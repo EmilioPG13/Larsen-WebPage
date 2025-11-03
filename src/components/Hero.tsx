@@ -36,13 +36,13 @@ const Hero: React.FC = () => {
             <div className="grid grid-cols-3 gap-6 py-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-green-600 font-bold">2</span>
+                  <span className="text-green-600 font-bold">365</span>
                 </div>
-                <p className="text-sm font-medium text-gray-700">Años de garantía</p>
+                <p className="text-sm font-medium text-gray-700">Días de garantía</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-blue-600 font-bold">24/7</span>
+                  <span className="text-2xl">🔨</span>
                 </div>
                 <p className="text-sm font-medium text-gray-700">Soporte técnico</p>
               </div>
@@ -50,7 +50,7 @@ const Hero: React.FC = () => {
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-purple-600 font-bold">🚚</span>
                 </div>
-                <p className="text-sm font-medium text-gray-700">Envío gratuito</p>
+                <p className="text-sm font-medium text-gray-700">Envío rápido</p>
               </div>
             </div>
           </div>
