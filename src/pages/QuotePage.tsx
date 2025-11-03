@@ -5,26 +5,21 @@ import ContactAlternatives from '../components/ContactAlternatives';
 
 const QuotePage: React.FC = () => {
   useEffect(() => {
-    // Check if there's a hash in the URL
+    // Check if there's a hash in the URL or if we should scroll to form
     const hasHash = window.location.hash === '#quote-form';
-    
-    // If no hash, check if we should scroll to form (e.g., coming from a button)
-    // This will center the form in the viewport
+
     const timeoutId = setTimeout(() => {
       const formElement = document.getElementById('quote-form');
       if (formElement) {
-        // Calculate position to center form in viewport
-        const formRect = formElement.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const scrollPosition = window.scrollY + formRect.top - (viewportHeight / 2) + (formRect.height / 2);
-        
-        window.scrollTo({
-          top: Math.max(0, scrollPosition),
-          behavior: 'smooth'
+        // Center the form in the current viewport without scrolling to top first
+        formElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
         });
       }
-    }, hasHash ? 0 : 500); // Faster if hash present, slight delay if navigating from button
-    
+    }, hasHash ? 0 : 300); // Slight delay for page load, faster if hash present
+
     return () => clearTimeout(timeoutId);
   }, []);
 
