@@ -111,9 +111,13 @@ const BrandsPage: React.FC = () => {
                   </div>
 
                   {/* CTA Button */}
-                  <button className="mt-6 w-full bg-gray-100 hover:bg-larsen-red hover:text-white text-gray-700 font-medium py-3 px-4 rounded-lg transition-all duration-300 text-sm">
+                  <Link 
+                    to="/maquinas"
+                    onClick={() => window.scrollTo(0, 0)}
+                    className="mt-6 w-full bg-gray-100 hover:bg-larsen-red hover:text-white text-gray-700 font-medium py-3 px-4 rounded-lg transition-all duration-300 text-sm block text-center"
+                  >
                     Ver Productos
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
