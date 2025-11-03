@@ -114,14 +114,14 @@ const MachinesPage = () => {
                       <div className="border-t border-gray-200 pt-4">
                         <button
                           onClick={() => toggleExpand(machine.id)}
-                          className="w-full flex items-center justify-between text-left py-2 hover:text-larsen-red transition-colors"
+                          className="w-full flex items-center justify-between text-left py-2 hover:text-larsen-red transition-all duration-300 group"
                         >
-                          <span className="font-semibold text-gray-700">
+                          <span className="font-semibold text-gray-700 group-hover:translate-x-1 transition-transform duration-300">
                             Especificaciones Técnicas Detalladas
                           </span>
                           <svg
-                            className={`w-5 h-5 transition-transform ${
-                              expandedMachine === machine.id ? 'rotate-180' : ''
+                            className={`w-5 h-5 transition-all duration-300 transform ${
+                              expandedMachine === machine.id ? 'rotate-180 text-larsen-red' : 'group-hover:scale-110'
                             }`}
                             fill="none"
                             stroke="currentColor"
@@ -136,8 +136,18 @@ const MachinesPage = () => {
                           </svg>
                         </button>
 
-                        {expandedMachine === machine.id && (
-                          <div className="mt-4 space-y-3">
+                        <div
+                          className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                            expandedMachine === machine.id
+                              ? 'max-h-[2000px] opacity-100 mt-4'
+                              : 'max-h-0 opacity-0 mt-0'
+                          }`}
+                        >
+                          <div className={`space-y-3 transform transition-all duration-500 ${
+                            expandedMachine === machine.id
+                              ? 'translate-y-0'
+                              : '-translate-y-4'
+                          }`}>
                             <div className="grid sm:grid-cols-2 gap-3 text-sm">
                               <div>
                                 <span className="font-medium text-gray-700">Tipo:</span>
@@ -188,7 +198,7 @@ const MachinesPage = () => {
                               </div>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
 
                       {/* CTA Button */}
