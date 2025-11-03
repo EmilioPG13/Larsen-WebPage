@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ImagePlaceholder from '../components/ImagePlaceholder';
 
 const AboutPage: React.FC = () => {
@@ -356,12 +357,12 @@ const AboutPage: React.FC = () => {
             la solución perfecta para tus necesidades de maquinaria textil.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <button className="bg-white text-larsen-red font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:brightness-105 hover:-translate-y-1">
+            <Link 
+              to="/cotizacion"
+              className="bg-white text-larsen-red font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:brightness-105 hover:-translate-y-1 inline-block"
+            >
               Solicitar Cotización
-            </button>
-            <button className="bg-transparent border-2 border-white text-white font-semibold text-lg px-12 py-4 rounded-full hover:bg-white hover:text-larsen-blue transition-all duration-300 hover:-translate-y-1">
-              Contáctanos
-            </button>
+            </Link>
           </div>
         </div>
       </section>
