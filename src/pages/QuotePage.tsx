@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import InteractiveQuoteForm from '../components/InteractiveQuoteForm';
 import QuoteSteps from '../components/QuoteSteps';
 import ContactAlternatives from '../components/ContactAlternatives';
 
 const QuotePage: React.FC = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Hero Section */}

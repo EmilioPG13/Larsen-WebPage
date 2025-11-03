@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import ContactModal from '../components/ContactModal';
 import type { Product, Machine } from '../types';
 import machinesData from '../data/machines.json';
@@ -217,12 +218,13 @@ const MachinesPage = () => {
               Nuestro equipo de expertos te ayudará a elegir la máquina perfecta 
               para tus necesidades de producción.
             </p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-white text-larsen-red font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:brightness-105 hover:-translate-y-1"
+            <Link
+              to="/cotizacion"
+              onClick={() => window.scrollTo(0, 0)}
+              className="inline-block bg-white text-larsen-red font-semibold text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:brightness-105 hover:-translate-y-1"
             >
               Contactar Especialista
-            </button>
+            </Link>
           </div>
         </section>
       </div>
