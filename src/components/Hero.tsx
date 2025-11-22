@@ -21,7 +21,7 @@ const Hero: React.FC = () => {
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Coser es 
+                Tejer es 
                 <span className="text-larsen-red"> fácil</span>
                 <span className="text-2xl align-top">™</span>
               </h1>

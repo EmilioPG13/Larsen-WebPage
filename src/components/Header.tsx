@@ -210,7 +210,7 @@ const Header: React.FC = () => {
                 location.pathname === '/maquinas' ? 'text-larsen-red' : 'hover:text-larsen-red'
               }`}
             >
-              <span className="relative z-10">Máquinas Industriales</span>
+              <span className="relative z-10">Máquinas Disponibles</span>
               <span className={`absolute bottom-0 left-0 h-0.5 bg-larsen-blue transition-all duration-300 ${
                 location.pathname === '/maquinas' ? 'w-full' : 'w-0 group-hover:w-full'
               }`}></span>
