@@ -16,12 +16,6 @@ const brands: Brand[] = [
     specialties: ["Máquinas de coser industriales", "Equipos de alta velocidad", "Tecnología italiana"]
   },
   {
-    name: "Scheller",
-    image: "/images/brands/Scheller.png",
-    description: "Máquinas textiles de precisión alemana",
-    specialties: ["Máquinas textiles", "Precisión alemana", "Innovación tecnológica"]
-  },
-  {
     name: "SHIMA SEIKI",
     image: "/images/brands/SHIMA SEIKI.png",
     description: "Líder mundial en máquinas de tejido japonesas",
@@ -71,14 +65,14 @@ const BrandsPage: React.FC = () => {
       {/* Brands Grid */}
       <section className="pt-4 pb-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
             {brands.map((brand) => (
               <div
                 key={brand.name}
-                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2"
+                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 w-full max-w-xs flex flex-col items-center text-center"
               >
                 {/* Logo Container */}
-                <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+                <div className="relative h-48 w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
                   <img
                     src={brand.image}
                     alt={brand.name}
@@ -89,7 +83,7 @@ const BrandsPage: React.FC = () => {
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-6 flex flex-col items-center text-center flex-1 w-full">
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-larsen-red transition-colors duration-300">
                     {brand.name}
                   </h3>
@@ -98,11 +92,11 @@ const BrandsPage: React.FC = () => {
                   </p>
                   
                   {/* Specialties */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     {brand.specialties.map((specialty, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center text-xs text-gray-500"
+                        className="flex items-center justify-center text-xs text-gray-500"
                       >
                         <span className="w-1.5 h-1.5 bg-larsen-red rounded-full mr-2 opacity-60 group-hover:opacity-100 transition-opacity duration-300"></span>
                         {specialty}
