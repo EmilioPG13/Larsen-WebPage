@@ -26,7 +26,7 @@ const QuotePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="relative pt-12 pb-8 overflow-hidden">
+      <section className="relative py-11 pb-0.5 overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-20 w-32 h-32 bg-larsen-blue rounded-full"></div>

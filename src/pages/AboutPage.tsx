@@ -6,7 +6,7 @@ const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="relative py-18 pb-5 overflow-hidden">
+      <section className="relative py-11 pb-0.5 overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-20 w-32 h-32 bg-larsen-blue rounded-full"></div>
@@ -347,7 +347,7 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* CTA Final */}
-      <section className="py-20 bg-gradient-to-r from-larsen-blue to-larsen-red">
+      <section className="py-15 bg-gradient-to-r from-larsen-blue to-larsen-red">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
             ¿Listo para trabajar con nosotros?
