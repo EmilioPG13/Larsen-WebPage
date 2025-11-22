@@ -39,7 +39,7 @@ const BrandsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="relative py-18 pb-5 overflow-hidden">
+      <section className="relative py-11 pb-0.5 overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-20 w-32 h-32 bg-larsen-blue rounded-full"></div>
@@ -63,7 +63,7 @@ const BrandsPage: React.FC = () => {
       </section>
 
       {/* Brands Grid */}
-      <section className="pt-4 pb-20">
+      <section className=" pb-17">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
             {brands.map((brand) => (
@@ -120,7 +120,7 @@ const BrandsPage: React.FC = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-larsen-blue to-larsen-red">
+      <section className="py-15 bg-gradient-to-r from-larsen-blue to-larsen-red">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
             ¿Necesitas asesoría especializada?

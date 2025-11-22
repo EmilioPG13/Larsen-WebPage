@@ -11,8 +11,20 @@ const Header: React.FC = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Handle scroll detection for header effects
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Navigation keyword mapping
   const navigationKeywords = {
@@ -185,7 +197,13 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-lg animate-slide-down">
+    <header 
+      className={`sticky top-0 z-50 bg-white transition-all duration-300 ease-in-out ${
+        isScrolled 
+          ? 'shadow-xl backdrop-blur-md bg-white/95' 
+          : 'shadow-lg'
+      }`}
+    >
       {/* Main navigation - cleaner layout */}
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
@@ -401,6 +419,15 @@ const Header: React.FC = () => {
           </div>
         </div>
       </nav>
+      
+      {/* Separator line - bottom border with gradient */}
+      <div 
+        className={`h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent transition-all duration-300 ${
+          isScrolled 
+            ? 'opacity-80 bg-gradient-to-r from-larsen-blue/30 via-gray-300 to-larsen-red/30' 
+            : 'opacity-60'
+        }`}
+      ></div>
     </header>
   );
 };
