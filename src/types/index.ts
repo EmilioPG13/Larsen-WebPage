@@ -7,6 +7,7 @@ export interface Product {
   features: string[];
   category: string;
   discount: string;
+  inStock?: boolean;
 }
 
 export interface Machine {
@@ -25,6 +26,7 @@ export interface Machine {
   power: string;
   category: string;
   image: string;
+  inStock?: boolean;
 }
 
 export interface ContactFormData {

@@ -17,9 +17,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onInterest }) => {
           className="w-full h-full object-contain p-8"
         />
         
+        {/* Inventory status badge */}
+        {product.inStock !== undefined && (
+          <div className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs font-semibold shadow-md ${
+            product.inStock 
+              ? 'bg-green-600 text-white' 
+              : 'bg-gray-500 text-white'
+          }`}>
+            {product.inStock ? 'En Stock' : 'No disponible'}
+          </div>
+        )}
+        
         {/* Discount badge */}
         {product.discount && (
-          <div className="absolute top-4 left-4 bg-larsen-red text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-md">
+          <div className={`absolute top-4 ${product.inStock !== undefined ? 'left-20' : 'left-4'} bg-larsen-red text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-md`}>
             {product.discount}
           </div>
         )}

@@ -8,6 +8,10 @@ import BrandsPage from './pages/BrandsPage';
 import QuotePage from './pages/QuotePage';
 import AboutPage from './pages/AboutPage';
 import MachinesPage from './pages/MachinesPage';
+import AdminLogin from './admin/pages/Login';
+import AdminDashboard from './admin/pages/Dashboard';
+import AdminLayout from './admin/components/AdminLayout';
+import ProtectedRoute from './admin/components/ProtectedRoute';
 
 function AppContent() {
   const location = useLocation();
@@ -48,6 +52,19 @@ function AppContent() {
           <Route path="/maquinas" element={<MachinesPage />} />
           <Route path="/cotizacion" element={<QuotePage />} />
           <Route path="/nosotros" element={<AboutPage />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
       

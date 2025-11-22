@@ -1,13 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ContactModal from '../components/ContactModal';
 import type { Product, Machine } from '../types';
-import machinesData from '../data/machines.json';
+import { getMachines } from '../services/api';
 
 const MachinesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMachine, setSelectedMachine] = useState<Product | undefined>();
   const [expandedMachine, setExpandedMachine] = useState<string | null>(null);
+  const [machines, setMachines] = useState<Machine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMachines = async () => {
+      try {
+        setLoading(true);
+        const data = await getMachines();
+        setMachines(data);
+      } catch (err) {
+        console.error('Error fetching machines:', err);
+        setError('Error al cargar máquinas');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMachines();
+  }, []);
 
   const handleMachineInterest = (machine: Machine) => {
     const productData: Product = {
@@ -18,7 +38,8 @@ const MachinesPage = () => {
       image: machine.image,
       features: [machine.speed, machine.width],
       category: machine.category,
-      discount: machine.brand
+      discount: machine.brand,
+      inStock: machine.inStock
     };
     setSelectedMachine(productData);
     setIsModalOpen(true);
@@ -33,7 +54,21 @@ const MachinesPage = () => {
     setExpandedMachine(expandedMachine === machineId ? null : machineId);
   };
 
-  const machines = machinesData as Machine[];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Cargando máquinas...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -87,12 +122,31 @@ const MachinesPage = () => {
                     <div className="flex flex-col">
                       {/* Header */}
                       <div>
-                        <div className="inline-flex items-center bg-larsen-blue/10 text-larsen-blue px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                          {machine.brand}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="inline-flex items-center bg-larsen-blue/10 text-larsen-blue px-4 py-2 rounded-full text-sm font-semibold">
+                            {machine.brand}
+                          </div>
+                          {/* Inventory status badge */}
+                          {machine.inStock !== undefined && (
+                            <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
+                              machine.inStock 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-gray-200 text-gray-700'
+                            }`}>
+                              {machine.inStock ? '✓ En Stock' : '✗ No disponible'}
+                            </div>
+                          )}
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 mb-3">
                           {machine.name}
                         </h2>
+                        {machine.inStock === false && (
+                          <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-700 text-sm font-medium">
+                              ⚠️ No disponible actualmente en almacén
+                            </p>
+                          </div>
+                        )}
                         <p className="text-gray-600 leading-relaxed mb-6">
                           {machine.description}
                         </p>
@@ -205,16 +259,30 @@ const MachinesPage = () => {
                       <div className="mt-auto pt-6">
                         <button
                           onClick={() => handleMachineInterest(machine)}
-                          className="w-full bg-larsen-red text-white font-semibold py-4 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-2xl hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transform-gpu group relative overflow-hidden"
+                          disabled={machine.inStock === false}
+                          className={`w-full font-semibold py-4 px-6 rounded-full transition-all duration-300 shadow-lg ${
+                            machine.inStock === false
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-larsen-red text-white hover:shadow-2xl hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transform-gpu group relative overflow-hidden'
+                          }`}
                         >
-                          <span className="relative z-10 flex items-center justify-center gap-2">
-                            <span className="group-hover:scale-110 transition-transform duration-300 inline-block">💬</span>
-                            Solicitar Cotización
-                            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                          </span>
-                          <span className="absolute inset-0 bg-gradient-to-r from-larsen-red to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          {machine.inStock === false ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <span>📦</span>
+                              No disponible actualmente
+                            </span>
+                          ) : (
+                            <>
+                              <span className="relative z-10 flex items-center justify-center gap-2">
+                                <span className="group-hover:scale-110 transition-transform duration-300 inline-block">💬</span>
+                                Solicitar Cotización
+                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                              </span>
+                              <span className="absolute inset-0 bg-gradient-to-r from-larsen-red to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>

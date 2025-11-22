@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import emailjs from '@emailjs/browser';
+import { submitLead } from '../services/api';
 
 interface QuoteFormData {
   // Step 1: Personal Info
@@ -116,25 +116,19 @@ const InteractiveQuoteForm: React.FC = () => {
     setSubmitStatus('idle');
 
     try {
-      const result = await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        {
-          from_name: formData.name,
-          from_email: formData.email,
-          phone: formData.phone,
-          company: formData.company,
-          industry: formData.industry || 'No especificado',
-          production_volume: formData.productionVolume || 'No especificado',
-          budget: formData.budget,
-          purchase_date: formData.purchaseDate,
-          message: formData.message || 'Sin mensaje adicional',
-          to_email: 'ventas@larsenitaliana.com', // Replace with your email
-        },
-        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
-      );
+      await submitLead({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.company,
+        industry: formData.industry || undefined,
+        productionVolume: formData.productionVolume || undefined,
+        budget: formData.budget,
+        purchaseDate: formData.purchaseDate,
+        message: formData.message || undefined,
+      });
 
-      console.log('Quote request sent successfully:', result);
+      console.log('Quote request sent successfully');
       setSubmitStatus('success');
       
       // Reset form after successful submission

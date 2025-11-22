@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import emailjs from '@emailjs/browser';
+import { submitContact } from '../services/api';
 import type { Product, ContactFormData } from '../types';
 
 interface ContactModalProps {
@@ -87,24 +87,17 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
     setSubmitStatus('idle');
 
     try {
-      // EmailJS configuration - Replace with your actual service ID, template ID, and public key
-      const result = await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        {
-          from_name: formData.name,
-          from_email: formData.email,
-          phone: formData.phone,
-          company: formData.company,
-          message: formData.message,
-          product_name: formData.productName,
-          product_id: formData.productId,
-          to_email: 'ventas@larsenitaliana.com', // Replace with your email
-        },
-        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
-      );
+      await submitContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.company,
+        message: formData.message,
+        productId: formData.productId,
+        productName: formData.productName,
+      });
 
-      console.log('Email sent successfully:', result);
+      console.log('Contact form submitted successfully');
       setSubmitStatus('success');
       
       // Reset form after successful submission
@@ -123,7 +116,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
       }, 2000);
 
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('Error submitting contact form:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

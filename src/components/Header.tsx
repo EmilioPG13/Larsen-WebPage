@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { SearchResult, Machine, Product } from '../types';
-import machinesData from '../data/machines.json';
-import productsData from '../data/products.json';
+import { getMachines, getProducts } from '../services/api';
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -12,8 +11,27 @@ const Header: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [machines, setMachines] = useState<Machine[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch machines and products on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [machinesData, productsData] = await Promise.all([
+          getMachines(),
+          getProducts(),
+        ]);
+        setMachines(machinesData);
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error fetching data for search:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Handle scroll detection for header effects
   useEffect(() => {
@@ -42,7 +60,6 @@ const Header: React.FC = () => {
     const results: SearchResult[] = [];
 
     // Search in machines
-    const machines = machinesData as Machine[];
     machines.forEach((machine) => {
       const searchableText = [
         machine.name,
@@ -67,7 +84,6 @@ const Header: React.FC = () => {
     });
 
     // Search in products
-    const products = productsData as Product[];
     products.forEach((product) => {
       const searchableText = [
         product.name,
