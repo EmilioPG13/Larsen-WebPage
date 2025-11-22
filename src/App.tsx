@@ -33,10 +33,16 @@ function AppContent() {
     window.scrollTo(0, 0);
   }, [displayLocation]);
 
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen bg-white">
-      <TopBanner />
-      <Header />
+      {!isAdminRoute && (
+        <>
+          <TopBanner />
+          <Header />
+        </>
+      )}
       
       <div 
         key={displayLocation.pathname}
@@ -68,7 +74,7 @@ function AppContent() {
         </Routes>
       </div>
       
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }
