@@ -1,17 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 import { updateMachineStock } from '../controllers/machines.controller';
-import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
 
 // Mock Prisma
 jest.mock('../config/database', () => ({
+  __esModule: true,
   default: {
     machine: {
-      update: vi.fn(),
-      findUnique: vi.fn(),
+      update: jest.fn(),
+      findUnique: jest.fn(),
     },
   },
 }));
+
+const prisma = require('../config/database').default;
+const mockUpdate = prisma.machine.update;
+const mockFindUnique = prisma.machine.findUnique;
 
 describe('Machines Controller - Stock Updates', () => {
   let mockRequest: Partial<Request>;
@@ -44,11 +48,11 @@ describe('Machines Controller - Stock Updates', () => {
 
       mockRequest.params = { id: '1' };
       mockRequest.body = { inStock: false };
-      (prisma.machine.update as jest.Mock).mockResolvedValue(updatedMachine);
+      mockUpdate.mockResolvedValue(updatedMachine);
 
       await updateMachineStock(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.machine.update).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { inStock: false },
         include: { brandRelation: true },
@@ -68,11 +72,11 @@ describe('Machines Controller - Stock Updates', () => {
 
       mockRequest.params = { id: '1' };
       mockRequest.body = { quantity: 1 };
-      (prisma.machine.update as jest.Mock).mockResolvedValue(updatedMachine);
+      mockUpdate.mockResolvedValue(updatedMachine);
 
       await updateMachineStock(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.machine.update).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { inStock: true },
         include: { brandRelation: true },
@@ -91,11 +95,11 @@ describe('Machines Controller - Stock Updates', () => {
 
       mockRequest.params = { id: '1' };
       mockRequest.body = { quantity: 0 };
-      (prisma.machine.update as jest.Mock).mockResolvedValue(updatedMachine);
+      mockUpdate.mockResolvedValue(updatedMachine);
 
       await updateMachineStock(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.machine.update).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { inStock: false },
         include: { brandRelation: true },
@@ -119,7 +123,7 @@ describe('Machines Controller - Stock Updates', () => {
     it('should return 404 when machine not found', async () => {
       mockRequest.params = { id: '999' };
       mockRequest.body = { inStock: false };
-      (prisma.machine.update as jest.Mock).mockRejectedValue({ code: 'P2025' });
+      mockUpdate.mockRejectedValue({ code: 'P2025' });
 
       await updateMachineStock(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -134,7 +138,7 @@ describe('Machines Controller - Stock Updates', () => {
     it('should handle database errors', async () => {
       mockRequest.params = { id: '1' };
       mockRequest.body = { inStock: false };
-      (prisma.machine.update as jest.Mock).mockRejectedValue(new Error('Database error'));
+      mockUpdate.mockRejectedValue(new Error('Database error'));
 
       await updateMachineStock(mockRequest as Request, mockResponse as Response, mockNext);
 

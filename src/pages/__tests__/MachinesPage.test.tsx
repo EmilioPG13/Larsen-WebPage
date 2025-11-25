@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import MachinesPage from '../MachinesPage';
 import * as api from '../../services/api';
 
@@ -58,12 +59,20 @@ describe('MachinesPage', () => {
 
   it('should display loading state initially', () => {
     mockGetMachines.mockImplementation(() => new Promise(() => {}));
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
     expect(screen.getByText(/cargando/i)).toBeInTheDocument();
   });
 
   it('should display machines after loading', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Test Machine')).toBeInTheDocument();
@@ -72,7 +81,11 @@ describe('MachinesPage', () => {
   });
 
   it('should display "En Stock" badge for machines in stock', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       const inStockBadge = screen.getByText('✓ En Stock');
@@ -82,7 +95,11 @@ describe('MachinesPage', () => {
   });
 
   it('should display "No disponible" badge for machines out of stock', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       const outOfStockBadge = screen.getByText('✗ No disponible');
@@ -92,7 +109,11 @@ describe('MachinesPage', () => {
   });
 
   it('should display warning message for out-of-stock machines', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       const warningMessage = screen.getByText('⚠️ No disponible actualmente en almacén');
@@ -102,7 +123,11 @@ describe('MachinesPage', () => {
   });
 
   it('should disable "Me interesa" button for out-of-stock machines', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       const buttons = screen.getAllByText('💬 Me interesa');
@@ -113,7 +138,11 @@ describe('MachinesPage', () => {
   });
 
   it('should display machine specifications', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Test Machine')).toBeInTheDocument();
@@ -124,7 +153,11 @@ describe('MachinesPage', () => {
 
   it('should expand/collapse machine details', async () => {
     const user = userEvent.setup();
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Test Machine')).toBeInTheDocument();
@@ -140,7 +173,11 @@ describe('MachinesPage', () => {
   it('should display error message on fetch failure', async () => {
     mockGetMachines.mockRejectedValue(new Error('Failed to fetch machines'));
 
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/error al cargar máquinas/i)).toBeInTheDocument();
@@ -148,7 +185,11 @@ describe('MachinesPage', () => {
   });
 
   it('should not display warning message for in-stock machines', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Test Machine')).toBeInTheDocument();
@@ -161,7 +202,11 @@ describe('MachinesPage', () => {
   });
 
   it('should display brand badge for machines', async () => {
-    render(<MachinesPage />);
+    render(
+      <MemoryRouter>
+        <MachinesPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Test Brand')).toBeInTheDocument();

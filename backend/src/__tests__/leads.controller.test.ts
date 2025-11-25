@@ -1,20 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
 import { createLead, getLeads, getLeadById, updateLeadStatus } from '../controllers/leads.controller';
-import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
 
 // Mock Prisma
 jest.mock('../config/database', () => ({
+  __esModule: true,
   default: {
     lead: {
-      create: vi.fn(),
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      count: vi.fn(),
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      count: jest.fn(),
     },
   },
 }));
+
+const prisma = require('../config/database').default;
+const mockCreate = prisma.lead.create;
+const mockFindMany = prisma.lead.findMany;
+const mockFindUnique = prisma.lead.findUnique;
+const mockUpdate = prisma.lead.update;
+const mockCount = prisma.lead.count;
 
 describe('Leads Controller', () => {
   let mockRequest: Partial<Request>;
@@ -58,11 +65,11 @@ describe('Leads Controller', () => {
       };
 
       mockRequest.body = leadData;
-      (prisma.lead.create as jest.Mock).mockResolvedValue(createdLead);
+      mockCreate.mockResolvedValue(createdLead);
 
       await createLead(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.create).toHaveBeenCalledWith({
+      expect(mockCreate).toHaveBeenCalledWith({
         data: {
           ...leadData,
           industry: null,
@@ -97,11 +104,11 @@ describe('Leads Controller', () => {
       };
 
       mockRequest.body = leadData;
-      (prisma.lead.create as jest.Mock).mockResolvedValue(createdLead);
+      mockCreate.mockResolvedValue(createdLead);
 
       await createLead(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.create).toHaveBeenCalledWith({
+      expect(mockCreate).toHaveBeenCalledWith({
         data: {
           ...leadData,
           status: 'new',
@@ -138,7 +145,7 @@ describe('Leads Controller', () => {
       };
 
       mockRequest.body = leadData;
-      (prisma.lead.create as jest.Mock).mockRejectedValue(new Error('Database error'));
+      mockCreate.mockRejectedValue(new Error('Database error'));
 
       await createLead(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -159,12 +166,12 @@ describe('Leads Controller', () => {
         },
       ];
 
-      (prisma.lead.findMany as jest.Mock).mockResolvedValue(mockLeads);
-      (prisma.lead.count as jest.Mock).mockResolvedValue(1);
+      mockFindMany.mockResolvedValue(mockLeads);
+      mockCount.mockResolvedValue(1);
 
       await getLeads(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.findMany).toHaveBeenCalledWith({
+      expect(mockFindMany).toHaveBeenCalledWith({
         where: {},
         skip: 0,
         take: 50,
@@ -183,12 +190,12 @@ describe('Leads Controller', () => {
 
     it('should filter leads by status', async () => {
       mockRequest.query = { status: 'new' };
-      (prisma.lead.findMany as jest.Mock).mockResolvedValue([]);
-      (prisma.lead.count as jest.Mock).mockResolvedValue(0);
+      mockFindMany.mockResolvedValue([]);
+      mockCount.mockResolvedValue(0);
 
       await getLeads(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.findMany).toHaveBeenCalledWith({
+      expect(mockFindMany).toHaveBeenCalledWith({
         where: { status: 'new' },
         skip: 0,
         take: 50,
@@ -198,12 +205,12 @@ describe('Leads Controller', () => {
 
     it('should handle pagination', async () => {
       mockRequest.query = { page: '2', limit: '10' };
-      (prisma.lead.findMany as jest.Mock).mockResolvedValue([]);
-      (prisma.lead.count as jest.Mock).mockResolvedValue(20);
+      mockFindMany.mockResolvedValue([]);
+      mockCount.mockResolvedValue(20);
 
       await getLeads(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.findMany).toHaveBeenCalledWith({
+      expect(mockFindMany).toHaveBeenCalledWith({
         where: {},
         skip: 10,
         take: 10,
@@ -224,11 +231,11 @@ describe('Leads Controller', () => {
       };
 
       mockRequest.params = { id: '1' };
-      (prisma.lead.findUnique as jest.Mock).mockResolvedValue(mockLead);
+      mockFindUnique.mockResolvedValue(mockLead);
 
       await getLeadById(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.findUnique).toHaveBeenCalledWith({
+      expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: '1' },
       });
       expect(mockResponse.json).toHaveBeenCalledWith(mockLead);
@@ -236,7 +243,7 @@ describe('Leads Controller', () => {
 
     it('should return 404 when lead not found', async () => {
       mockRequest.params = { id: '999' };
-      (prisma.lead.findUnique as jest.Mock).mockResolvedValue(null);
+      mockFindUnique.mockResolvedValue(null);
 
       await getLeadById(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -261,11 +268,11 @@ describe('Leads Controller', () => {
 
       mockRequest.params = { id: '1' };
       mockRequest.body = { status: 'contacted' };
-      (prisma.lead.update as jest.Mock).mockResolvedValue(updatedLead);
+      mockUpdate.mockResolvedValue(updatedLead);
 
       await updateLeadStatus(mockRequest as Request, mockResponse as Response, mockNext);
 
-      expect(prisma.lead.update).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { status: 'contacted' },
       });
@@ -289,7 +296,7 @@ describe('Leads Controller', () => {
     it('should return 404 when lead not found', async () => {
       mockRequest.params = { id: '999' };
       mockRequest.body = { status: 'contacted' };
-      (prisma.lead.update as jest.Mock).mockRejectedValue({ code: 'P2025' });
+      mockUpdate.mockRejectedValue({ code: 'P2025' });
 
       await updateLeadStatus(mockRequest as Request, mockResponse as Response, mockNext);
 
