@@ -10,6 +10,10 @@ import AboutPage from './pages/AboutPage';
 import MachinesPage from './pages/MachinesPage';
 import AdminLogin from './admin/pages/Login';
 import AdminDashboard from './admin/pages/Dashboard';
+import AdminProducts from './admin/pages/Products';
+import AdminMachines from './admin/pages/Machines';
+import AdminBrands from './admin/pages/Brands';
+import AdminLeads from './admin/pages/Leads';
 import AdminLayout from './admin/components/AdminLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 
@@ -67,6 +71,46 @@ function AppContent() {
               <ProtectedRoute>
                 <AdminLayout>
                   <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminProducts />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/machines"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminMachines />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/brands"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminBrands />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/leads"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminLeads />
                 </AdminLayout>
               </ProtectedRoute>
             }
