@@ -19,6 +19,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Error interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
+    return Promise.reject(error);
+  }
+);
+
 // Products API
 export const getProducts = async (): Promise<Product[]> => {
   const response = await api.get('/products');

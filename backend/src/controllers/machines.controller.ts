@@ -6,7 +6,7 @@ export const getMachines = async (req: Request, res: Response, next: NextFunctio
   try {
     const machines = await prisma.machine.findMany({
       include: {
-        brand: true,
+        brandRelation: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -24,7 +24,7 @@ export const getMachineById = async (req: Request, res: Response, next: NextFunc
     const machine = await prisma.machine.findUnique({
       where: { id },
       include: {
-        brand: true,
+        brandRelation: true,
       },
     });
 
@@ -83,7 +83,7 @@ export const createMachine = async (req: Request, res: Response, next: NextFunct
         inStock: inStock !== undefined ? inStock : true,
       },
       include: {
-        brand: true,
+        brandRelation: true,
       },
     });
 
@@ -102,7 +102,7 @@ export const updateMachine = async (req: Request, res: Response, next: NextFunct
       where: { id },
       data: updateData,
       include: {
-        brand: true,
+        brandRelation: true,
       },
     });
 
@@ -152,7 +152,7 @@ export const updateMachineStock = async (req: Request, res: Response, next: Next
       where: { id },
       data: { inStock: stockStatus },
       include: {
-        brand: true,
+        brandRelation: true,
       },
     });
 

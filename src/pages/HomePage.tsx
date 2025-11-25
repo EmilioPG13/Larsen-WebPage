@@ -18,9 +18,10 @@ const HomePage = () => {
         setLoading(true);
         const data = await getProducts();
         setProducts(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching products:', err);
-        setError('Error al cargar productos');
+        const errorMessage = err.response?.data?.error || err.message || 'Error al cargar productos';
+        setError(`Error al cargar productos: ${errorMessage}`);
       } finally {
         setLoading(false);
       }
