@@ -23,7 +23,7 @@ model User {
 
 model Brand {
   id          String   @id @default(uuid())
-  name        String
+  name        String   @unique
   image       String
   description String
   specialties String[] // Array of strings
@@ -31,7 +31,7 @@ model Brand {
   updatedAt   DateTime @updatedAt
 
   products Product[]
-  machines Machine[]
+  machines Machine[] @relation("MachineBrandRelation")
 
   @@map("brands")
 }
@@ -59,7 +59,7 @@ model Product {
 model Machine {
   id              String   @id @default(uuid())
   name            String
-  brand           String
+  brand           String   // Brand name as string (from JSON data)
   description     String
   type            String
   knittingSystems String
@@ -77,7 +77,7 @@ model Machine {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  brand Brand? @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  brandRelation Brand? @relation("MachineBrandRelation", fields: [brandId], references: [id], onDelete: SetNull)
 
   @@map("machines")
 }
