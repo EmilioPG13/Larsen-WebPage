@@ -1,24 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import axios from 'axios';
 import { submitLead } from '../services/api';
 
+// Use vi.hoisted to define mocks before vi.mock is hoisted
+const { mockPost, mockGet, mockPut, mockDelete, mockInterceptors } = vi.hoisted(() => {
+  const mockPost = vi.fn();
+  const mockGet = vi.fn();
+  const mockPut = vi.fn();
+  const mockDelete = vi.fn();
+  const mockInterceptors = {
+    request: { use: vi.fn() },
+    response: { use: vi.fn() },
+  };
+  return { mockPost, mockGet, mockPut, mockDelete, mockInterceptors };
+});
+
 // Mock axios
-vi.mock('axios');
-const mockedAxios = axios as any;
+vi.mock('axios', () => ({
+  default: {
+    create: vi.fn(() => ({
+      post: mockPost,
+      get: mockGet,
+      put: mockPut,
+      delete: mockDelete,
+      interceptors: mockInterceptors,
+    })),
+  },
+}));
 
 describe('API Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock axios.create to return a mock instance
-    mockedAxios.create = vi.fn(() => mockedAxios);
-    mockedAxios.post = vi.fn();
-    mockedAxios.get = vi.fn();
-    mockedAxios.put = vi.fn();
-    mockedAxios.delete = vi.fn();
-    mockedAxios.interceptors = {
-      request: { use: vi.fn() },
-      response: { use: vi.fn() },
-    };
   });
 
   describe('submitLead', () => {
@@ -41,11 +52,11 @@ describe('API Service', () => {
         },
       };
 
-      mockedAxios.post.mockResolvedValue(mockResponse);
+      mockPost.mockResolvedValue(mockResponse);
 
       const result = await submitLead(leadData);
 
-      expect(mockedAxios.post).toHaveBeenCalledWith('/leads', leadData);
+      expect(mockPost).toHaveBeenCalledWith('/leads', leadData);
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -71,11 +82,11 @@ describe('API Service', () => {
         },
       };
 
-      mockedAxios.post.mockResolvedValue(mockResponse);
+      mockPost.mockResolvedValue(mockResponse);
 
       const result = await submitLead(leadData);
 
-      expect(mockedAxios.post).toHaveBeenCalledWith('/leads', leadData);
+      expect(mockPost).toHaveBeenCalledWith('/leads', leadData);
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -96,10 +107,10 @@ describe('API Service', () => {
         },
       };
 
-      mockedAxios.post.mockRejectedValue(errorResponse);
+      mockPost.mockRejectedValue(errorResponse);
 
       await expect(submitLead(leadData)).rejects.toEqual(errorResponse);
-      expect(mockedAxios.post).toHaveBeenCalledWith('/leads', leadData);
+      expect(mockPost).toHaveBeenCalledWith('/leads', leadData);
     });
 
     it('should handle network errors', async () => {
@@ -113,7 +124,7 @@ describe('API Service', () => {
       };
 
       const networkError = new Error('Network Error');
-      mockedAxios.post.mockRejectedValue(networkError);
+      mockPost.mockRejectedValue(networkError);
 
       await expect(submitLead(leadData)).rejects.toThrow('Network Error');
     });

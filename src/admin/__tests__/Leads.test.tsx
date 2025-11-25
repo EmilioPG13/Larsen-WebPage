@@ -80,7 +80,9 @@ describe('Leads Page', () => {
     // Email also appears in both table and sidebar
     const emailElements = screen.getAllByText('john@example.com');
     expect(emailElements.length).toBeGreaterThan(0);
-    expect(screen.getByText('Test Company')).toBeInTheDocument();
+    // Company also appears in both table and sidebar
+    const companyElements = screen.getAllByText('Test Company');
+    expect(companyElements.length).toBeGreaterThan(0);
   });
 
   it('should filter leads by status', async () => {

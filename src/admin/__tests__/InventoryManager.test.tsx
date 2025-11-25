@@ -121,9 +121,10 @@ describe('InventoryManager', () => {
     const toggleButton = screen.getByText('Marcar como No disponible');
     await user.click(toggleButton);
 
-    // Button should show "Actualizando..." while updating
+    // Button should show "Actualizando..." while updating (use getAllByText since there might be multiple)
     await waitFor(() => {
-      expect(screen.getByText('Actualizando...')).toBeInTheDocument();
+      const updatingButtons = screen.getAllByText('Actualizando...');
+      expect(updatingButtons.length).toBeGreaterThan(0);
     });
 
     // Resolve the update

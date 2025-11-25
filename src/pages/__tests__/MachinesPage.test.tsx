@@ -130,10 +130,14 @@ describe('MachinesPage', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByText('💬 Me interesa');
-      // Find the button for the out-of-stock machine
-      const outOfStockButton = buttons.find((btn) => btn.closest('button')?.hasAttribute('disabled'));
-      expect(outOfStockButton).toBeDefined();
+      // Check that out-of-stock machine exists
+      expect(screen.getByText('Out of Stock Machine')).toBeInTheDocument();
+      // For out-of-stock machines, the button text changes to "No disponible actualmente"
+      const outOfStockButton = screen.getByText('No disponible actualmente');
+      expect(outOfStockButton).toBeInTheDocument();
+      // The button should be disabled
+      const button = outOfStockButton.closest('button');
+      expect(button).toHaveAttribute('disabled');
     });
   });
 
@@ -146,8 +150,11 @@ describe('MachinesPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Machine')).toBeInTheDocument();
-      expect(screen.getByText('180cm')).toBeInTheDocument();
-      expect(screen.getByText('1.2 m/s')).toBeInTheDocument();
+      // Use getAllByText since there might be multiple machines with similar specs
+      const widthElements = screen.getAllByText('180cm');
+      expect(widthElements.length).toBeGreaterThan(0);
+      const speedElements = screen.getAllByText('1.2 m/s');
+      expect(speedElements.length).toBeGreaterThan(0);
     });
   });
 
@@ -163,8 +170,11 @@ describe('MachinesPage', () => {
       expect(screen.getByText('Test Machine')).toBeInTheDocument();
     });
 
-    const expandButton = screen.getByText('Especificaciones Técnicas Detalladas');
-    await user.click(expandButton);
+    // Use getAllByText since there are multiple machines
+    const expandButtons = screen.getAllByText('Especificaciones Técnicas Detalladas');
+    expect(expandButtons.length).toBeGreaterThan(0);
+    // Click the first one
+    await user.click(expandButtons[0]);
 
     // Check if expanded content is visible (this depends on implementation)
     // The expand functionality should show additional specs
@@ -209,7 +219,9 @@ describe('MachinesPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Test Brand')).toBeInTheDocument();
+      // Use getAllByText since there are multiple machines with the same brand
+      const brandElements = screen.getAllByText('Test Brand');
+      expect(brandElements.length).toBeGreaterThan(0);
     });
   });
 });
