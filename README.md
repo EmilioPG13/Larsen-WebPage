@@ -1,84 +1,288 @@
-# Larsen Italiana - Sitio Web de Generación de Leads
+# Larsen Italiana - Lead Generation Website
 
-Un sitio web profesional para máquinas de coser industriales Larsen Italiana, construido con React, TypeScript y Tailwind CSS.
+A professional website for Larsen Italiana industrial sewing machines, built with React, TypeScript, Express, and PostgreSQL. Includes a complete admin panel, lead management system, and dynamic catalog of products and machines.
 
-## 🚀 Características
+## 🚀 Main Features
 
-- **Diseño Responsivo**: Optimizado para todos los dispositivos
-- **Catálogo de Productos**: 6 máquinas industriales con información detallada
-- **Formulario de Contacto**: Modal integrado con EmailJS
-- **Paleta de Colores Personalizada**: Branding de Larsen Italiana
-- **Interfaz Moderna**: Inspirada en Singer pero con identidad propia
+### Public Frontend
+- **Responsive Design**: Optimized for all devices (mobile, tablets, desktop)
+- **Multiple Pages**: Home, Brands, Machines, Quote, About
+- **Dynamic Catalog**: Products and machines with detailed information from database
+- **Interactive Quote Form**: Multi-step form with validation
+- **Contact Form**: Modal integrated with EmailJS
+- **Stock Management**: Real-time availability badges
+- **Carousels**: Hero carousel and Product carousel
+- **Page Transitions**: Smooth animations between pages
+- **Top Banner**: Featured promotions and announcements
 
-## 🛠️ Tecnologías
+### Admin Panel
+- **Secure Authentication**: Login with JWT and bcrypt
+- **Dashboard**: System statistics and summary
+- **Lead Management**: View, filter by status, and update leads
+- **Inventory Management**: Stock updates for products and machines
+- **Product Management**: Full CRUD for products
+- **Machine Management**: Full CRUD for machines
+- **Brand Management**: Brand administration and relationships
+- **Protected Routes**: Authentication middleware for all admin routes
 
-- **Frontend**: Vite + React 18 + TypeScript
-- **Estilos**: Tailwind CSS
-- **Formularios**: EmailJS
-- **Despliegue**: Vercel (recomendado)
+### Backend API
+- **RESTful API**: Complete endpoints for all operations
+- **PostgreSQL Database**: With Prisma ORM
+- **JWT Authentication**: Secure tokens for admin sessions
+- **Data Validation**: With Zod
+- **Error Handling**: Centralized middleware
+- **CORS Configured**: Support for development and production
 
-## 📦 Instalación
+## 🛠️ Technology Stack
 
+### Frontend
+- **Framework**: Vite + React 19 + TypeScript
+- **Routing**: React Router DOM v7
+- **Styles**: Tailwind CSS v4
+- **Forms**: EmailJS for contacts
+- **HTTP Client**: Axios
+- **Testing**: Vitest + Testing Library
+
+### Backend
+- **Runtime**: Node.js + Express
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Authentication**: JWT + bcrypt
+- **Validation**: Zod
+- **Testing**: Jest + Supertest
+
+### DevOps
+- **Frontend Deployment**: Vercel (configured)
+- **Backend Deployment**: Railway/Render compatible
+- **Version Control**: Git
+
+## 📦 Installation and Setup
+
+### Prerequisites
+- Node.js v18 or higher
+- PostgreSQL (local or remote)
+- npm or yarn
+
+### Initial Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Larsen-WebPage
+   ```
+
+2. **Install frontend dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Setup the backend**
+   ```bash
+   cd backend
+   npm install
+   ```
+
+4. **Configure backend environment variables**
+   
+   Create `backend/.env`:
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/larsen_db"
+   JWT_SECRET="your-super-secure-secret-key"
+   PORT=3001
+   CORS_ORIGIN="http://localhost:5173"
+   ```
+
+5. **Setup database**
+   ```bash
+   cd backend
+   npm run prisma:generate
+   npm run prisma:migrate
+   npm run seed
+   ```
+   
+   **Alternative: Use Prisma Studio for database management**
+   ```bash
+   npm run prisma:studio
+   ```
+   This opens a GUI at `http://localhost:5555` to view and edit your database.
+
+6. **Configure frontend environment variables**
+   
+   Create `.env` in the root:
+   ```env
+   VITE_API_URL=http://localhost:3001/api
+   ```
+
+7. **Create admin user**
+   ```bash
+   # From the backend directory
+   curl -X POST http://localhost:3001/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"email":"admin@larsenitaliana.com","password":"your-secure-password"}'
+   ```
+
+### Development
+
+**Start backend:**
 ```bash
-# Instalar dependencias
-npm install
-
-# Ejecutar en desarrollo
+cd backend
 npm run dev
-
-# Construir para producción
-npm run build
 ```
 
-## ⚙️ Configuración de EmailJS
+**Start frontend (in another terminal):**
+```bash
+npm run dev
+```
 
-Para que el formulario de contacto funcione, necesitas configurar EmailJS:
+**Using development script (Windows):**
+```bash
+dev.bat
+```
 
-1. **Crear cuenta en EmailJS**:
-   - Ve a [https://www.emailjs.com/](https://www.emailjs.com/)
-   - Crea una cuenta gratuita
+Frontend will be available at `http://localhost:5173`  
+Backend will be available at `http://localhost:3001`
 
-2. **Configurar servicio de email**:
-   - En el dashboard, ve a "Email Services"
-   - Conecta tu proveedor de email (Gmail, Outlook, etc.)
-   - Anota el **Service ID**
+## 🗂️ Project Structure
 
-3. **Crear plantilla de email**:
-   - Ve a "Email Templates"
-   - Crea una nueva plantilla con estas variables:
-     ```
-     {{from_name}} - Nombre del cliente
-     {{from_email}} - Email del cliente
-     {{phone}} - Teléfono
-     {{company}} - Empresa
-     {{message}} - Mensaje
-     {{product_name}} - Producto de interés
-     ```
-   - Anota el **Template ID**
+```
+Larsen-WebPage/
+├── backend/                    # Backend API
+│   ├── prisma/
+│   │   ├── schema.prisma      # Database schema
+│   │   ├── seed.ts            # Initial data
+│   │   └── migrations/        # Database migrations
+│   ├── src/
+│   │   ├── config/            # Configuration (DB, env)
+│   │   ├── controllers/       # Route controllers
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── products.controller.ts
+│   │   │   ├── machines.controller.ts
+│   │   │   ├── brands.controller.ts
+│   │   │   └── leads.controller.ts
+│   │   ├── middleware/        # Middleware (auth, errors)
+│   │   ├── routes/            # Route definitions
+│   │   ├── services/          # Business logic
+│   │   ├── types/             # TypeScript types
+│   │   ├── utils/             # Utilities
+│   │   └── server.ts          # Entry point
+│   ├── __tests__/             # Backend tests
+│   └── package.json
+│
+├── src/                        # Frontend
+│   ├── admin/                  # Admin panel
+│   │   ├── components/
+│   │   │   ├── AdminLayout.tsx
+│   │   │   ├── InventoryManager.tsx
+│   │   │   └── ProtectedRoute.tsx
+│   │   ├── pages/
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Products.tsx
+│   │   │   ├── Machines.tsx
+│   │   │   ├── Brands.tsx
+│   │   │   └── Leads.tsx
+│   │   └── services/
+│   │       └── adminApi.ts
+│   │
+│   ├── components/             # Public components
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Hero.tsx
+│   │   ├── HeroCarousel.tsx
+│   │   ├── TopBanner.tsx
+│   │   ├── ProductGrid.tsx
+│   │   ├── ProductCard.tsx
+│   │   ├── ProductCarousel.tsx
+│   │   ├── ContactModal.tsx
+│   │   ├── ContactAlternatives.tsx
+│   │   ├── InteractiveQuoteForm.tsx
+│   │   ├── QuoteSteps.tsx
+│   │   └── ImagePlaceholder.tsx
+│   │
+│   ├── pages/                  # Application pages
+│   │   ├── HomePage.tsx
+│   │   ├── BrandsPage.tsx
+│   │   ├── MachinesPage.tsx
+│   │   ├── QuotePage.tsx
+│   │   └── AboutPage.tsx
+│   │
+│   ├── services/               # API services
+│   │   └── api.ts
+│   │
+│   ├── types/                  # TypeScript types
+│   │   └── index.ts
+│   │
+│   ├── data/                   # Static data (fallback)
+│   │   ├── products.json
+│   │   └── machines.json
+│   │
+│   ├── __tests__/              # Frontend tests
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── public/
+│   └── images/
+│       ├── logo/
+│       ├── brands/
+│       └── machines/
+│
+├── BACKEND_SETUP.md            # Backend setup guide
+├── DEPLOYMENT.md               # Deployment guide
+├── TESTING.md                  # Testing guide
+└── README.md                   # This file
+```
 
-4. **Obtener Public Key**:
-   - Ve a "Account" > "General"
-   - Copia tu **Public Key**
+## 📡 API Endpoints
 
-5. **Actualizar configuración**:
-   - Abre `src/components/ContactModal.tsx`
-   - Reemplaza estos valores en la línea 42-48:
-     ```typescript
-     const result = await emailjs.send(
-       'TU_SERVICE_ID',    // Reemplazar
-       'TU_TEMPLATE_ID',   // Reemplazar
-       {
-         // ... datos del formulario
-         to_email: 'ventas@larsenitaliana.com', // Tu email
-       },
-       'TU_PUBLIC_KEY'     // Reemplazar
-     );
-     ```
+### Public Endpoints
+- `GET /api/products` - List all products
+- `GET /api/products/:id` - Get product by ID
+- `GET /api/machines` - List all machines
+- `GET /api/machines/:id` - Get machine by ID
+- `GET /api/brands` - List all brands
+- `GET /api/brands/:id` - Get brand by ID
+- `POST /api/leads` - Create new lead (quote request)
+- `POST /api/contact` - Submit contact form
 
-## 🎨 Paleta de Colores
+### Authentication Endpoints
+- `POST /api/auth/register` - Register admin (development only)
+- `POST /api/auth/login` - Admin login
+
+### Admin Endpoints (Require Authentication)
+
+**Products:**
+- `GET /api/admin/products` - List products (with pagination)
+- `POST /api/admin/products` - Create product
+- `PUT /api/admin/products/:id` - Update product
+- `DELETE /api/admin/products/:id` - Delete product
+- `PUT /api/admin/products/:id/stock` - Update product stock status
+
+**Machines:**
+- `GET /api/admin/machines` - List machines (with pagination)
+- `POST /api/admin/machines` - Create machine
+- `PUT /api/admin/machines/:id` - Update machine
+- `DELETE /api/admin/machines/:id` - Delete machine
+- `PUT /api/admin/machines/:id/stock` - Update machine stock status
+
+**Brands:**
+- `GET /api/admin/brands` - List brands
+- `POST /api/admin/brands` - Create brand
+- `PUT /api/admin/brands/:id` - Update brand
+- `DELETE /api/admin/brands/:id` - Delete brand
+
+**Leads:**
+- `GET /api/admin/leads` - List leads
+- `GET /api/admin/leads/:id` - Get lead by ID
+- `PUT /api/admin/leads/:id/status` - Update lead status
+- `GET /api/admin/leads/stats` - Dashboard statistics
+
+**Statistics:**
+- `GET /api/admin/stats` - Dashboard statistics
+
+## 🎨 Color Palette
 
 ```css
-/* Colores principales */
+/* Main colors */
 --larsen-blue: #28327B
 --larsen-red: #D81E2A
 --larsen-pink: #D3AFC4
@@ -86,82 +290,182 @@ Para que el formulario de contacto funcione, necesitas configurar EmailJS:
 --larsen-white: #FFFFFF
 ```
 
-## 📁 Estructura del Proyecto
+## 🗄️ Data Model
 
+### Prisma Schema
+- **User**: Admin users
+- **Brand**: Product/machine brands
+- **Product**: Products with stock (`inStock` boolean field)
+- **Machine**: Industrial machines with stock (`inStock` boolean field)
+- **Lead**: Quote requests with status tracking
+- **ContactSubmission**: Contact form submissions
+
+All models include timestamps (`createdAt`, `updatedAt`) and appropriate relationships.
+
+### Inventory Management
+
+Products and machines have an `inStock` boolean field for stock status tracking. Update stock status using:
+
+```bash
+PUT /api/admin/products/:id/stock
+PUT /api/admin/machines/:id/stock
+
+Body: { "inStock": true } OR { "quantity": 5 }
 ```
-src/
-├── components/
-│   ├── Header.tsx          # Navegación principal
-│   ├── Hero.tsx           # Sección hero con ofertas
-│   ├── ProductGrid.tsx    # Grid de productos
-│   ├── ProductCard.tsx    # Tarjeta individual de producto
-│   ├── ContactModal.tsx   # Modal de contacto
-│   └── Footer.tsx         # Pie de página
-├── data/
-│   └── products.json      # Datos de productos
-├── types/
-│   └── index.ts          # Tipos TypeScript
-└── App.tsx               # Componente principal
+
+**Note:** If `quantity` is provided, it converts to boolean (quantity > 0 = inStock = true, quantity = 0 = inStock = false).
+
+## 🧪 Testing
+
+### Frontend Testing
+```bash
+# Run tests
+npm test
+
+# Tests with UI
+npm run test:ui
+
+# Coverage
+npm run test:coverage
 ```
 
-## 🖼️ Imágenes
+### Backend Testing
+```bash
+cd backend
+npm test
+npm run test:watch
+npm run test:coverage
+```
 
-Las imágenes de productos deben colocarse en `public/images/`:
-- `hero-machine.jpg` - Máquina principal del hero
-- `machine-1.jpg` a `machine-6.jpg` - Imágenes de productos
-- `refurbished-machine.jpg` - Imagen para sección reacondicionadas
+See `TESTING.md` for complete manual and automated testing guide.
 
-## 🚀 Despliegue
+## 🚀 Deployment
 
-### Vercel (Recomendado)
+### Frontend (Vercel)
+1. Connect repository to Vercel
+2. Configure environment variables:
+   - `VITE_API_URL`: Your backend API URL
+3. Deploy automatically
 
-1. Conecta tu repositorio a Vercel
-2. Las configuraciones se detectan automáticamente
-3. Despliega con un click
+### Backend (Railway/Render)
+1. Connect repository
+2. Configure environment variables:
+   - `DATABASE_URL`: PostgreSQL URL
+   - `JWT_SECRET`: Secret key for JWT
+   - `CORS_ORIGIN`: Frontend URL
+   - `PORT`: Server port
+3. Run migrations: `npm run prisma:migrate`
+4. Run seed: `npm run seed`
 
-### Netlify
+See `DEPLOYMENT.md` for complete details.
 
-1. Conecta tu repositorio a Netlify
-2. Comando de build: `npm run build`
-3. Directorio de publicación: `dist`
+## ⚙️ EmailJS Configuration (Optional)
 
-## 📧 Configuración de Email
+For the traditional contact form:
 
-El formulario enviará emails con esta información:
-- Datos del cliente (nombre, email, teléfono, empresa)
-- Producto de interés
-- Mensaje personalizado
-- Timestamp automático
+1. Create account at [EmailJS](https://www.emailjs.com/)
+2. Configure email service
+3. Create template with variables:
+   - `{{from_name}}`, `{{from_email}}`, `{{phone}}`, `{{company}}`, `{{message}}`, `{{product_name}}`
+4. Update `src/components/ContactModal.tsx` with your IDs
 
-## 🎯 Flujo de Generación de Leads
+## 🎯 Lead Generation Flow
 
-1. Usuario navega el catálogo
-2. Hace clic en "Me interesa" en un producto
-3. Se abre modal con formulario
-4. Completa sus datos y envía
-5. Email automático al equipo de ventas
-6. Confirmación al usuario
+1. User browses catalog (products/machines)
+2. Clicks "I'm interested" or navigates to `/cotizacion`
+3. Completes interactive multi-step form
+4. Data saved to database as Lead
+5. Lead appears in admin panel with "New" status
+6. Admin can update status (Contacted, Converted, Archived)
+7. Optional email via EmailJS for notifications
 
-## 🔧 Personalización
+## 📱 Responsive Features
 
-Para personalizar el contenido:
-- **Productos**: Edita `src/data/products.json`
-- **Colores**: Modifica `tailwind.config.js`
-- **Textos**: Actualiza los componentes directamente
-- **Email destino**: Cambia en `ContactModal.tsx`
-
-## 📱 Responsive Design
-
-El sitio está optimizado para:
-- 📱 Móviles (320px+)
+The site is optimized for:
+- 📱 Mobile (320px+)
 - 📱 Tablets (768px+)
 - 💻 Desktop (1024px+)
 - 🖥️ Large screens (1280px+)
 
-## 🆘 Soporte
+## 🔒 Security
 
-Para soporte técnico o personalizaciones adicionales, contacta al equipo de desarrollo.
+- JWT authentication with secure tokens
+- Passwords hashed with bcrypt
+- Authentication middleware on protected routes
+- Data validation with Zod
+- CORS configured appropriately
+- Environment variables for secrets
+
+## 🖼️ Images
+
+Images should be placed in `public/images/`:
+- `logo/` - Larsen logos
+- `brands/` - Brand images
+- `machines/` - Machine images
+
+The system includes automatic placeholders if images are not available.
+
+## 📚 Additional Documentation
+
+- `TESTING.md` - Manual and automated testing guide with detailed test procedures
+
+## 🔧 Available Scripts
+
+### Frontend
+- `npm run dev` - Development server
+- `npm run build` - Production build
+- `npm run preview` - Preview build
+- `npm test` - Run tests
+- `npm run lint` - Linter
+
+### Backend
+- `npm run dev` - Development server with hot reload
+- `npm run build` - Compile TypeScript
+- `npm start` - Run production server
+- `npm run prisma:generate` - Generate Prisma Client
+- `npm run prisma:migrate` - Run database migrations
+- `npm run prisma:studio` - Open Prisma Studio (GUI for database management)
+- `npm run seed` - Seed database with initial data
+- `npm test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+
+## 🆘 Troubleshooting
+
+### Database connection error
+- Verify PostgreSQL is running
+- Verify `DATABASE_URL` in `.env`
+- Ensure database exists
+
+### CORS errors
+- Verify `CORS_ORIGIN` in backend `.env`
+- Must match frontend URL
+
+### Authentication error
+- Verify `JWT_SECRET` is configured
+- Verify token hasn't expired
+- Verify admin user exists
+
+### Products/Machines not appearing
+- Verify backend is running
+- Verify `VITE_API_URL` in frontend `.env`
+- Check browser console for errors
+
+## 🔄 Potential Future Improvements
+
+- [ ] Email notification system for new leads
+- [ ] Export leads to CSV/Excel
+- [ ] Advanced search and filters
+- [ ] Image upload for products/machines
+- [ ] Multi-language (i18n)
+- [ ] Integrated analytics
+- [ ] Live chat
+- [ ] Blog/News
+
+## 📄 License
+
+This project is private and property of Larsen Italiana.
 
 ---
 
-**Larsen Italiana** - Especialistas en máquinas de coser industriales desde 2004.
+**Larsen Italiana** - Industrial sewing machine specialists since 2004.
