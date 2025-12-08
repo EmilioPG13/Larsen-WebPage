@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InventoryManager from '../components/InventoryManager';
 
@@ -136,7 +136,7 @@ describe('InventoryManager', () => {
 
   it('should handle update errors gracefully', async () => {
     const user = userEvent.setup();
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => { });
     mockOnUpdate.mockRejectedValue(new Error('Update failed'));
 
     render(

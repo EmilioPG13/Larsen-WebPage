@@ -9,11 +9,10 @@ interface InventoryManagerProps {
 const InventoryManager: React.FC<InventoryManagerProps> = ({
   currentStock,
   onUpdate,
-  type,
+  type: _type,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [quantity, setQuantity] = useState<number>(currentStock ? 1 : 0);
-  const [useQuantity, setUseQuantity] = useState(false);
 
   const handleToggle = async () => {
     setIsUpdating(true);
@@ -49,11 +48,10 @@ const InventoryManager: React.FC<InventoryManagerProps> = ({
           Estado Actual:
         </label>
         <div
-          className={`inline-flex items-center px-4 py-2 rounded-lg font-medium ${
-            currentStock
+          className={`inline-flex items-center px-4 py-2 rounded-lg font-medium ${currentStock
               ? 'bg-green-100 text-green-700'
               : 'bg-gray-100 text-gray-700'
-          }`}
+            }`}
         >
           {currentStock ? '✓ En Stock' : '✗ No disponible'}
         </div>
@@ -68,17 +66,16 @@ const InventoryManager: React.FC<InventoryManagerProps> = ({
           <button
             onClick={handleToggle}
             disabled={isUpdating}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              currentStock
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentStock
                 ? 'bg-red-100 text-red-700 hover:bg-red-200'
                 : 'bg-green-100 text-green-700 hover:bg-green-200'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isUpdating
               ? 'Actualizando...'
               : currentStock
-              ? 'Marcar como No disponible'
-              : 'Marcar como En Stock'}
+                ? 'Marcar como No disponible'
+                : 'Marcar como En Stock'}
           </button>
         </div>
       </div>
