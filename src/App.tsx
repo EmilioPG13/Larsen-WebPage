@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import TopBanner from './components/TopBanner';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -40,13 +39,8 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-white">
-      {!isAdminRoute && (
-        <>
-          <TopBanner />
-          <Header />
-        </>
-      )}
+    <div className="min-h-screen bg-bg text-ink">
+      {!isAdminRoute && <Header />}
       
       <div 
         key={displayLocation.pathname}

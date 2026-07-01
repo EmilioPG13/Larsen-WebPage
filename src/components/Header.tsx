@@ -1,449 +1,164 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import type { SearchResult, Machine, Product } from '../types';
-import { getMachines, getProducts } from '../services/api';
+import { Sun, Moon, Menu, X } from './ui/icons';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useT } from '../i18n/useT';
 
-const Header: React.FC = () => {
+const NAV: { key: keyof ReturnType<typeof useT>['nav']; path: string }[] = [
+  { key: 'home', path: '/' },
+  { key: 'machines', path: '/maquinas' },
+  { key: 'brands', path: '/marcas' },
+  { key: 'quote', path: '/cotizacion' },
+  { key: 'about', path: '/nosotros' },
+];
+
+const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [machines, setMachines] = useState<Machine[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { isDark, toggleTheme } = useTheme();
+  const { lang, setLang } = useLanguage();
+  const t = useT();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Fetch machines and products on mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [machinesData, productsData] = await Promise.all([
-          getMachines(),
-          getProducts(),
-        ]);
-        setMachines(machinesData);
-        setProducts(productsData);
-      } catch (error) {
-        console.error('Error fetching data for search:', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // Handle scroll detection for header effects
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Navigation keyword mapping
-  const navigationKeywords = {
-    '/maquinas': ['máquina', 'máquinas', 'industriales', 'machine', 'machines', 'tejer', 'rectilínea', 'rectilinea'],
-    '/marcas': ['marca', 'marcas', 'brand', 'brands', 'steiger', 'sangiacomo'],
-    '/cotizacion': ['cotización', 'cotizacion', 'cotizar', 'precio', 'quote', 'presupuesto', 'solicitar'],
-    '/nosotros': ['nosotros', 'acerca', 'sobre', 'empresa', 'about', 'historia', 'contacto']
+  const go = (path: string) => {
+    navigate(path);
+    setMenuOpen(false);
+    window.scrollTo(0, 0);
   };
 
-  // Search function
-  const performSearch = (query: string): SearchResult[] => {
-    if (!query.trim()) return [];
-
-    const lowerQuery = query.toLowerCase().trim();
-    const results: SearchResult[] = [];
-
-    // Search in machines
-    machines.forEach((machine) => {
-      const searchableText = [
-        machine.name,
-        machine.description,
-        machine.brand,
-        machine.category,
-        machine.type,
-        ...machine.capabilities
-      ].join(' ').toLowerCase();
-
-      if (searchableText.includes(lowerQuery)) {
-        results.push({
-          type: 'machine',
-          id: machine.id,
-          title: machine.name,
-          subtitle: `${machine.brand} - ${machine.category}`,
-          image: machine.image,
-          route: '/maquinas',
-          data: machine
-        });
-      }
-    });
-
-    // Search in products
-    products.forEach((product) => {
-      const searchableText = [
-        product.name,
-        product.description,
-        product.category,
-        ...product.features
-      ].join(' ').toLowerCase();
-
-      if (searchableText.includes(lowerQuery)) {
-        results.push({
-          type: 'product',
-          id: product.id,
-          title: product.name,
-          subtitle: product.category,
-          image: product.image,
-          route: '/maquinas',
-          data: product
-        });
-      }
-    });
-
-    // Search navigation keywords
-    Object.entries(navigationKeywords).forEach(([route, keywords]) => {
-      if (keywords.some(keyword => lowerQuery.includes(keyword))) {
-        const pageNames: Record<string, string> = {
-          '/maquinas': 'Máquinas Industriales',
-          '/marcas': 'Nuestras Marcas',
-          '/cotizacion': 'Cotización',
-          '/nosotros': 'Acerca de nosotros'
-        };
-
-        // Avoid duplicates
-        if (!results.some(r => r.type === 'page' && r.route === route)) {
-          results.push({
-            type: 'page',
-            id: `page-${route}`,
-            title: pageNames[route],
-            route: route
-          });
-        }
-      }
-    });
-
-    // Limit results per category
-    const machinesResults = results.filter(r => r.type === 'machine').slice(0, 5);
-    const productsResults = results.filter(r => r.type === 'product').slice(0, 5);
-    const pagesResults = results.filter(r => r.type === 'page').slice(0, 3);
-
-    return [...machinesResults, ...productsResults, ...pagesResults];
-  };
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    const results = performSearch(value);
-    setSearchResults(results);
-    setIsDropdownOpen(value.length > 0 && results.length > 0);
-    setFocusedIndex(-1);
-  };
-
-  // Handle result click
-  const handleResultClick = (result: SearchResult) => {
-    navigate(result.route);
-    setSearchQuery('');
-    setSearchResults([]);
-    setIsDropdownOpen(false);
-    setFocusedIndex(-1);
-  };
-
-  // Handle keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!isDropdownOpen || searchResults.length === 0) {
-      if (e.key === 'Escape') {
-        setSearchQuery('');
-        setSearchResults([]);
-        setIsDropdownOpen(false);
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setFocusedIndex(prev => 
-          prev < searchResults.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setFocusedIndex(prev => prev > 0 ? prev - 1 : -1);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (focusedIndex >= 0 && focusedIndex < searchResults.length) {
-          handleResultClick(searchResults[focusedIndex]);
-        }
-        break;
-      case 'Escape':
-        setSearchQuery('');
-        setSearchResults([]);
-        setIsDropdownOpen(false);
-        setFocusedIndex(-1);
-        inputRef.current?.blur();
-        break;
-    }
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-        setFocusedIndex(-1);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Group results by type
-  const groupedResults = {
-    machines: searchResults.filter(r => r.type === 'machine'),
-    products: searchResults.filter(r => r.type === 'product'),
-    pages: searchResults.filter(r => r.type === 'page')
-  };
+  const themeTitle = isDark
+    ? lang === 'es' ? 'Modo claro' : 'Light mode'
+    : lang === 'es' ? 'Modo oscuro' : 'Dark mode';
 
   return (
-    <header 
-      className={`sticky top-0 z-50 bg-white transition-all duration-300 ease-in-out ${
-        isScrolled 
-          ? 'shadow-xl backdrop-blur-md bg-white/95' 
-          : 'shadow-lg'
-      }`}
+    <header
+      className="sticky top-0 z-50 border-b border-line backdrop-blur-custom"
+      style={{ background: 'var(--bg-blur)', boxShadow: '0 6px 22px rgba(20,22,28,0.10)' }}
     >
-      {/* Main navigation - cleaner layout */}
-      <nav className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo - simplified */}
-          <div className="flex items-center">
-            <div className="flex items-center">
-              <Link to="/">
-                <img 
-                  src="/images/logo/larsen-logo-1.png" 
-                  alt="Larsen Italiana" 
-                  className="h-12 w-auto object-contain"
-                />
+      <div className="max-w-[1240px] mx-auto px-7 h-[74px] flex items-center justify-between gap-6">
+        {/* Logo */}
+        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center shrink-0">
+          <img
+            src="/images/logo/larsen-logo-1.png"
+            alt="Larsen Italiana"
+            className="h-[34px] w-auto object-contain"
+            style={isDark ? { filter: 'brightness(0) invert(1)' } : undefined}
+          />
+        </Link>
+
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-1.5">
+          {NAV.map((item) => {
+            const active = location.pathname === item.path;
+            return (
+              <Link
+                key={item.key}
+                to={item.path}
+                onClick={() => window.scrollTo(0, 0)}
+                className={`relative text-[14.5px] font-medium tracking-[0.01em] px-3.5 py-2 rounded-lg transition-colors duration-200 hover:text-larsen-red hover:bg-larsen-red/[0.06] ${
+                  active ? 'text-larsen-red' : 'text-ink'
+                }`}
+              >
+                {t.nav[item.key]}
               </Link>
-            </div>
-          </div>
+            );
+          })}
+        </nav>
 
-          {/* Navigation menu - centered */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/maquinas" 
-              className={`relative text-gray-700 font-medium py-2 px-3 transition-all duration-300 group ${
-                location.pathname === '/maquinas' ? 'text-larsen-red' : 'hover:text-larsen-red'
-              }`}
-            >
-              <span className="relative z-10">Máquinas Disponibles</span>
-              <span className={`absolute bottom-0 left-0 h-0.5 bg-larsen-blue transition-all duration-300 ${
-                location.pathname === '/maquinas' ? 'w-full' : 'w-0 group-hover:w-full'
-              }`}></span>
-              <span className="absolute inset-0 bg-larsen-red/5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></span>
-            </Link>
-            <Link 
-              to="/marcas" 
-              className={`relative text-gray-700 font-medium py-2 px-3 transition-all duration-300 group ${
-                location.pathname === '/marcas' ? 'text-larsen-red' : 'hover:text-larsen-red'
-              }`}
-            >
-              <span className="relative z-10">Nuestras Marcas</span>
-              <span className={`absolute bottom-0 left-0 h-0.5 bg-larsen-blue transition-all duration-300 ${
-                location.pathname === '/marcas' ? 'w-full' : 'w-0 group-hover:w-full'
-              }`}></span>
-              <span className="absolute inset-0 bg-larsen-red/5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></span>
-            </Link>
-            <Link 
-              to="/cotizacion" 
-              className={`relative text-gray-700 font-medium py-2 px-3 transition-all duration-300 group ${
-                location.pathname === '/cotizacion' ? 'text-larsen-red' : 'hover:text-larsen-red'
-              }`}
-            >
-              <span className="relative z-10">Cotización</span>
-              <span className={`absolute bottom-0 left-0 h-0.5 bg-larsen-blue transition-all duration-300 ${
-                location.pathname === '/cotizacion' ? 'w-full' : 'w-0 group-hover:w-full'
-              }`}></span>
-              <span className="absolute inset-0 bg-larsen-red/5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></span>
-            </Link>
-            <Link 
-              to="/nosotros" 
-              className={`relative text-gray-700 font-medium py-2 px-3 transition-all duration-300 group ${
-                location.pathname === '/nosotros' ? 'text-larsen-red' : 'hover:text-larsen-red'
-              }`}
-            >
-              <span className="relative z-10">Acerca de nosotros</span>
-              <span className={`absolute bottom-0 left-0 h-0.5 bg-larsen-blue transition-all duration-300 ${
-                location.pathname === '/nosotros' ? 'w-full' : 'w-0 group-hover:w-full'
-              }`}></span>
-              <span className="absolute inset-0 bg-larsen-red/5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-0"></span>
-            </Link>
-          </div>
+        {/* Right controls */}
+        <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            aria-label="Theme"
+            title={themeTitle}
+            className="border border-line bg-fill w-[38px] h-[38px] rounded-full flex items-center justify-center text-ink transition-colors duration-200 hover:border-larsen-red hover:text-larsen-red"
+          >
+            {isDark ? <Sun size={17} /> : <Moon size={16} />}
+          </button>
 
-          {/* Right side - simplified */}
-          <div className="flex items-center">
-            {/* Search */}
-            <div 
-              ref={searchRef}
-              className="relative hidden lg:block group transition-all duration-300 group-focus-within:-translate-y-0.5 group-focus-within:scale-[1.01] group-hover:-translate-y-0.5 group-hover:scale-[1.005]"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onKeyDown={handleKeyDown}
-                onFocus={() => {
-                  if (searchQuery.length > 0 && searchResults.length > 0) {
-                    setIsDropdownOpen(true);
-                  }
+          {/* Language toggle */}
+          <div className="hidden sm:flex items-center bg-fill border border-line rounded-full p-[3px]">
+            {(['es', 'en'] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                className="font-mono text-[11.5px] font-bold tracking-[0.04em] px-[11px] py-[5px] rounded-full transition-all duration-200"
+                style={{
+                  background: lang === l ? '#28327B' : 'transparent',
+                  color: lang === l ? '#ffffff' : 'var(--faint)',
                 }}
-                className="pl-5 pr-12 py-3 border-2 border-gray-200 rounded-full w-80 bg-white focus:outline-none focus:border-gray-300 focus:shadow-lg focus:shadow-black/5 transition-all duration-300 hover:border-gray-300 hover:shadow-md"
-              />
-              <button className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 transition-all duration-300 group-hover:text-gray-600 group-focus-within:text-gray-600 pointer-events-none">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+              >
+                {l.toUpperCase()}
               </button>
-
-              {/* Search Results Dropdown */}
-              {isDropdownOpen && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                  {/* Machines Section */}
-                  {groupedResults.machines.length > 0 && (
-                    <div className="p-2">
-                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        Máquinas
-                      </div>
-                      {groupedResults.machines.map((result) => {
-                        const globalIndex = searchResults.indexOf(result);
-                        return (
-                          <div
-                            key={result.id}
-                            onClick={() => handleResultClick(result)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${
-                              focusedIndex === globalIndex
-                                ? 'bg-larsen-red/10 border-l-2 border-larsen-red'
-                                : 'hover:bg-gray-50'
-                            }`}
-                            onMouseEnter={() => setFocusedIndex(globalIndex)}
-                          >
-                            {result.image && (
-                              <img
-                                src={result.image}
-                                alt={result.title}
-                                className="w-12 h-12 object-contain bg-white rounded border border-gray-200"
-                              />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-gray-900 truncate">{result.title}</div>
-                              {result.subtitle && (
-                                <div className="text-xs text-gray-500 truncate">{result.subtitle}</div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Products Section */}
-                  {groupedResults.products.length > 0 && (
-                    <div className="p-2 border-t border-gray-100">
-                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        Productos
-                      </div>
-                      {groupedResults.products.map((result) => {
-                        const globalIndex = searchResults.indexOf(result);
-                        return (
-                          <div
-                            key={result.id}
-                            onClick={() => handleResultClick(result)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${
-                              focusedIndex === globalIndex
-                                ? 'bg-larsen-red/10 border-l-2 border-larsen-red'
-                                : 'hover:bg-gray-50'
-                            }`}
-                            onMouseEnter={() => setFocusedIndex(globalIndex)}
-                          >
-                            {result.image && (
-                              <img
-                                src={result.image}
-                                alt={result.title}
-                                className="w-12 h-12 object-contain bg-white rounded border border-gray-200"
-                              />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-gray-900 truncate">{result.title}</div>
-                              {result.subtitle && (
-                                <div className="text-xs text-gray-500 truncate">{result.subtitle}</div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Pages Section */}
-                  {groupedResults.pages.length > 0 && (
-                    <div className="p-2 border-t border-gray-100">
-                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        Páginas
-                      </div>
-                      {groupedResults.pages.map((result) => {
-                        const globalIndex = searchResults.indexOf(result);
-                        return (
-                          <div
-                            key={result.id}
-                            onClick={() => handleResultClick(result)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${
-                              focusedIndex === globalIndex
-                                ? 'bg-larsen-red/10 border-l-2 border-larsen-red'
-                                : 'hover:bg-gray-50'
-                            }`}
-                            onMouseEnter={() => setFocusedIndex(globalIndex)}
-                          >
-                            <div className="w-10 h-10 flex items-center justify-center bg-larsen-blue/10 rounded-lg">
-                              <svg className="w-5 h-5 text-larsen-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                              </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-gray-900">{result.title}</div>
-                            </div>
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            ))}
           </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => go('/cotizacion')}
+            className="hidden sm:inline-flex bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-sm px-5 py-[11px] rounded-full transition-all duration-200 hover:-translate-y-0.5"
+            style={{ boxShadow: '0 6px 18px rgba(216,30,42,0.24)' }}
+          >
+            {t.cta}
+          </button>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+            className="md:hidden border border-line bg-fill w-[38px] h-[38px] rounded-full flex items-center justify-center text-ink"
+          >
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
-      </nav>
-      
-      {/* Separator line - bottom border with gradient */}
-      <div 
-        className={`h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent transition-all duration-300 ${
-          isScrolled 
-            ? 'opacity-80 bg-gradient-to-r from-larsen-blue/30 via-gray-300 to-larsen-red/30' 
-            : 'opacity-60'
-        }`}
-      ></div>
+      </div>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-line animate-slide-down" style={{ background: 'var(--bg-blur)' }}>
+          <nav className="max-w-[1240px] mx-auto px-7 py-4 flex flex-col gap-1">
+            {NAV.map((item) => {
+              const active = location.pathname === item.path;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => go(item.path)}
+                  className={`text-left text-[15px] font-medium px-3 py-2.5 rounded-lg transition-colors ${
+                    active ? 'text-larsen-red bg-larsen-red/[0.06]' : 'text-ink hover:bg-fill'
+                  }`}
+                >
+                  {t.nav[item.key]}
+                </button>
+              );
+            })}
+            <div className="flex items-center justify-between mt-2 pt-3 border-t border-line">
+              <div className="flex items-center bg-fill border border-line rounded-full p-[3px]">
+                {(['es', 'en'] as const).map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    className="font-mono text-[11.5px] font-bold tracking-[0.04em] px-3 py-[5px] rounded-full transition-all"
+                    style={{
+                      background: lang === l ? '#28327B' : 'transparent',
+                      color: lang === l ? '#ffffff' : 'var(--faint)',
+                    }}
+                  >
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => go('/cotizacion')}
+                className="bg-larsen-red text-white font-semibold text-sm px-5 py-2.5 rounded-full"
+              >
+                {t.cta}
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

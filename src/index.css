@@ -1,7 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
+/* ============================================================
+   Theme tokens — light/dark via [data-theme] on <html>
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  --bg: #ECEDF0;
+  --bg-blur: rgba(236, 237, 240, 0.82);
+  --surface: #ffffff;
+  --surface-2: rgba(255, 255, 255, 0.55);
+  --field: #F3F4F6;
+  --plate: linear-gradient(160deg, #EEEFF2, #E0E2E7);
+  --logo-bg: linear-gradient(160deg, #F8F9FB, #EDEEF1);
+  --ink: #1b1c20;
+  --text2: #4c4f55;
+  --muted: #696c72;
+  --faint: #9a9da3;
+  --line: rgba(20, 22, 28, 0.10);
+  --line-strong: rgba(20, 22, 28, 0.17);
+  --fill: rgba(20, 22, 28, 0.05);
+  --deep: #28327B;
+  --deep-soft: rgba(40, 50, 123, 0.05);
+  --deep-line: rgba(40, 50, 123, 0.14);
+  --ghost: rgba(40, 50, 123, 0.05);
+}
+
+[data-theme="dark"] {
+  --bg: #121318;
+  --bg-blur: rgba(18, 19, 24, 0.82);
+  --surface: #1d1e26;
+  --surface-2: rgba(255, 255, 255, 0.035);
+  --field: #16171d;
+  --plate: linear-gradient(160deg, #272834, #1a1b22);
+  --logo-bg: linear-gradient(160deg, #F6F2EA, #EBE4D6);
+  --ink: #F2EFE9;
+  --text2: #C7C2B9;
+  --muted: #9C978D;
+  --faint: #7C776E;
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.17);
+  --fill: rgba(255, 255, 255, 0.06);
+  --deep: #94A0F0;
+  --deep-soft: rgba(148, 160, 240, 0.10);
+  --deep-line: rgba(148, 160, 240, 0.24);
+  --ghost: rgba(148, 160, 240, 0.07);
+}
+
+/* ============================================================
+   Tailwind theme — alias the live CSS vars so utilities like
+   bg-bg / text-ink / border-line stay theme-aware.
+   ============================================================ */
 @theme {
+  --font-sans: 'Archivo', sans-serif;
+  --font-serif: 'Newsreader', serif;
+  --font-mono: 'Space Mono', monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-field: var(--field);
+  --color-ink: var(--ink);
+  --color-text2: var(--text2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fill: var(--fill);
+  --color-deep: var(--deep);
+
   --color-larsen-blue: #28327B;
   --color-larsen-red: #D81E2A;
   --color-larsen-pink: #D3AFC4;
@@ -13,29 +80,96 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Archivo', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #FFFFFF;
-    color: #1f2937;
+    background-color: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.45s ease, color 0.45s ease;
   }
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold py-3 px-8 rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105;
-  }
-  
-  .btn-secondary {
-    @apply bg-larsen-blue hover:bg-larsen-blue/90 text-white font-semibold py-3 px-8 rounded-full transition-all duration-200 shadow-md hover:shadow-lg;
-  }
-  
-  .btn-outline {
-    @apply border-2 border-larsen-red text-larsen-red hover:bg-larsen-red hover:text-white font-semibold py-3 px-8 rounded-full transition-all duration-200;
-  }
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes lz-rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes lz-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes lz-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+@keyframes lz-line {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes lz-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes lz-up {
+  from { transform: translateY(22px); }
+  to { transform: translateY(0); }
+}
 
+[data-rise] {
+  animation: lz-up 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+[data-reveal] {
+  animation: lz-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 24%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-rise],
+  [data-reveal] {
+    animation: none;
+  }
+  .lz-float {
+    animation: none !important;
+  }
+}
+
+/* Floating hero image */
+.lz-float {
+  animation: lz-float 7s ease-in-out infinite;
+}
+
+/* Brand logos: grayscale by default, original color on hover. */
+.lz-logo {
+  filter: grayscale(1);
+  opacity: 0.72;
+  transition: filter 0.4s, opacity 0.4s, transform 0.4s;
+}
+.lz-logo:hover {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: scale(1.05);
+}
+.lz-logo-lg {
+  filter: grayscale(1);
+  opacity: 0.82;
+  transition: filter 0.4s, opacity 0.4s, transform 0.4s;
+}
+.lz-logo-lg:hover {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: scale(1.04);
+}
+
+/* ============================================================
+   Utilities (retained from previous build + page transitions)
+   ============================================================ */
+@layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
@@ -54,122 +188,60 @@
     overflow: hidden;
   }
 
-  .gradient-text {
-    @apply bg-gradient-to-r from-larsen-red to-larsen-dark-red bg-clip-text text-transparent;
-  }
-
-  /* Improved card styles */
-  .card {
-    @apply bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300;
-  }
-
-  /* Better focus styles */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-larsen-red focus:ring-offset-2;
   }
 }
 
 @layer utilities {
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
   .backdrop-blur-custom {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
   /* Page transition animations */
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.4s ease-out;
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .page-transition-enter {
     animation: fadeIn 0.4s ease-out;
   }
-  
+
   .duration-400 {
     transition-duration: 400ms;
   }
 
-  /* Modal enter animation */
+  /* Modal animations (ContactModal) */
   @keyframes modalEnter {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
   }
-
   .animate-modal-enter {
     animation: modalEnter 0.3s ease-out;
   }
 
-  /* Modal exit animation */
   @keyframes modalExit {
-    from {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: scale(0.95) translateY(10px);
-    }
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.95) translateY(10px); }
   }
-
   .animate-modal-exit {
     animation: modalExit 0.3s ease-in;
   }
 
-  /* Backdrop enter animation */
   @keyframes modalBackdropEnter {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-
   .animate-modal-backdrop-enter {
     animation: modalBackdropEnter 0.3s ease-out;
   }
 
-  /* Backdrop exit animation */
   @keyframes modalBackdropExit {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
-
   .animate-modal-backdrop-exit {
     animation: modalBackdropExit 0.3s ease-in;
   }
