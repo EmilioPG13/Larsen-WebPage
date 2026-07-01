@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Product, Machine, ContactFormData } from '../types';
+import machinesData from '../data/machines.json';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -45,14 +46,27 @@ export const getProductById = async (id: string): Promise<Product> => {
 };
 
 // Machines API
+// Falls back to the bundled static data when the backend isn't deployed
+// (e.g. a static-only deploy), mirroring the resilience pattern used by
+// sendQuoteLead in services/leads.ts.
 export const getMachines = async (): Promise<Machine[]> => {
-  const response = await api.get('/machines');
-  return response.data;
+  try {
+    const response = await api.get('/machines');
+    return response.data;
+  } catch {
+    return machinesData as Machine[];
+  }
 };
 
 export const getMachineById = async (id: string): Promise<Machine> => {
-  const response = await api.get(`/machines/${id}`);
-  return response.data;
+  try {
+    const response = await api.get(`/machines/${id}`);
+    return response.data;
+  } catch {
+    const machine = (machinesData as Machine[]).find((m) => m.id === id);
+    if (!machine) throw new Error(`Machine not found: ${id}`);
+    return machine;
+  }
 };
 
 // Brands API
