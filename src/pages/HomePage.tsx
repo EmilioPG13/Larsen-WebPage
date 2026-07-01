@@ -4,6 +4,7 @@ import ContactModal from '../components/ContactModal';
 import Reveal from '../components/ui/Reveal';
 import Stat from '../components/ui/Stat';
 import { useT } from '../i18n/useT';
+import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { brands } from '../data/brands';
 import { getMachines } from '../services/api';
 import { machineToProduct } from '../utils/machineToProduct';
@@ -11,6 +12,7 @@ import type { Machine, Product } from '../types';
 
 const HomePage = () => {
   const t = useT();
+  useDocumentMeta(t.meta.home.title, t.meta.home.desc);
   const navigate = useNavigate();
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,7 @@ const HomePage = () => {
       {/* HERO */}
       <section className="relative max-w-[1240px] mx-auto px-7 pt-[84px] pb-[70px]">
         <div
+          aria-hidden="true"
           className="absolute top-[30px] -right-10 font-serif font-medium leading-[0.8] tracking-[-0.03em] pointer-events-none select-none z-0 text-[clamp(120px,20vw,300px)]"
           style={{ color: 'var(--ghost)' }}
         >
@@ -100,6 +103,8 @@ const HomePage = () => {
               <img
                 src="/images/machines/ARIES3.png"
                 alt="Steiger Aries.3"
+                decoding="async"
+                fetchPriority="high"
                 className="w-full max-w-[540px] mx-auto block object-contain"
                 style={{ filter: 'drop-shadow(0 30px 50px rgba(26,26,31,0.22))' }}
               />
@@ -141,6 +146,8 @@ const HomePage = () => {
               <img
                 src={b.image}
                 alt={b.name}
+                loading="lazy"
+                decoding="async"
                 className="lz-logo max-w-full object-contain"
                 style={{ maxHeight: `${78 * (b.name === 'Scheller' ? 1.2 : b.logoScale ?? 1)}px` }}
               />
@@ -179,7 +186,7 @@ const HomePage = () => {
                   style={{ background: 'var(--plate)' }}
                   onClick={() => openInterest(m)}
                 >
-                  <img src={m.image} alt={m.name} className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" />
+                  <img src={m.image} alt={m.name} loading="lazy" decoding="async" className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" />
                   <div className="absolute top-3.5 left-3.5 font-mono text-[10.5px] font-bold tracking-[0.05em] text-deep bg-white/85 px-2.5 py-[5px] rounded-full uppercase">
                     {m.brand}
                   </div>
@@ -226,7 +233,7 @@ const HomePage = () => {
         <Reveal
           className="bg-larsen-blue rounded-3xl px-12 py-14 relative overflow-hidden grid md:grid-cols-[1.4fr_1fr] gap-10 items-center"
         >
-          <div className="absolute -top-[60px] -right-[30px] font-serif font-medium text-[280px] leading-[0.7] pointer-events-none text-white/5">365</div>
+          <div aria-hidden="true" className="absolute -top-[60px] -right-[30px] font-serif font-medium text-[280px] leading-[0.7] pointer-events-none text-white/5">365</div>
           <div className="relative z-[1]">
             <div className="font-mono text-xs tracking-[0.08em] text-larsen-pink uppercase mb-4">{t.warranty.k}</div>
             <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,46px)] tracking-[-0.02em] text-white m-0 mb-4">{t.warranty.t}</h2>

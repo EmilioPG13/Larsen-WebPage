@@ -5,6 +5,7 @@ export type Lang = 'es' | 'en';
 
 export const es = {
   nav: { home: 'Inicio', machines: 'Máquinas', brands: 'Marcas', quote: 'Cotización', about: 'Nosotros' },
+  skipToContent: 'Saltar al contenido',
   cta: 'Cotizar',
   hero: {
     tag: 'Máquinas de tejer industriales · desde 1964',
@@ -66,6 +67,7 @@ export const es = {
     telT: 'Teléfono', telS: 'Llámanos directamente', telNum: '775 365 0376',
     hrsT: 'Horarios', hrsRow1: 'Lunes – Viernes', hrsRow1v: '8:00 – 18:00', hrsRow2: 'Sábados', hrsRow2v: '9:00 – 14:00', hrsZone: 'Zona horaria · CET (GMT+1)',
     tip: 'Para cotizaciones más rápidas, usa nuestro formulario interactivo arriba.',
+    req: 'Campo obligatorio', invalidEmail: 'Introduce un correo válido',
   },
   apage: {
     k: 'Desde 1964', t: 'Nuestra historia',
@@ -102,12 +104,28 @@ export const es = {
     prod: 'Navegación', contact: 'Contacto', rights: 'Todos los derechos reservados.',
     privacy: 'Política de privacidad', terms: 'Términos de uso', cookies: 'Cookies',
   },
+  notFound: {
+    tag: 'Error 404',
+    t: 'Página no encontrada',
+    s: 'La página que buscas no existe o fue movida. Vuelve al inicio o explora nuestras máquinas.',
+    home: 'Volver al inicio',
+    machines: 'Ver máquinas',
+  },
+  meta: {
+    home: { title: 'Larsen Italiana — Máquinas industriales de coser y tejer', desc: 'Reacondicionamos máquinas industriales de coser y tejer de las mejores marcas europeas y japonesas con garantía total.' },
+    machines: { title: 'Máquinas disponibles — Larsen Italiana', desc: 'Máquinas industriales reacondicionadas y listas para producción. Consulta especificaciones y disponibilidad.' },
+    brands: { title: 'Nuestras marcas — Larsen Italiana', desc: 'Trabajamos con los referentes mundiales: Steiger, Shima Seiki, Stoll, Protti y más.' },
+    quote: { title: 'Solicitar cotización — Larsen Italiana', desc: 'Cuéntanos qué necesitas y nuestro equipo te responderá en menos de 24 horas.' },
+    about: { title: 'Nuestra historia — Larsen Italiana', desc: 'Desde 1964 reacondicionando máquinas industriales de coser y tejer de segunda mano.' },
+    notFound: { title: 'Página no encontrada — Larsen Italiana', desc: 'La página que buscas no existe o fue movida.' },
+  },
 };
 
 export type Dictionary = typeof es;
 
 export const en: Dictionary = {
   nav: { home: 'Home', machines: 'Machines', brands: 'Brands', quote: 'Quote', about: 'About' },
+  skipToContent: 'Skip to content',
   cta: 'Get a quote',
   hero: {
     tag: 'Industrial knitting machines · since 1964',
@@ -169,6 +187,7 @@ export const en: Dictionary = {
     telT: 'Phone', telS: 'Call us directly', telNum: '775 365 0376',
     hrsT: 'Hours', hrsRow1: 'Monday – Friday', hrsRow1v: '8:00 – 18:00', hrsRow2: 'Saturday', hrsRow2v: '9:00 – 14:00', hrsZone: 'Timezone · CET (GMT+1)',
     tip: 'For faster quotes, use our interactive form above.',
+    req: 'Required field', invalidEmail: 'Enter a valid email',
   },
   apage: {
     k: 'Since 1964', t: 'Our story',
@@ -204,6 +223,21 @@ export const en: Dictionary = {
     blurb: 'Specialists in refurbished industrial knitting machines. Over 60 years of experience in the textile sector.',
     prod: 'Navigation', contact: 'Contact', rights: 'All rights reserved.',
     privacy: 'Privacy policy', terms: 'Terms of use', cookies: 'Cookies',
+  },
+  notFound: {
+    tag: 'Error 404',
+    t: 'Page not found',
+    s: 'The page you are looking for does not exist or has moved. Head back home or explore our machines.',
+    home: 'Back to home',
+    machines: 'View machines',
+  },
+  meta: {
+    home: { title: 'Larsen Italiana — Industrial sewing & knitting machines', desc: 'We refurbish industrial sewing and knitting machines from the finest European and Japanese brands with a full warranty.' },
+    machines: { title: 'Available machines — Larsen Italiana', desc: 'Refurbished, production-ready industrial machines. Check specifications and availability.' },
+    brands: { title: 'Our brands — Larsen Italiana', desc: 'We work with the world leaders: Steiger, Shima Seiki, Stoll, Protti and more.' },
+    quote: { title: 'Request a quote — Larsen Italiana', desc: 'Tell us what you need and our team will get back to you within 24 hours.' },
+    about: { title: 'Our story — Larsen Italiana', desc: 'Refurbishing second-hand industrial sewing and knitting machines since 1964.' },
+    notFound: { title: 'Page not found — Larsen Italiana', desc: 'The page you are looking for does not exist or has moved.' },
   },
 };
 

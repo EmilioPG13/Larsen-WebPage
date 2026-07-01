@@ -7,6 +7,7 @@ import BrandsPage from './pages/BrandsPage';
 import QuotePage from './pages/QuotePage';
 import AboutPage from './pages/AboutPage';
 import MachinesPage from './pages/MachinesPage';
+import NotFoundPage from './pages/NotFoundPage';
 import AdminLogin from './admin/pages/Login';
 import AdminDashboard from './admin/pages/Dashboard';
 import AdminProducts from './admin/pages/Products';
@@ -15,6 +16,7 @@ import AdminBrands from './admin/pages/Brands';
 import AdminLeads from './admin/pages/Leads';
 import AdminLayout from './admin/components/AdminLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
+import { useT } from './i18n/useT';
 
 function AppContent() {
   const location = useLocation();
@@ -37,16 +39,26 @@ function AppContent() {
   }, [displayLocation]);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const t = useT();
 
   return (
     <div className="min-h-screen bg-bg text-ink">
+      {!isAdminRoute && (
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-3 focus:left-3 focus:bg-larsen-red focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:font-semibold"
+        >
+          {t.skipToContent}
+        </a>
+      )}
       {!isAdminRoute && <Header />}
-      
-      <div 
+
+      <main
+        id="main-content"
         key={displayLocation.pathname}
         className={`page-transition-enter ${
-          transitionStage === 'fadeOut' 
-            ? 'opacity-0 translate-y-2' 
+          transitionStage === 'fadeOut'
+            ? 'opacity-0 translate-y-2'
             : 'opacity-100 translate-y-0'
         } transition-all duration-400 ease-out`}
       >
@@ -56,7 +68,7 @@ function AppContent() {
           <Route path="/maquinas" element={<MachinesPage />} />
           <Route path="/cotizacion" element={<QuotePage />} />
           <Route path="/nosotros" element={<AboutPage />} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
@@ -109,9 +121,12 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+
+          {/* 404 catch-all */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </div>
-      
+      </main>
+
       {!isAdminRoute && <Footer />}
     </div>
   );

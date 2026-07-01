@@ -1,10 +1,12 @@
 import Reveal from '../components/ui/Reveal';
 import { useT } from '../i18n/useT';
+import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { useLanguage } from '../i18n/LanguageContext';
 import { brands } from '../data/brands';
 
 const BrandsPage = () => {
   const t = useT();
+  useDocumentMeta(t.meta.brands.title, t.meta.brands.desc);
   const { lang } = useLanguage();
 
   return (
@@ -28,6 +30,8 @@ const BrandsPage = () => {
               <img
                 src={b.image}
                 alt={b.name}
+                loading="lazy"
+                decoding="async"
                 className="lz-logo-lg max-w-full object-contain"
                 style={{ maxHeight: `${78 * (b.name === 'Scheller' ? 1.3 : b.logoScale ?? 1)}px` }}
               />

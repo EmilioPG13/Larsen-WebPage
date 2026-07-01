@@ -3,9 +3,11 @@ import Reveal from '../components/ui/Reveal';
 import CountUp from '../components/ui/CountUp';
 import { ImageIcon } from '../components/ui/icons';
 import { useT } from '../i18n/useT';
+import { useDocumentMeta } from '../i18n/useDocumentMeta';
 
 const AboutPage = () => {
   const t = useT();
+  useDocumentMeta(t.meta.about.title, t.meta.about.desc);
   const navigate = useNavigate();
 
   return (
@@ -13,6 +15,7 @@ const AboutPage = () => {
       {/* HERO */}
       <section className="relative max-w-[1240px] mx-auto px-7 pt-[78px] pb-10 text-center">
         <div
+          aria-hidden="true"
           className="absolute top-5 left-1/2 -translate-x-1/2 font-serif font-medium italic leading-[0.8] pointer-events-none select-none z-0 text-[clamp(140px,22vw,320px)]"
           style={{ color: 'var(--ghost)' }}
         >

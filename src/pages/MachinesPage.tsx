@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import ContactModal from '../components/ContactModal';
 import Reveal from '../components/ui/Reveal';
 import { useT } from '../i18n/useT';
+import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { getMachines } from '../services/api';
 import { machineToProduct } from '../utils/machineToProduct';
 import type { Machine, Product } from '../types';
 
 const MachinesPage = () => {
   const t = useT();
+  useDocumentMeta(t.meta.machines.title, t.meta.machines.desc);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,8 @@ const MachinesPage = () => {
                   <img
                     src={m.image}
                     alt={m.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full max-h-[320px] object-contain transition-transform duration-500 hover:scale-105"
                     style={{ filter: 'drop-shadow(0 18px 30px rgba(26,26,31,0.18))' }}
                   />

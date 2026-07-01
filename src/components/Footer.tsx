@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useT } from '../i18n/useT';
-import { Phone, Mail, MapPin, Linkedin } from './ui/icons';
+import { Phone, Mail, MapPin, Linkedin, Instagram } from './ui/icons';
 
 const NAV: { key: 'home' | 'machines' | 'brands' | 'quote' | 'about'; path: string }[] = [
   { key: 'home', path: '/' },
@@ -21,19 +21,32 @@ const Footer = () => {
           <img
             src="/images/logo/larsen-logo-2.png"
             alt="Larsen Italiana"
+            loading="lazy"
+            decoding="async"
             className="h-10 w-auto object-contain mb-5"
             style={{ filter: 'brightness(0) invert(1)' }}
           />
           <p className="text-[14.5px] leading-[1.62] text-white/55 mb-[22px] max-w-[340px]">{t.foot.blurb}</p>
-          <a
-            href="https://www.linkedin.com/company/larsen-italiana-soc-arl"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn"
-            className="inline-flex w-[38px] h-[38px] border border-white/20 rounded-[9px] items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-blue hover:text-white hover:border-larsen-blue"
-          >
-            <Linkedin size={17} />
-          </a>
+          <div className="flex items-center gap-2.5">
+            <a
+              href="https://www.linkedin.com/company/larsen-italiana-soc-arl"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              className="inline-flex w-[38px] h-[38px] border border-white/20 rounded-[9px] items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-blue hover:text-white hover:border-larsen-blue"
+            >
+              <Linkedin size={17} />
+            </a>
+            <a
+              href="https://www.instagram.com/larsen.italiana"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="inline-flex w-[38px] h-[38px] border border-white/20 rounded-[9px] items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-red hover:text-white hover:border-larsen-red"
+            >
+              <Instagram size={17} />
+            </a>
+          </div>
         </div>
 
         {/* Navigation */}

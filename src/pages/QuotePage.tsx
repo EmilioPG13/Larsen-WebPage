@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Reveal from '../components/ui/Reveal';
 import { useT } from '../i18n/useT';
-import { getMachines, submitLead } from '../services/api';
+import { useDocumentMeta } from '../i18n/useDocumentMeta';
+import { getMachines } from '../services/api';
+import { sendQuoteLead } from '../services/leads';
 import { Check, Clock, MessageCircle, Phone } from '../components/ui/icons';
 import { FileText, BarChart, DollarSign, Package } from '../components/ui/icons';
 
@@ -12,9 +14,14 @@ interface QuoteForm {
   phone: string;
   machine: string;
   message: string;
+  website: string; // honeypot — must stay empty
 }
 
-const EMPTY: QuoteForm = { name: '', company: '', email: '', phone: '', machine: '', message: '' };
+const EMPTY: QuoteForm = { name: '', company: '', email: '', phone: '', machine: '', message: '', website: '' };
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FieldErrors = Partial<Record<'name' | 'email' | 'phone', string>>;
 
 const inputClass =
   'font-sans text-[14.5px] px-3.5 py-3 border-[1.5px] border-line-strong rounded-[10px] bg-field text-ink outline-none transition-colors duration-200 focus:border-deep';
@@ -22,11 +29,13 @@ const labelClass = 'text-[12.5px] font-semibold text-text2';
 
 const QuotePage = () => {
   const t = useT();
+  useDocumentMeta(t.meta.quote.title, t.meta.quote.desc);
   const [form, setForm] = useState<QuoteForm>(EMPTY);
   const [machineOptions, setMachineOptions] = useState<string[]>([]);
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     (async () => {
@@ -39,23 +48,49 @@ const QuotePage = () => {
     })();
   }, []);
 
-  const upd = (k: keyof QuoteForm) => (e: { target: { value: string } }) =>
+  const upd = (k: keyof QuoteForm) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
+    if (k === 'name' || k === 'email' || k === 'phone') {
+      setErrors((prev) => ({ ...prev, [k]: undefined }));
+    }
+  };
+
+  const validate = (): FieldErrors => {
+    const next: FieldErrors = {};
+    if (!form.name.trim()) next.name = t.qpage.req;
+    if (!form.email.trim()) next.email = t.qpage.req;
+    else if (!EMAIL_RE.test(form.email.trim())) next.email = t.qpage.invalidEmail;
+    if (!form.phone.trim()) next.phone = t.qpage.req;
+    return next;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    // Honeypot: a real user never fills this hidden field. Silently accept
+    // to avoid tipping off bots, but don't send anything.
+    if (form.website) {
+      setSent(true);
+      return;
+    }
+
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     setSubmitting(true);
     setError(false);
     try {
       const machineLine = form.machine ? `${t.qpage.machine}: ${form.machine}\n` : '';
-      await submitLead({
+      await sendQuoteLead({
         name: form.name,
+        company: form.company,
         email: form.email,
         phone: form.phone,
-        company: form.company,
-        budget: 'No especificado',
-        purchaseDate: 'No especificado',
-        message: `${machineLine}${form.message}`.trim() || undefined,
+        machine: form.machine,
+        message: `${machineLine}${form.message}`.trim(),
       });
       setSent(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -69,6 +104,8 @@ const QuotePage = () => {
 
   const resetForm = () => {
     setForm(EMPTY);
+    setErrors({});
+    setError(false);
     setSent(false);
   };
 
@@ -131,7 +168,13 @@ const QuotePage = () => {
               <form onSubmit={handleSubmit} className="bg-surface border border-line rounded-[22px] p-[34px] grid grid-cols-1 sm:grid-cols-2 gap-[18px]" style={{ boxShadow: '0 20px 50px rgba(26,26,31,0.08)' }}>
                 <div className="flex flex-col gap-[7px]">
                   <label className={labelClass}>{t.qpage.name}</label>
-                  <input required value={form.name} onChange={upd('name')} className={inputClass} />
+                  <input
+                    value={form.name}
+                    onChange={upd('name')}
+                    aria-invalid={!!errors.name}
+                    className={`${inputClass} ${errors.name ? 'border-larsen-red focus:border-larsen-red' : ''}`}
+                  />
+                  {errors.name && <span className="text-[12px] text-larsen-red">{errors.name}</span>}
                 </div>
                 <div className="flex flex-col gap-[7px]">
                   <label className={labelClass}>{t.qpage.company}</label>
@@ -139,12 +182,36 @@ const QuotePage = () => {
                 </div>
                 <div className="flex flex-col gap-[7px]">
                   <label className={labelClass}>{t.qpage.email}</label>
-                  <input required type="email" value={form.email} onChange={upd('email')} className={inputClass} />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={upd('email')}
+                    aria-invalid={!!errors.email}
+                    className={`${inputClass} ${errors.email ? 'border-larsen-red focus:border-larsen-red' : ''}`}
+                  />
+                  {errors.email && <span className="text-[12px] text-larsen-red">{errors.email}</span>}
                 </div>
                 <div className="flex flex-col gap-[7px]">
                   <label className={labelClass}>{t.qpage.phone}</label>
-                  <input required value={form.phone} onChange={upd('phone')} className={inputClass} />
+                  <input
+                    value={form.phone}
+                    onChange={upd('phone')}
+                    aria-invalid={!!errors.phone}
+                    className={`${inputClass} ${errors.phone ? 'border-larsen-red focus:border-larsen-red' : ''}`}
+                  />
+                  {errors.phone && <span className="text-[12px] text-larsen-red">{errors.phone}</span>}
                 </div>
+
+                {/* Honeypot: hidden from users, catches bots */}
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={form.website}
+                  onChange={upd('website')}
+                  className="hidden"
+                />
                 <div className="flex flex-col gap-[7px] sm:col-span-2">
                   <label className={labelClass}>{t.qpage.machine}</label>
                   <select value={form.machine} onChange={upd('machine')} className={inputClass}>
