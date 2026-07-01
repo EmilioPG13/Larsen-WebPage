@@ -208,7 +208,7 @@ const QuotePage = () => {
       </div>
 
       {/* DIRECT CONTACT (dark) */}
-      <div className="bg-[#1a1a1f]">
+      <div className="bg-[#161e61]">
         <div className="max-w-[1240px] mx-auto px-7 pt-[74px] pb-20">
           <Reveal className="text-center mb-[46px]">
             <h2 className="font-serif font-medium text-[clamp(30px,3.8vw,46px)] tracking-[-0.02em] text-white m-0 mb-3">

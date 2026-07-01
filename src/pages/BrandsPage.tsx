@@ -22,10 +22,15 @@ const BrandsPage = () => {
             className="bg-surface border border-line rounded-[18px] p-8 flex gap-[26px] items-center transition-all duration-300 hover:-translate-y-1 hover:border-deep/25"
           >
             <div
-              className="shrink-0 w-[148px] h-[104px] border border-line rounded-[14px] flex items-center justify-center p-[22px] overflow-hidden"
+              className="shrink-0 w-[196px] h-[132px] border border-line rounded-[14px] flex items-center justify-center p-3 overflow-hidden"
               style={{ background: 'var(--logo-bg)' }}
             >
-              <img src={b.image} alt={b.name} className="lz-logo-lg max-w-full max-h-[72px] object-contain" />
+              <img
+                src={b.image}
+                alt={b.name}
+                className="lz-logo-lg max-w-full object-contain"
+                style={{ maxHeight: `${78 * (b.name === 'Scheller' ? 1.3 : b.logoScale ?? 1)}px` }}
+              />
             </div>
             <div className="flex-1">
               <div className="flex items-baseline gap-2.5 mb-2">

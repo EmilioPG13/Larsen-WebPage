@@ -108,7 +108,7 @@ const AboutPage = () => {
       </section>
 
       {/* SPECIALTIES (dark) */}
-      <section className="bg-[#1a1a1f] mt-[30px]">
+      <section className="bg-[#161e61] mt-[30px]">
         <div className="max-w-[1240px] mx-auto px-7 py-[72px]">
           <Reveal className="text-center mb-11">
             <div className="font-mono text-xs tracking-[0.08em] text-larsen-pink uppercase mb-3.5">{t.apage.sk}</div>

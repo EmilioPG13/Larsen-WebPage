@@ -135,10 +135,15 @@ const HomePage = () => {
           {brands.map((b) => (
             <div
               key={b.name}
-              className="border border-line rounded-2xl h-28 flex items-center justify-center px-6 overflow-hidden transition-all duration-300 hover:border-larsen-red/40 hover:-translate-y-[3px]"
+              className="border border-line rounded-2xl h-[124px] flex items-center justify-center px-3 overflow-hidden transition-all duration-300 hover:border-larsen-red/40 hover:-translate-y-[3px]"
               style={{ background: 'var(--logo-bg)' }}
             >
-              <img src={b.image} alt={b.name} className="lz-logo max-w-full max-h-[54px] object-contain" />
+              <img
+                src={b.image}
+                alt={b.name}
+                className="lz-logo max-w-full object-contain"
+                style={{ maxHeight: `${78 * (b.name === 'Scheller' ? 1.2 : b.logoScale ?? 1)}px` }}
+              />
             </div>
           ))}
         </Reveal>

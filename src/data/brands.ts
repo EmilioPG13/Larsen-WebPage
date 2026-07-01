@@ -5,6 +5,8 @@ export interface BrandEntry {
   origin: { es: string; en: string };
   image: string;
   blurb: { es: string; en: string };
+  /** Optional multiplier (0-1) to visually balance logos whose artwork reads larger than others at the same box height. */
+  logoScale?: number;
 }
 
 // Ported from the Claude Design source (rawBrands()).
@@ -26,6 +28,7 @@ export const brands: BrandEntry[] = [
       es: 'Referente alemán en máquinas de tejido rectilíneo electrónico de altas prestaciones.',
       en: 'German benchmark in high-performance electronic flat-knitting machines.',
     },
+    logoScale: 0.62,
   },
   {
     name: 'Steiger',
@@ -44,6 +47,7 @@ export const brands: BrandEntry[] = [
       es: 'Histórica marca italiana de máquinas de tejido rectilíneo.',
       en: 'Historic Italian flat-knitting machine brand.',
     },
+    logoScale: 0.62,
   },
   {
     name: 'Scheller',
