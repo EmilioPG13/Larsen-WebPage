@@ -2,11 +2,13 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import WhatsAppButton from './components/WhatsAppButton';
 import HomePage from './pages/HomePage';
 import BrandsPage from './pages/BrandsPage';
 import QuotePage from './pages/QuotePage';
 import AboutPage from './pages/AboutPage';
 import MachinesPage from './pages/MachinesPage';
+import MachineDetailPage from './pages/MachineDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AdminLogin from './admin/pages/Login';
 import AdminDashboard from './admin/pages/Dashboard';
@@ -17,6 +19,7 @@ import AdminLeads from './admin/pages/Leads';
 import AdminLayout from './admin/components/AdminLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 import { useT } from './i18n/useT';
+import { initAnalytics, trackPageView } from './services/analytics';
 
 function AppContent() {
   const location = useLocation();
@@ -37,6 +40,14 @@ function AppContent() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [displayLocation]);
+
+  // Analytics: init once, then send a manual page_view on each route change (SPA).
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
   const t = useT();
@@ -66,6 +77,7 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
           <Route path="/marcas" element={<BrandsPage />} />
           <Route path="/maquinas" element={<MachinesPage />} />
+          <Route path="/maquinas/:id" element={<MachineDetailPage />} />
           <Route path="/cotizacion" element={<QuotePage />} />
           <Route path="/nosotros" element={<AboutPage />} />
 
@@ -128,6 +140,7 @@ function AppContent() {
       </main>
 
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <WhatsAppButton />}
     </div>
   );
 }

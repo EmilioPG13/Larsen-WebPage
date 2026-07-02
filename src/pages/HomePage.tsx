@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ContactModal from '../components/ContactModal';
 import Reveal from '../components/ui/Reveal';
 import Stat from '../components/ui/Stat';
 import { useT } from '../i18n/useT';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { brands } from '../data/brands';
 import { getMachines } from '../services/api';
-import { machineToProduct } from '../utils/machineToProduct';
-import type { Machine, Product } from '../types';
+import type { Machine } from '../types';
 
 const HomePage = () => {
   const t = useT();
@@ -17,8 +15,6 @@ const HomePage = () => {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
 
   useEffect(() => {
     (async () => {
@@ -34,11 +30,6 @@ const HomePage = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const openInterest = (machine: Machine) => {
-    setSelectedProduct(machineToProduct(machine));
-    setIsModalOpen(true);
-  };
 
   const featured = machines.slice(0, 3);
 
@@ -175,31 +166,31 @@ const HomePage = () => {
           </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-[22px]">
             {featured.map((m) => (
-              <Reveal
-                key={m.id}
-                as="button"
-                className="text-left bg-surface border border-line rounded-[18px] overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:border-deep/25"
-                style={{ boxShadow: 'none' }}
-              >
-                <div
-                  className="relative px-[18px] py-3.5 flex items-center justify-center h-[210px] overflow-hidden"
-                  style={{ background: 'var(--plate)' }}
-                  onClick={() => openInterest(m)}
+              <Reveal key={m.id}>
+                <Link
+                  to={`/maquinas/${m.id}`}
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="text-left bg-surface border border-line rounded-[18px] overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:border-deep/25"
                 >
-                  <img src={m.image} alt={m.name} loading="lazy" decoding="async" className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" />
-                  <div className="absolute top-3.5 left-3.5 font-mono text-[10.5px] font-bold tracking-[0.05em] text-deep bg-white/85 px-2.5 py-[5px] rounded-full uppercase">
-                    {m.brand}
+                  <div
+                    className="relative px-[18px] py-3.5 flex items-center justify-center h-[210px] overflow-hidden"
+                    style={{ background: 'var(--plate)' }}
+                  >
+                    <img src={m.image} alt={m.name} loading="lazy" decoding="async" className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" />
+                    <div className="absolute top-3.5 left-3.5 font-mono text-[10.5px] font-bold tracking-[0.05em] text-deep bg-white/85 px-2.5 py-[5px] rounded-full uppercase">
+                      {m.brand}
+                    </div>
                   </div>
-                </div>
-                <div className="p-[22px] pt-[22px] pb-6 flex flex-col flex-1" onClick={() => openInterest(m)}>
-                  <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2.5">{m.name}</h3>
-                  <p className="text-[14.5px] leading-[1.55] text-muted m-0 mb-4 flex-1 line-clamp-3">{m.description}</p>
-                  <div className="flex flex-wrap gap-[7px]">
-                    {m.capabilities.slice(0, 4).map((tag, i) => (
-                      <span key={i} className="text-[11.5px] font-medium text-text2 bg-fill px-[11px] py-[5px] rounded-full">{tag}</span>
-                    ))}
+                  <div className="p-[22px] pt-[22px] pb-6 flex flex-col flex-1">
+                    <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2.5">{m.name}</h3>
+                    <p className="text-[14.5px] leading-[1.55] text-muted m-0 mb-4 flex-1 line-clamp-3">{m.description}</p>
+                    <div className="flex flex-wrap gap-[7px]">
+                      {m.capabilities.slice(0, 4).map((tag, i) => (
+                        <span key={i} className="text-[11.5px] font-medium text-text2 bg-fill px-[11px] py-[5px] rounded-full">{tag}</span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </Link>
               </Reveal>
             ))}
           </div>
@@ -262,7 +253,6 @@ const HomePage = () => {
         </Reveal>
       </section>
 
-      <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} product={selectedProduct} />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useT } from '../i18n/useT';
+import { track } from '../services/analytics';
 import { Phone, Mail, MapPin, Linkedin, Instagram } from './ui/icons';
 
 const NAV: { key: 'home' | 'machines' | 'brands' | 'quote' | 'about'; path: string }[] = [
@@ -70,7 +71,7 @@ const Footer = () => {
         <div>
           <h4 className="font-mono text-xs tracking-[0.06em] uppercase text-white/50 mb-[18px]">{t.foot.contact}</h4>
           <div className="flex flex-col gap-[15px] text-[14.5px] text-white/60">
-            <a href="tel:+527753650376" className="flex items-start gap-3 transition-colors duration-200 hover:text-white">
+            <a href="tel:+527753650376" onClick={() => track('click_phone', { source: 'footer' })} className="flex items-start gap-3 transition-colors duration-200 hover:text-white">
               <Phone size={17} className="shrink-0 mt-[3px] text-larsen-red" />
               <span className="flex flex-col gap-[3px]">
                 <span>+52 775 365 0376</span>

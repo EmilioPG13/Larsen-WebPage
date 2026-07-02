@@ -3,12 +3,14 @@ import { submitLead } from './api';
 
 export interface QuoteLeadPayload {
   name: string;
-  company: string;
+  company?: string;
   email: string;
   phone: string;
   machine: string;
   /** Fully composed message (machine of interest + free-text). */
   message: string;
+  /** Where the lead came from, e.g. 'quote-form' | 'spec-download'. */
+  source?: string;
 }
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined;
@@ -25,11 +27,12 @@ async function sendViaEmailjs(p: QuoteLeadPayload): Promise<void> {
     {
       to_name: 'Larsen Italiana',
       from_name: p.name,
-      company: p.company,
+      company: p.company || '—',
       reply_to: p.email,
       email: p.email,
       phone: p.phone,
       machine: p.machine || '—',
+      source: p.source || 'quote-form',
       message: p.message,
     },
     { publicKey: PUBLIC_KEY! },
@@ -37,14 +40,15 @@ async function sendViaEmailjs(p: QuoteLeadPayload): Promise<void> {
 }
 
 async function sendViaBackend(p: QuoteLeadPayload): Promise<void> {
+  const sourceLine = p.source ? `[${p.source}] ` : '';
   await submitLead({
     name: p.name,
     email: p.email,
     phone: p.phone,
-    company: p.company,
+    company: p.company || '',
     budget: 'No especificado',
     purchaseDate: 'No especificado',
-    message: p.message || undefined,
+    message: `${sourceLine}${p.message}`.trim() || undefined,
   });
 }
 

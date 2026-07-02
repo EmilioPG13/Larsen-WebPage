@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import ContactModal from '../components/ContactModal';
 import Reveal from '../components/ui/Reveal';
 import { useT } from '../i18n/useT';
@@ -129,6 +130,13 @@ const MachinesPage = () => {
                     >
                       {inStock ? t.mpage.interested : t.mpage.outOfStock}
                     </button>
+                    <Link
+                      to={`/maquinas/${m.id}`}
+                      onClick={() => window.scrollTo(0, 0)}
+                      className="font-semibold text-[14.5px] px-[22px] py-[13px] rounded-full border-[1.5px] border-line-strong text-ink transition-colors duration-200 hover:border-deep hover:bg-deep/5"
+                    >
+                      {t.detail.view} →
+                    </Link>
                     <div className="flex flex-wrap gap-[7px]">
                       {m.capabilities.slice(0, 3).map((tag, i) => (
                         <span key={i} className="text-[11.5px] font-medium text-text2 bg-fill px-[11px] py-[5px] rounded-full">{tag}</span>

@@ -4,6 +4,7 @@ import { useT } from '../i18n/useT';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { getMachines } from '../services/api';
 import { sendQuoteLead } from '../services/leads';
+import { track } from '../services/analytics';
 import { Check, Clock, MessageCircle, Phone } from '../components/ui/icons';
 import { FileText, BarChart, DollarSign, Package } from '../components/ui/icons';
 
@@ -92,6 +93,7 @@ const QuotePage = () => {
         machine: form.machine,
         message: `${machineLine}${form.message}`.trim(),
       });
+      track('submit_quote', { machine: form.machine || 'none' });
       setSent(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -295,7 +297,7 @@ const QuotePage = () => {
               </div>
               <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2">{t.qpage.waT}</h3>
               <p className="text-[14.5px] text-muted m-0 mb-[18px]">{t.qpage.waS}</p>
-              <a href="https://wa.me/527753650376" target="_blank" rel="noopener noreferrer" className="mt-auto text-[15px] font-semibold text-[#1F8A5B] transition-opacity duration-200 hover:opacity-70">
+              <a href="https://wa.me/527753650376" target="_blank" rel="noopener noreferrer" onClick={() => track('click_whatsapp', { source: 'quote_direct' })} className="mt-auto text-[15px] font-semibold text-[#1F8A5B] transition-opacity duration-200 hover:opacity-70">
                 {t.qpage.waLink}
               </a>
             </div>
@@ -307,7 +309,7 @@ const QuotePage = () => {
               <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2">{t.qpage.telT}</h3>
               <p className="text-[14.5px] text-muted m-0 mb-[18px]">{t.qpage.telS}</p>
               <div className="mt-auto flex flex-col items-center gap-1.5">
-                <a href="tel:+527753650376" className="text-base font-bold text-deep transition-opacity duration-200 hover:opacity-70">{t.qpage.telNum}</a>
+                <a href="tel:+527753650376" onClick={() => track('click_phone', { source: 'quote_direct' })} className="text-base font-bold text-deep transition-opacity duration-200 hover:opacity-70">{t.qpage.telNum}</a>
                 <a href="tel:+393486907430" className="text-sm font-medium text-muted transition-opacity duration-200 hover:opacity-70">+39 348 6907430</a>
               </div>
             </div>
