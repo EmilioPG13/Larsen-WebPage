@@ -6,6 +6,12 @@ export type Lang = 'es' | 'en';
 export const es = {
   nav: { home: 'Inicio', machines: 'Máquinas', brands: 'Marcas', quote: 'Cotización', about: 'Nosotros' },
   skipToContent: 'Saltar al contenido',
+  contact: {
+    office: 'Oficina',
+    workshop: 'Taller',
+    mexico: 'Cuautepec de Hinojosa, Hidalgo · México',
+    italy: 'Moglia, MN · Italia',
+  },
   cta: 'Cotizar',
   hero: {
     tag: 'Máquinas de tejer industriales · desde 1964',
@@ -64,8 +70,8 @@ export const es = {
     s4t: 'Entrega', s4d: 'Coordinamos la entrega e instalación.',
     directT1: '¿Prefieres contacto', directT2: 'directo?', directS: 'Nuestro equipo de ventas está disponible para atenderte de inmediato.',
     waT: 'WhatsApp', waS: 'Chatea con nosotros ahora mismo', waLink: 'Enviar mensaje →',
-    telT: 'Teléfono', telS: 'Llámanos directamente', telNum: '775 365 0376',
-    hrsT: 'Horarios', hrsRow1: 'Lunes – Viernes', hrsRow1v: '8:00 – 18:00', hrsRow2: 'Sábados', hrsRow2v: '9:00 – 14:00', hrsZone: 'Zona horaria · CET (GMT+1)',
+    telT: 'Teléfono', telS: 'Llámanos directamente', telNum: '+52 775 365 0376',
+    hrsT: 'Horarios', hrsRow1: 'Lunes – Viernes', hrsRow1v: '8:00 – 18:00', hrsRow2: 'Sábados', hrsRow2v: '9:00 – 14:00', hrsZone: 'Zona horaria · Centro de México (GMT-6)',
     tip: 'Para cotizaciones más rápidas, usa nuestro formulario interactivo arriba.',
     req: 'Campo obligatorio', invalidEmail: 'Introduce un correo válido',
   },
@@ -126,6 +132,12 @@ export type Dictionary = typeof es;
 export const en: Dictionary = {
   nav: { home: 'Home', machines: 'Machines', brands: 'Brands', quote: 'Quote', about: 'About' },
   skipToContent: 'Skip to content',
+  contact: {
+    office: 'Office',
+    workshop: 'Workshop',
+    mexico: 'Cuautepec de Hinojosa, Hidalgo · Mexico',
+    italy: 'Moglia, MN · Italy',
+  },
   cta: 'Get a quote',
   hero: {
     tag: 'Industrial knitting machines · since 1964',
@@ -184,8 +196,8 @@ export const en: Dictionary = {
     s4t: 'Delivery', s4d: 'We coordinate delivery and installation.',
     directT1: 'Prefer direct', directT2: 'contact?', directS: 'Our sales team is available to assist you right away.',
     waT: 'WhatsApp', waS: 'Chat with us right now', waLink: 'Send a message →',
-    telT: 'Phone', telS: 'Call us directly', telNum: '775 365 0376',
-    hrsT: 'Hours', hrsRow1: 'Monday – Friday', hrsRow1v: '8:00 – 18:00', hrsRow2: 'Saturday', hrsRow2v: '9:00 – 14:00', hrsZone: 'Timezone · CET (GMT+1)',
+    telT: 'Phone', telS: 'Call us directly', telNum: '+52 775 365 0376',
+    hrsT: 'Hours', hrsRow1: 'Monday – Friday', hrsRow1v: '8:00 – 18:00', hrsRow2: 'Saturday', hrsRow2v: '9:00 – 14:00', hrsZone: 'Timezone · Central Mexico (GMT-6)',
     tip: 'For faster quotes, use our interactive form above.',
     req: 'Required field', invalidEmail: 'Enter a valid email',
   },

@@ -70,20 +70,23 @@ const Footer = () => {
         <div>
           <h4 className="font-mono text-xs tracking-[0.06em] uppercase text-white/50 mb-[18px]">{t.foot.contact}</h4>
           <div className="flex flex-col gap-[15px] text-[14.5px] text-white/60">
-            <a href="tel:+17753650376" className="flex items-start gap-3 transition-colors duration-200 hover:text-white">
+            <a href="tel:+527753650376" className="flex items-start gap-3 transition-colors duration-200 hover:text-white">
               <Phone size={17} className="shrink-0 mt-[3px] text-larsen-red" />
               <span className="flex flex-col gap-[3px]">
-                <span>775 365 0376</span>
-                <span className="text-white/40 text-[13.5px]">0039 348 6907430</span>
+                <span>+52 775 365 0376</span>
+                <span className="text-white/40 text-[13.5px]">+39 348 6907430</span>
               </span>
             </a>
-            <a href="mailto:info@larsenitaliana.it" className="flex items-center gap-3 transition-colors duration-200 hover:text-white">
+            <a href="mailto:info@larsenitaliana.com" className="flex items-center gap-3 transition-colors duration-200 hover:text-white">
               <Mail size={17} className="shrink-0 text-larsen-red" />
-              <span>info@larsenitaliana.it</span>
+              <span>info@larsenitaliana.com</span>
             </a>
-            <div className="flex items-center gap-3">
-              <MapPin size={17} className="shrink-0 text-larsen-red" />
-              <span>Moglia, MN · Italia</span>
+            <div className="flex items-start gap-3">
+              <MapPin size={17} className="shrink-0 mt-[3px] text-larsen-red" />
+              <span className="flex flex-col gap-[3px]">
+                <span>{t.contact.office}: {t.contact.mexico}</span>
+                <span className="text-white/40 text-[13.5px]">{t.contact.workshop}: {t.contact.italy}</span>
+              </span>
             </div>
           </div>
         </div>

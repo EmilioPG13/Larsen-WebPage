@@ -138,17 +138,21 @@ const QuotePage = () => {
               <div className="flex items-start gap-3.5">
                 <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">TEL</span>
                 <span className="flex flex-col gap-[3px]">
-                  <span className="text-[14.5px] font-semibold text-ink">775 365 0376</span>
-                  <span className="text-[13.5px] text-muted">0039 348 6907430</span>
+                  <span className="text-[14.5px] font-semibold text-ink">+52 775 365 0376</span>
+                  <span className="text-[13.5px] text-muted">+39 348 6907430</span>
                 </span>
               </div>
               <div className="flex items-center gap-3.5">
                 <span className="font-mono text-[11px] text-faint w-[54px]">EMAIL</span>
-                <span className="text-[15px] text-ink">info@larsenitaliana.it</span>
+                <span className="text-[15px] text-ink">info@larsenitaliana.com</span>
               </div>
-              <div className="flex items-center gap-3.5">
-                <span className="font-mono text-[11px] text-faint w-[54px]">SEDE</span>
-                <span className="text-[15px] text-ink">Moglia, MN · Italia</span>
+              <div className="flex items-start gap-3.5">
+                <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">MX</span>
+                <span className="text-[15px] text-ink">{t.contact.mexico}</span>
+              </div>
+              <div className="flex items-start gap-3.5">
+                <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">IT</span>
+                <span className="text-[15px] text-muted">{t.contact.italy}</span>
               </div>
             </div>
           </Reveal>
@@ -291,7 +295,7 @@ const QuotePage = () => {
               </div>
               <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2">{t.qpage.waT}</h3>
               <p className="text-[14.5px] text-muted m-0 mb-[18px]">{t.qpage.waS}</p>
-              <a href="https://wa.me/393486907430" target="_blank" rel="noopener noreferrer" className="mt-auto text-[15px] font-semibold text-[#1F8A5B] transition-opacity duration-200 hover:opacity-70">
+              <a href="https://wa.me/527753650376" target="_blank" rel="noopener noreferrer" className="mt-auto text-[15px] font-semibold text-[#1F8A5B] transition-opacity duration-200 hover:opacity-70">
                 {t.qpage.waLink}
               </a>
             </div>
@@ -303,8 +307,8 @@ const QuotePage = () => {
               <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2">{t.qpage.telT}</h3>
               <p className="text-[14.5px] text-muted m-0 mb-[18px]">{t.qpage.telS}</p>
               <div className="mt-auto flex flex-col items-center gap-1.5">
-                <a href="tel:+17753650376" className="text-base font-bold text-deep transition-opacity duration-200 hover:opacity-70">{t.qpage.telNum}</a>
-                <a href="tel:+393486907430" className="text-sm font-medium text-muted transition-opacity duration-200 hover:opacity-70">0039 348 6907430</a>
+                <a href="tel:+527753650376" className="text-base font-bold text-deep transition-opacity duration-200 hover:opacity-70">{t.qpage.telNum}</a>
+                <a href="tel:+393486907430" className="text-sm font-medium text-muted transition-opacity duration-200 hover:opacity-70">+39 348 6907430</a>
               </div>
             </div>
             {/* Hours */}
