@@ -90,7 +90,7 @@ const HomePage = () => {
               className="absolute inset-[8%_6%]"
               style={{ background: 'radial-gradient(circle at 50% 45%, rgba(40,50,123,0.10), transparent 68%)', filter: 'blur(8px)' }}
             />
-            <div className="relative lz-float">
+            <div className="relative">
               <img
                 src="/images/machines/ARIES3.png"
                 alt="Steiger Aries.3"

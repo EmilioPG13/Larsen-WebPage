@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Archivo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
@@ -53,7 +53,7 @@
    ============================================================ */
 @theme {
   --font-sans: 'Archivo', sans-serif;
-  --font-serif: 'Newsreader', serif;
+  --font-serif: 'IBM Plex Serif', serif;
   --font-mono: 'Space Mono', monospace;
 
   --color-bg: var(--bg);
@@ -110,10 +110,6 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes lz-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
 @keyframes lz-line {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -141,14 +137,6 @@
   [data-reveal] {
     animation: none;
   }
-  .lz-float {
-    animation: none !important;
-  }
-}
-
-/* Floating hero image */
-.lz-float {
-  animation: lz-float 7s ease-in-out infinite;
 }
 
 /* Brand logos: grayscale by default, original color on hover. */
