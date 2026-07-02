@@ -4,6 +4,7 @@ import { Sun, Moon, Menu, X } from './ui/icons';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useT } from '../i18n/useT';
+import { useHideOnScroll } from '../hooks/useHideOnScroll';
 
 const NAV: { key: keyof ReturnType<typeof useT>['nav']; path: string }[] = [
   { key: 'home', path: '/' },
@@ -20,6 +21,8 @@ const Header = () => {
   const { lang, setLang } = useLanguage();
   const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
+  const hidden = useHideOnScroll({ disabled: menuOpen, resetKey: location.pathname });
+  const effectiveHidden = hidden && !menuOpen;
 
   const go = (path: string) => {
     navigate(path);
@@ -33,8 +36,12 @@ const Header = () => {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-line backdrop-blur-custom"
+      className={`sticky top-0 z-50 border-b border-line backdrop-blur-custom transition-transform duration-300 ease-in-out motion-reduce:transition-none ${
+        effectiveHidden ? '-translate-y-full' : 'translate-y-0'
+      }`}
       style={{ background: 'var(--bg-blur)', boxShadow: '0 6px 22px rgba(20,22,28,0.10)' }}
+      aria-hidden={effectiveHidden || undefined}
+      inert={effectiveHidden || undefined}
     >
       <div className="max-w-[1240px] mx-auto px-7 h-[74px] flex items-center justify-between gap-6">
         {/* Logo */}
