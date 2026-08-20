@@ -1,0 +1,16 @@
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\README.md
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\REQUIREMENTS.md
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\TESTING.md
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\docs\SHOTLIST.md
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\index.html
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\robots.txt
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\brands\PROTTI.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\brands\SHIMA SEIKI.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\brands\STOLL.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\brands\Scheller.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\brands\Steiger ZAMARK.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\logo\larsen-logo-1.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\logo\larsen-logo-2.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\machines\ARIES3.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\machines\ARIES6.png
+C:\Users\Emili\Desktop\Code\Larsen-WebPage\public\images\machines\VESTAMULTI.png

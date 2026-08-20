@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Reveal from '../components/ui/Reveal';
 import Stat from '../components/ui/Stat';
+import { Wrench, Cpu, Layers, ShieldCheck } from '../components/ui/icons';
 import { useT } from '../i18n/useT';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { brands } from '../data/brands';
@@ -198,8 +199,55 @@ const HomePage = () => {
       )}
 
       {error && featured.length === 0 && (
-        <div className="max-w-[1240px] mx-auto px-7 py-10 text-center text-muted">{error}</div>
+        <div className="max-w-[1240px] mx-auto px-7 py-10 text-center text-larsen-red">{error}</div>
       )}
+
+      {/* SERVICES & SPARE PARTS */}
+      <section className="max-w-[1240px] mx-auto px-7 py-14 border-t border-line">
+        <Reveal className="flex items-end justify-between gap-6 mb-[42px] flex-wrap">
+          <div>
+            <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-3.5">{t.services.k}</div>
+            <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,44px)] tracking-[-0.02em] text-ink m-0 mb-2">{t.services.t}</h2>
+            <p className="text-base text-muted m-0 max-w-[560px]">{t.services.s}</p>
+          </div>
+          <Link
+            to="/cotizacion"
+            onClick={() => window.scrollTo(0, 0)}
+            className="bg-transparent border-[1.5px] border-line-strong text-ink font-semibold text-sm px-[22px] py-3 rounded-full transition-colors duration-200 hover:border-deep hover:bg-deep/5"
+          >
+            {t.services.cta} →
+          </Link>
+        </Reveal>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-[20px]">
+          {t.services.items.map((srv, i) => {
+            const Icon =
+              srv.icon === 'Wrench'
+                ? Wrench
+                : srv.icon === 'Cpu'
+                ? Cpu
+                : srv.icon === 'Layers'
+                ? Layers
+                : ShieldCheck;
+
+            return (
+              <Reveal
+                key={i}
+                className="bg-surface border border-line rounded-[20px] p-6 flex flex-col justify-between transition-all duration-300 hover:border-deep/30 hover:-translate-y-1"
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-larsen-red/10 text-larsen-red flex items-center justify-center mb-5">
+                    <Icon size={24} />
+                  </div>
+                  <h3 className="font-serif font-semibold text-[20px] text-ink m-0 mb-2.5 leading-snug">{srv.title}</h3>
+                  <p className="text-[14px] leading-[1.6] text-muted m-0">{srv.desc}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </section>
 
       {/* HOW WE WORK */}
       <section className="max-w-[1240px] mx-auto px-7 py-14">

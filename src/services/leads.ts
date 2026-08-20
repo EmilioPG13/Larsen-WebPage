@@ -25,7 +25,8 @@ async function sendViaEmailjs(p: QuoteLeadPayload): Promise<void> {
     SERVICE_ID!,
     TEMPLATE_ID!,
     {
-      to_name: 'Larsen Italiana',
+      to_name: 'Larsen Italiana Admin',
+      to_email: 'admin@larsenitaliana.com',
       from_name: p.name,
       company: p.company || '—',
       reply_to: p.email,

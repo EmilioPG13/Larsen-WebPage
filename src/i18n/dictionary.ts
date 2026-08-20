@@ -40,6 +40,34 @@ export const es = {
       { n: '03', title: 'Prueba de tejido', text: 'Probamos el tejido antes del despacho, incluso con el hilo y diseño del cliente.' },
     ],
   },
+  services: {
+    k: 'Soluciones Integrales',
+    t: 'Refacciones, Soporte y Programación',
+    s: 'Más allá de la maquinaria: respaldamos la continuidad operativa y la máxima productividad de tu taller textil.',
+    cta: 'Consultar refacciones o soporte',
+    items: [
+      {
+        icon: 'Wrench',
+        title: 'Refacciones Originales & Consumibles',
+        desc: 'Suministro inmediato de agujas (Groz-Beckert, Organ), platinas, guiahilos, peines y componentes mecánicos para Steiger, Stoll, Shima Seiki y Protti.',
+      },
+      {
+        icon: 'Cpu',
+        title: 'Servicio Técnico & Mantenimiento',
+        desc: 'Diagnóstico electrónico, puesta en marcha en planta, calibración milimétrica y pólizas de mantenimiento preventivo y correctivo.',
+      },
+      {
+        icon: 'Layers',
+        title: 'Capacitación en Software Textil',
+        desc: 'Entrenamiento especializado en software de diseño y programación (Logica, Model Studio) para tejido Jacquard, Intarsia y Menguados (Shaping).',
+      },
+      {
+        icon: 'ShieldCheck',
+        title: 'Garantía y Asistencia Remota',
+        desc: 'Atención técnica directa y soporte remoto para resolver dudas operativas y evitar tiempos muertos en tu línea de producción.',
+      },
+    ],
+  },
   warranty: { k: 'Garantía', t: '365 días de garantía completa', s: 'Cada máquina reacondicionada incluye un año de garantía, repuestos originales y asistencia técnica especializada.', badge: 'Cobertura total · Servicio postventa' },
   cend: { t: '¿Listo para trabajar con nosotros?', s: 'Más de 60 años de experiencia al servicio de tu producción textil.', b: 'Solicitar cotización' },
   mpage: {
@@ -197,6 +225,34 @@ export const en: Dictionary = {
       { n: '01', title: 'Sourcing', text: 'We buy second-hand machines from the best brands on the global market.' },
       { n: '02', title: 'Refurbishment', text: 'We inspect and renew every mechanical, electrical and electronic part.' },
       { n: '03', title: 'Knit testing', text: 'We test the knit before dispatch, even with the customer’s own yarn and design.' },
+    ],
+  },
+  services: {
+    k: 'Comprehensive Solutions',
+    t: 'Spare Parts, Support & Programming',
+    s: 'Beyond machinery: we ensure the operational uptime and maximum productivity of your textile business.',
+    cta: 'Inquire about spare parts or technical support',
+    items: [
+      {
+        icon: 'Wrench',
+        title: 'Original Spare Parts & Consumables',
+        desc: 'Immediate supply of needles (Groz-Beckert, Organ), sinkers, yarn carriers, stitch combs and mechanical parts for Steiger, Stoll, Shima Seiki and Protti.',
+      },
+      {
+        icon: 'Cpu',
+        title: 'Technical Service & Maintenance',
+        desc: 'Electronic diagnostics, on-site commissioning, precision calibration, and preventive & corrective maintenance agreements.',
+      },
+      {
+        icon: 'Layers',
+        title: 'Textile Software Training',
+        desc: 'Specialised training in design and programming software (Logica, Model Studio) for Jacquard, Intarsia and Full Fashion shaping.',
+      },
+      {
+        icon: 'ShieldCheck',
+        title: 'Warranty & Remote Assistance',
+        desc: 'Direct technical support and remote troubleshooting to eliminate downtime in your factory floor.',
+      },
     ],
   },
   warranty: { k: 'Warranty', t: '365 days of full warranty', s: 'Every refurbished machine includes a full year of warranty, original spare parts and specialised technical support.', badge: 'Total coverage · After-sales service' },

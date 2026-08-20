@@ -46,6 +46,16 @@ const brandsData = [
       'Sistemas CAD/CAM',
     ],
   },
+  {
+    name: 'Scheller',
+    image: '/images/brands/Scheller.png',
+    description: 'Maquinaria textil europea para tejido de punto y confección',
+    specialties: [
+      'Tejido de punto',
+      'Confección industrial',
+      'Ingeniería europea',
+    ],
+  },
 ];
 
 async function main() {
