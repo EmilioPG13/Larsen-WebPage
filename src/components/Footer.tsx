@@ -95,7 +95,7 @@ const Footer = () => {
 
       <div className="border-t border-white/10">
         <div className="max-w-[1240px] mx-auto px-7 py-[22px] flex flex-wrap justify-between items-center gap-3.5">
-          <p className="text-[13px] text-white/45 m-0">© 2025 Larsen Italiana. {t.foot.rights}</p>
+          <p className="text-[13px] text-white/45 m-0">© {new Date().getFullYear()} Larsen Italiana. {t.foot.rights}</p>
           <div className="flex gap-[26px] text-[13px]">
             <a href="#" className="text-white/45 transition-colors duration-200 hover:text-white">{t.foot.privacy}</a>
             <a href="#" className="text-white/45 transition-colors duration-200 hover:text-white">{t.foot.terms}</a>
