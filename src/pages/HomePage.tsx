@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Reveal from '../components/ui/Reveal';
 import Stat from '../components/ui/Stat';
 import { Wrench, Cpu, Layers, ShieldCheck } from '../components/ui/icons';
 import { useT } from '../i18n/useT';
+import { useLanguage } from '../i18n/LanguageContext';
+import { localizeMachine } from '../i18n/localizeMachine';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { brands } from '../data/brands';
 import { getMachines } from '../services/api';
@@ -13,7 +15,12 @@ const HomePage = () => {
   const t = useT();
   useDocumentMeta(t.meta.home.title, t.meta.home.desc);
   const navigate = useNavigate();
-  const [machines, setMachines] = useState<Machine[]>([]);
+  const [rawMachines, setRawMachines] = useState<Machine[]>([]);
+  const { lang } = useLanguage();
+  const machines = useMemo(
+    () => rawMachines.map((m) => localizeMachine(m, lang)),
+    [rawMachines, lang],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +28,7 @@ const HomePage = () => {
     (async () => {
       try {
         setLoading(true);
-        setMachines(await getMachines());
+        setRawMachines(await getMachines());
       } catch (err) {
         console.error('Error fetching machines:', err);
         setError(t.mpage.error);

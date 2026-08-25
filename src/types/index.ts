@@ -10,6 +10,21 @@ export interface Product {
   inStock?: boolean;
 }
 
+/** Campos traducibles de una máquina. Los que falten caen al valor en español. */
+export interface MachineI18n {
+  description?: string;
+  type?: string;
+  knittingSystems?: string;
+  width?: string;
+  speed?: string;
+  gauge?: string;
+  yarnGuides?: string;
+  capabilities?: string[];
+  software?: string;
+  power?: string;
+  category?: string;
+}
+
 export interface Machine {
   id: string;
   name: string;
@@ -27,6 +42,7 @@ export interface Machine {
   category: string;
   image: string;
   inStock?: boolean;
+  en?: MachineI18n;
 }
 
 export interface ContactFormData {

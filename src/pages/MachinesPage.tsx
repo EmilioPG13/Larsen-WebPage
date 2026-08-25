@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import ContactModal from '../components/ContactModal';
 import Reveal from '../components/ui/Reveal';
 import { useT } from '../i18n/useT';
+import { useLanguage } from '../i18n/LanguageContext';
+import { localizeMachine } from '../i18n/localizeMachine';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { getMachines } from '../services/api';
 import { machineToProduct } from '../utils/machineToProduct';
@@ -11,7 +13,12 @@ import type { Machine, Product } from '../types';
 const MachinesPage = () => {
   const t = useT();
   useDocumentMeta(t.meta.machines.title, t.meta.machines.desc);
-  const [machines, setMachines] = useState<Machine[]>([]);
+  const [rawMachines, setRawMachines] = useState<Machine[]>([]);
+  const { lang } = useLanguage();
+  const machines = useMemo(
+    () => rawMachines.map((m) => localizeMachine(m, lang)),
+    [rawMachines, lang],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,7 +28,7 @@ const MachinesPage = () => {
     (async () => {
       try {
         setLoading(true);
-        setMachines(await getMachines());
+        setRawMachines(await getMachines());
       } catch (err) {
         console.error('Error fetching machines:', err);
         setError(t.mpage.error);

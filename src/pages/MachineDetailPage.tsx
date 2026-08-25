@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ContactModal from '../components/ContactModal';
 import SpecSheetModal from '../components/SpecSheetModal';
 import Reveal from '../components/ui/Reveal';
 import { Check, MessageCircle } from '../components/ui/icons';
 import { useT } from '../i18n/useT';
+import { useLanguage } from '../i18n/LanguageContext';
+import { localizeMachine } from '../i18n/localizeMachine';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { getMachines } from '../services/api';
 import { machineToProduct } from '../utils/machineToProduct';
@@ -16,7 +18,12 @@ const WHATSAPP_NUMBER = '527753650376';
 const MachineDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const t = useT();
-  const [machine, setMachine] = useState<Machine | null | undefined>(undefined); // undefined = loading
+  const [rawMachine, setRawMachine] = useState<Machine | null | undefined>(undefined); // undefined = loading
+  const { lang } = useLanguage();
+  const machine = useMemo(
+    () => (rawMachine ? localizeMachine(rawMachine, lang) : rawMachine),
+    [rawMachine, lang],
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [product, setProduct] = useState<Product | undefined>();
@@ -25,10 +32,10 @@ const MachineDetailPage = () => {
     (async () => {
       try {
         const machines = await getMachines();
-        setMachine(machines.find((m) => m.id === id) ?? null);
+        setRawMachine(machines.find((m) => m.id === id) ?? null);
       } catch (err) {
         console.error('Error fetching machine:', err);
-        setMachine(null);
+        setRawMachine(null);
       }
     })();
   }, [id]);
@@ -40,7 +47,7 @@ const MachineDetailPage = () => {
 
   useEffect(() => {
     if (machine) track('view_machine_detail', { machine_id: machine.id, machine_name: machine.name });
-  }, [machine]);
+  }, [rawMachine]);
 
   if (machine === undefined) {
     return <div className="min-h-[60vh] flex items-center justify-center text-muted">{t.mpage.loading}</div>;
