@@ -47,6 +47,7 @@ const MachineDetailPage = () => {
 
   useEffect(() => {
     if (machine) track('view_machine_detail', { machine_id: machine.id, machine_name: machine.name });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rawMachine on purpose: machine is a localized derivative whose identity changes with the language
   }, [rawMachine]);
 
   if (machine === undefined) {
