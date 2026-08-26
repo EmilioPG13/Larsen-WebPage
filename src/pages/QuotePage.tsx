@@ -146,7 +146,7 @@ const QuotePage = () => {
               </div>
               <div className="flex items-center gap-3.5">
                 <span className="font-mono text-[11px] text-faint w-[54px]">EMAIL</span>
-                <span className="text-[15px] text-ink">info@larsenitaliana.com</span>
+                <span className="text-[15px] text-ink">admin@larsenitaliana.com</span>
               </div>
               <div className="flex items-start gap-3.5">
                 <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">MX</span>

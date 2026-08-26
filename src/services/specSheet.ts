@@ -112,7 +112,7 @@ export async function downloadSpecSheet(machine: Machine, lang: Lang): Promise<v
   doc.line(margin, footY - 16, pageW - margin, footY - 16);
   doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text('info@larsenitaliana.com  ·  +52 775 365 0376  ·  larsenitaliana.com', margin, footY);
+  doc.text('admin@larsenitaliana.com  ·  +52 775 365 0376  ·  larsenitaliana.com', margin, footY);
 
   const safeName = machine.name.replace(/[^\w.-]+/g, '_');
   doc.save(`Larsen_${safeName}.pdf`);

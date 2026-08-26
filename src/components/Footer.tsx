@@ -78,9 +78,9 @@ const Footer = () => {
                 <span className="text-white/40 text-[13.5px]">+39 348 6907430</span>
               </span>
             </a>
-            <a href="mailto:info@larsenitaliana.com" className="flex items-center gap-3 transition-colors duration-200 hover:text-white">
+            <a href="mailto:admin@larsenitaliana.com" className="flex items-center gap-3 transition-colors duration-200 hover:text-white">
               <Mail size={17} className="shrink-0 text-larsen-red" />
-              <span>info@larsenitaliana.com</span>
+              <span>admin@larsenitaliana.com</span>
             </a>
             <div className="flex items-start gap-3">
               <MapPin size={17} className="shrink-0 mt-[3px] text-larsen-red" />
