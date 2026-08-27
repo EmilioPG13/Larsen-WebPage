@@ -1,0 +1,6 @@
+This directory is intentionally empty.
+
+Vercel needs an output directory for the static half of the build. Pointing it
+at an empty folder keeps the repository's own files (package.json, src/) from
+being served as static assets, so every request falls through to the rewrite
+that hands it to the Express function in api/index.ts.
