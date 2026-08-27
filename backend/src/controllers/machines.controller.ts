@@ -55,6 +55,7 @@ export const createMachine = async (req: Request, res: Response, next: NextFunct
       power,
       category,
       image,
+      en,
       brandId,
       inStock,
     } = req.body;
@@ -81,6 +82,7 @@ export const createMachine = async (req: Request, res: Response, next: NextFunct
         image,
         brandId: brandId || null,
         inStock: inStock !== undefined ? inStock : true,
+        ...(en !== undefined ? { en } : {}),
       },
       include: {
         brandRelation: true,

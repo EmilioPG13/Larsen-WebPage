@@ -1,20 +1,14 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import env from '../config/env';
 import prisma from '../config/database';
+import { comparePassword } from './password';
 import { AppError } from '../middleware/error.middleware';
-
-export const hashPassword = async (password: string): Promise<string> => {
-  return bcrypt.hash(password, 10);
-};
-
-export const comparePassword = async (password: string, hash: string): Promise<boolean> => {
-  return bcrypt.compare(password, hash);
-};
 
 export const generateToken = (userId: string, email: string): string => {
   return jwt.sign({ userId, email }, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN,
+    // JWT_EXPIRES_IN is validated as a string ('7d'); the types want the
+    // narrower literal union that only accepts a duration or a number.
+    expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 };
 
@@ -44,31 +38,3 @@ export const login = async (email: string, password: string) => {
     },
   };
 };
-
-export const createAdminUser = async (email: string, password: string) => {
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    throw new AppError('User already exists', 400);
-  }
-
-  const passwordHash = await hashPassword(password);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      role: 'admin',
-    },
-  });
-
-  return {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  };
-};
-
-

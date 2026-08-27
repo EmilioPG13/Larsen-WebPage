@@ -3,6 +3,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // rhel-openssl-3.0.x is the engine Vercel's Node runtime (Amazon Linux 2023)
+  // loads. Without it the deployed function cannot start the query engine.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -72,6 +75,10 @@ model Machine {
   power           String
   category        String
   image           String
+  // Optional English overrides, mirroring the `en` block in src/data/machines.json
+  // that the catalog uses to translate spec values. Kept as JSON so a machine can
+  // translate only the fields that need it.
+  en              Json?
   brandId         String?
   inStock         Boolean  @default(true)
   createdAt       DateTime @default(now())

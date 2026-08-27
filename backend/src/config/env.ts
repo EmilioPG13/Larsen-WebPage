@@ -19,8 +19,10 @@ let env: Env;
 try {
   env = envSchema.parse(process.env);
 } catch (error) {
+  // Throw rather than exit: on a serverless host process.exit() kills the
+  // invocation before the reason reaches the logs.
   console.error('❌ Invalid environment variables:', error);
-  process.exit(1);
+  throw error;
 }
 
 export default env;

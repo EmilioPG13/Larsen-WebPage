@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
+import { hashPassword } from '../src/services/password';
 
 const prisma = new PrismaClient();
 
@@ -58,8 +60,41 @@ const brandsData = [
   },
 ];
 
+/**
+ * Creates or updates the admin account from ADMIN_EMAIL and ADMIN_PASSWORD.
+ * This replaces the public /api/auth/register endpoint, which allowed anyone
+ * to grant themselves admin access on a deployed API. Re-running the seed with
+ * a new ADMIN_PASSWORD doubles as a password reset.
+ */
+async function seedAdminUser() {
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    console.log('  ⚠ ADMIN_EMAIL / ADMIN_PASSWORD not set, skipping admin user');
+    return;
+  }
+
+  if (password.length < 12) {
+    throw new Error('ADMIN_PASSWORD must be at least 12 characters');
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  await prisma.user.upsert({
+    where: { email },
+    update: { passwordHash },
+    create: { email, passwordHash, role: 'admin' },
+  });
+
+  console.log(`  ✓ Admin user ready: ${email}`);
+}
+
 async function main() {
   console.log('🌱 Starting database seed...');
+
+  console.log('🔐 Seeding admin user...');
+  await seedAdminUser();
 
   // Seed Brands
   console.log('📦 Seeding brands...');
@@ -119,6 +154,7 @@ async function main() {
         power: machineData.power,
         category: machineData.category,
         image: machineData.image,
+        ...(machineData.en ? { en: machineData.en } : {}),
         brandId,
         inStock: true, // All existing machines are in stock by default
       },
@@ -138,6 +174,7 @@ async function main() {
         power: machineData.power,
         category: machineData.category,
         image: machineData.image,
+        ...(machineData.en ? { en: machineData.en } : {}),
         brandId,
         inStock: true, // All existing machines are in stock by default
       },
