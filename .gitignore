@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+.claude
+docs
+
+# Playwright CLI (local visual testing) — session artifacts and config
+.playwright/
+.playwright-cli/
