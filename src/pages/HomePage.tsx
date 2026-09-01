@@ -1,313 +1,421 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Reveal from '../components/ui/Reveal';
-import Stat from '../components/ui/Stat';
-import { Wrench, Cpu, Layers, ShieldCheck } from '../components/ui/icons';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useT } from '../i18n/useT';
 import { useLanguage } from '../i18n/LanguageContext';
 import { localizeMachine } from '../i18n/localizeMachine';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { brands } from '../data/brands';
 import { getMachines } from '../services/api';
+import { sendQuoteLead } from '../services/leads';
+import { track } from '../services/analytics';
 import type { Machine } from '../types';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const AUTOPLAY_MS = 6000;
+const PLATE = 'max-w-[1280px] mx-auto px-7';
+
+const reducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+interface QuoteForm {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  machine: string;
+  message: string;
+  website: string; // honeypot — must stay empty
+}
+const EMPTY: QuoteForm = { name: '', company: '', email: '', phone: '', machine: '', message: '', website: '' };
+
+type FieldKey = 'name' | 'email' | 'phone';
+type FieldErrors = Partial<Record<FieldKey, string>>;
 
 const HomePage = () => {
   const t = useT();
   useDocumentMeta(t.meta.home.title, t.meta.home.desc);
-  const navigate = useNavigate();
-  const [rawMachines, setRawMachines] = useState<Machine[]>([]);
   const { lang } = useLanguage();
+
+  const [rawMachines, setRawMachines] = useState<Machine[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const machines = useMemo(
     () => rawMachines.map((m) => localizeMachine(m, lang)),
     [rawMachines, lang],
   );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        setLoading(true);
         setRawMachines(await getMachines());
       } catch (err) {
         console.error('Error fetching machines:', err);
-        setError(t.mpage.error);
-      } finally {
-        setLoading(false);
+        setLoadError(true);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const featured = machines.slice(0, 3);
+  // ---- carousel ----------------------------------------------------------
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const count = machines.length;
 
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center text-muted">{t.mpage.loading}</div>
-    );
-  }
+  useEffect(() => {
+    if (active >= count && count > 0) setActive(0);
+  }, [count, active]);
+
+  useEffect(() => {
+    if (paused || count < 2 || reducedMotion()) return;
+    const id = window.setInterval(() => setActive((a) => (a + 1) % count), AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [paused, count]);
+
+  const current: Machine | undefined = machines[active];
+
+  // ---- inline quote form ----------------------------------------------------
+  const [form, setForm] = useState<QuoteForm>(EMPTY);
+  const machineTouched = useRef(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  // keep "machine of interest" synced to the active slide until the user picks one
+  useEffect(() => {
+    if (!machineTouched.current && current) {
+      setForm((f) => ({ ...f, machine: current.name }));
+    }
+  }, [current]);
+
+  // bring the confirmation plate into view once a request resolves
+  useEffect(() => {
+    if (reference) {
+      formRef.current?.scrollIntoView({
+        behavior: reducedMotion() ? 'auto' : 'smooth',
+        block: 'start',
+      });
+    }
+  }, [reference]);
+
+  const set =
+    (k: keyof QuoteForm) =>
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      if (k === 'machine') machineTouched.current = true;
+      setForm((f) => ({ ...f, [k]: e.target.value }));
+      if (k === 'name' || k === 'email' || k === 'phone') {
+        setErrors((prev) => ({ ...prev, [k]: undefined }));
+      }
+    };
+
+  const fieldError = (k: FieldKey, value: string): string | undefined => {
+    if (!value.trim()) return t.qpage.req;
+    if (k === 'email' && !EMAIL_RE.test(value.trim())) return t.qpage.invalidEmail;
+    return undefined;
+  };
+
+  const blur = (k: FieldKey) => () =>
+    setErrors((prev) => ({ ...prev, [k]: fieldError(k, form[k]) }));
+
+  const scrollToForm = () =>
+    formRef.current?.scrollIntoView({
+      behavior: reducedMotion() ? 'auto' : 'smooth',
+      block: 'center',
+    });
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (form.website) { setReference('—'); return; } // honeypot: pretend success
+
+    const next: FieldErrors = {
+      name: fieldError('name', form.name),
+      email: fieldError('email', form.email),
+      phone: fieldError('phone', form.phone),
+    };
+    setErrors(next);
+    if (Object.values(next).some(Boolean)) return;
+
+    setSubmitting(true);
+    setSubmitError(false);
+    try {
+      const machineLine = form.machine ? `${t.qpage.machine}: ${form.machine}\n` : '';
+      await sendQuoteLead({
+        name: form.name,
+        company: form.company,
+        email: form.email,
+        phone: form.phone,
+        machine: form.machine,
+        message: `${machineLine}${form.message}`.trim(),
+        source: 'home-quote',
+      });
+      track('submit_quote', { machine: form.machine || 'none', source: 'home' });
+      setReference(`LZ-${Date.now().toString(36).toUpperCase()}`);
+    } catch (err) {
+      console.error('Error sending quote request:', err);
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setForm(EMPTY);
+    machineTouched.current = false;
+    setErrors({});
+    setSubmitError(false);
+    setReference(null);
+  };
+
+  // ---- shared class fragments ---------------------------------------------
+  const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
+  const fieldBase =
+    'w-full px-3 bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep';
+  const field = `${fieldBase} h-11`;
+  const labelCls = `${kicker} text-muted mb-1.5 block`;
+  const errCls = 'block text-[12px] text-larsen-red mt-1';
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative max-w-[1240px] mx-auto px-7 pt-[84px] pb-[70px]">
+      {/* ================= HERO PLATE: carousel + inline quote form ================= */}
+      <section className="border-b border-line bg-surface">
         <div
-          aria-hidden="true"
-          className="absolute top-[30px] -right-10 font-serif font-medium leading-[0.8] tracking-[-0.03em] pointer-events-none select-none z-0 text-[clamp(120px,20vw,300px)]"
-          style={{ color: 'var(--ghost)' }}
+          className={`${PLATE} pt-12 md:pt-[72px] pb-14 md:pb-[88px]`}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
         >
-          1964
-        </div>
-        <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-[52px] items-center relative z-[1]">
-          <div>
+          {/* model tabs */}
+          {count > 0 && (
             <div
-              data-rise=""
-              className="inline-flex items-center gap-[9px] font-mono text-xs tracking-[0.04em] text-larsen-red uppercase mb-[26px]"
-              style={{ animationDelay: '.05s' }}
+              role="tablist"
+              aria-label={t.home.carouselHint}
+              className="flex flex-wrap gap-x-7 gap-y-2 border-b border-line-soft mb-10"
             >
-              <span className="w-[26px] h-px bg-larsen-red inline-block" />
-              {t.hero.tag}
-            </div>
-            <h1 className="font-serif font-medium text-[clamp(48px,6.4vw,86px)] leading-[0.98] tracking-[-0.025em] text-ink m-0 mb-[26px]">
-              <span data-rise="" className="block" style={{ animationDelay: '.12s' }}>{t.hero.t1}</span>
-              <span data-rise="" className="block italic text-deep" style={{ animationDelay: '.24s' }}>{t.hero.em}</span>
-            </h1>
-            <p data-rise="" className="text-[18px] leading-[1.62] text-text2 max-w-[480px] m-0 mb-[34px]" style={{ animationDelay: '.36s' }}>
-              {t.hero.sub}
-            </p>
-            <div data-rise="" className="flex flex-wrap gap-3.5" style={{ animationDelay: '.48s' }}>
-              <Link
-                to="/maquinas"
-                onClick={() => window.scrollTo(0, 0)}
-                className="bg-larsen-blue text-white font-semibold text-[15px] px-7 py-[15px] rounded-full transition-transform duration-200 hover:-translate-y-0.5"
-                style={{ boxShadow: '0 8px 22px rgba(40,50,123,0.26)' }}
-              >
-                {t.hero.c1}
-              </Link>
-              <Link
-                to="/cotizacion"
-                onClick={() => window.scrollTo(0, 0)}
-                className="bg-transparent text-ink font-semibold text-[15px] px-7 py-[15px] rounded-full border-[1.5px] border-line-strong transition-colors duration-200 hover:border-larsen-red hover:bg-larsen-red/5"
-              >
-                {t.hero.c2}
-              </Link>
-            </div>
-          </div>
-          <div className="relative">
-            <div
-              className="absolute inset-[8%_6%]"
-              style={{ background: 'radial-gradient(circle at 50% 45%, rgba(40,50,123,0.10), transparent 68%)', filter: 'blur(8px)' }}
-            />
-            <div className="relative">
-              <img
-                src="/images/machines/ARIES3.png"
-                alt="Steiger Aries.3"
-                decoding="async"
-                fetchPriority="high"
-                className="w-full max-w-[540px] mx-auto block object-contain"
-                style={{ filter: 'drop-shadow(0 30px 50px rgba(26,26,31,0.22))' }}
-              />
-            </div>
-            <div
-              className="absolute bottom-1.5 left-1.5 bg-surface border border-line rounded-[14px] px-4 py-3"
-              style={{ boxShadow: '0 14px 34px rgba(26,26,31,0.12)' }}
-            >
-              <div className="font-mono text-[10.5px] tracking-[0.06em] text-faint uppercase">Steiger</div>
-              <div className="font-serif text-[19px] font-semibold text-ink">Aries.3</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="border-y border-line bg-surface-2">
-        <div className="max-w-[1240px] mx-auto px-7 py-[38px] grid grid-cols-2 md:grid-cols-4 gap-6">
-          {t.stats.map((s, i) => (
-            <Stat key={i} to={s.to} suffix={s.suffix} label={s.label} />
-          ))}
-        </div>
-      </section>
-
-      {/* BRANDS STRIP */}
-      <section className="max-w-[1240px] mx-auto px-7 pt-[66px] pb-[30px]">
-        <Reveal className="text-center mb-[38px]">
-          <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-3.5">{t.brands.k}</div>
-          <h2 className="font-serif font-medium text-[clamp(28px,3.4vw,40px)] tracking-[-0.02em] text-ink m-0 mb-2.5">{t.brands.t}</h2>
-          <p className="text-base text-muted m-0 max-w-[520px] mx-auto">{t.brands.s}</p>
-        </Reveal>
-        <Reveal className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-          {brands.map((b) => (
-            <div
-              key={b.name}
-              className="border border-line rounded-2xl h-[124px] flex items-center justify-center px-3 overflow-hidden transition-all duration-300 hover:border-larsen-red/40 hover:-translate-y-[3px]"
-              style={{ background: 'var(--logo-bg)' }}
-            >
-              <img
-                src={b.image}
-                alt={b.name}
-                loading="lazy"
-                decoding="async"
-                className="lz-logo max-w-full object-contain"
-                style={{ maxHeight: `${78 * (b.name === 'Scheller' ? 1.2 : b.logoScale ?? 1)}px` }}
-              />
-            </div>
-          ))}
-        </Reveal>
-      </section>
-
-      {/* FEATURED MACHINES */}
-      {featured.length > 0 && (
-        <section className="max-w-[1240px] mx-auto px-7 py-14">
-          <Reveal className="flex items-end justify-between gap-6 mb-[38px] flex-wrap">
-            <div>
-              <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-3.5">{t.feat.k}</div>
-              <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,44px)] tracking-[-0.02em] text-ink m-0 mb-2">{t.feat.t}</h2>
-              <p className="text-base text-muted m-0 max-w-[440px]">{t.feat.s}</p>
-            </div>
-            <Link
-              to="/maquinas"
-              onClick={() => window.scrollTo(0, 0)}
-              className="bg-transparent border-[1.5px] border-line-strong text-ink font-semibold text-sm px-[22px] py-3 rounded-full transition-colors duration-200 hover:border-deep hover:bg-deep/5"
-            >
-              {t.feat.cta} →
-            </Link>
-          </Reveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-[22px]">
-            {featured.map((m) => (
-              <Reveal key={m.id}>
-                <Link
-                  to={`/maquinas/${m.id}`}
-                  onClick={() => window.scrollTo(0, 0)}
-                  className="text-left bg-surface border border-line rounded-[18px] overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:border-deep/25"
+              {machines.map((m, i) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="tab"
+                  id={`carousel-tab-${m.id}`}
+                  aria-selected={i === active}
+                  aria-controls="carousel-panel"
+                  tabIndex={i === active ? 0 : -1}
+                  onClick={() => setActive(i)}
+                  className={`${kicker} pb-3 -mb-px border-b-2 transition-colors ${
+                    i === active
+                      ? 'text-ink border-deep'
+                      : 'text-muted border-transparent hover:text-ink'
+                  }`}
                 >
-                  <div
-                    className="relative px-[18px] py-3.5 flex items-center justify-center h-[210px] overflow-hidden"
-                    style={{ background: 'var(--plate)' }}
-                  >
-                    <img src={m.image} alt={m.name} loading="lazy" decoding="async" className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" />
-                    <div className="absolute top-3.5 left-3.5 font-mono text-[10.5px] font-bold tracking-[0.05em] text-deep bg-white/85 px-2.5 py-[5px] rounded-full uppercase">
-                      {m.brand}
-                    </div>
-                  </div>
-                  <div className="p-[22px] pt-[22px] pb-6 flex flex-col flex-1">
-                    <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2.5">{m.name}</h3>
-                    <p className="text-[14.5px] leading-[1.55] text-muted m-0 mb-4 flex-1 line-clamp-3">{m.description}</p>
-                    <div className="flex flex-wrap gap-[7px]">
-                      {m.capabilities.slice(0, 4).map((tag, i) => (
-                        <span key={i} className="text-[11.5px] font-medium text-text2 bg-fill px-[11px] py-[5px] rounded-full">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      )}
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          )}
 
-      {error && featured.length === 0 && (
-        <div className="max-w-[1240px] mx-auto px-7 py-10 text-center text-larsen-red">{error}</div>
-      )}
-
-      {/* SERVICES & SPARE PARTS */}
-      <section className="max-w-[1240px] mx-auto px-7 py-14 border-t border-line">
-        <Reveal className="flex items-end justify-between gap-6 mb-[42px] flex-wrap">
-          <div>
-            <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-3.5">{t.services.k}</div>
-            <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,44px)] tracking-[-0.02em] text-ink m-0 mb-2">{t.services.t}</h2>
-            <p className="text-base text-muted m-0 max-w-[560px]">{t.services.s}</p>
-          </div>
-          <Link
-            to="/cotizacion"
-            onClick={() => window.scrollTo(0, 0)}
-            className="bg-transparent border-[1.5px] border-line-strong text-ink font-semibold text-sm px-[22px] py-3 rounded-full transition-colors duration-200 hover:border-deep hover:bg-deep/5"
-          >
-            {t.services.cta} →
-          </Link>
-        </Reveal>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-[20px]">
-          {t.services.items.map((srv, i) => {
-            const Icon =
-              srv.icon === 'Wrench'
-                ? Wrench
-                : srv.icon === 'Cpu'
-                ? Cpu
-                : srv.icon === 'Layers'
-                ? Layers
-                : ShieldCheck;
-
-            return (
-              <Reveal
-                key={i}
-                className="bg-surface border border-line rounded-[20px] p-6 flex flex-col justify-between transition-all duration-300 hover:border-deep/30 hover:-translate-y-1"
-                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}
-              >
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-larsen-red/10 text-larsen-red flex items-center justify-center mb-5">
-                    <Icon size={24} />
-                  </div>
-                  <h3 className="font-serif font-semibold text-[20px] text-ink m-0 mb-2.5 leading-snug">{srv.title}</h3>
-                  <p className="text-[14px] leading-[1.6] text-muted m-0">{srv.desc}</p>
+          {/* stage */}
+          {current ? (
+            <div
+              key={active}
+              data-slide
+              id="carousel-panel"
+              role="tabpanel"
+              aria-labelledby={`carousel-tab-${current.id}`}
+              tabIndex={0}
+              className="grid lg:grid-cols-[1.02fr_0.98fr] gap-10 lg:gap-14 items-center"
+            >
+              <div>
+                <div className={`${kicker} text-deep mb-5`}>
+                  {current.brand} · {t.home.kicker}
                 </div>
-              </Reveal>
-            );
-          })}
+                <h1 className="font-serif font-medium text-[clamp(38px,5.2vw,68px)] leading-[1.02] tracking-[-0.01em] text-ink m-0 mb-5">
+                  {current.name}
+                </h1>
+                <p className="text-[15px] leading-[1.6] text-text2 max-w-[46ch] m-0 mb-8">
+                  {current.description}
+                </p>
+                <button
+                  type="button"
+                  onClick={scrollToForm}
+                  className="inline-flex items-center bg-deep text-white font-semibold text-[14px] px-6 h-12 transition-transform hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                >
+                  {t.detail.ctaQuote}
+                </button>
+              </div>
+              <div className="relative">
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-[6%] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle at 50% 45%, var(--deep-soft), transparent 70%)' }}
+                />
+                <img
+                  src={current.image}
+                  alt={`${current.brand} ${current.name}`}
+                  decoding="async"
+                  fetchPriority="high"
+                  className="relative w-full max-w-[560px] mx-auto block object-contain"
+                />
+              </div>
+            </div>
+          ) : loadError ? (
+            <p className="text-[14px] text-larsen-red m-0">{t.mpage.error}</p>
+          ) : (
+            <div className="h-[320px]" aria-hidden="true" />
+          )}
+
+          {/* inline quote form — same plate */}
+          <div ref={formRef} className="mt-14 md:mt-[72px] pt-12 border-t border-line scroll-mt-24">
+            <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-10">
+              <div>
+                <div className={`${kicker} text-deep mb-4`}>{t.qpage.k}</div>
+                <h2 className="font-serif font-medium text-[clamp(26px,3vw,36px)] tracking-[-0.01em] text-ink m-0 mb-3">
+                  {t.home.formTitle}
+                </h2>
+                <p className="text-[14px] leading-[1.6] text-muted m-0">{t.home.formNote}</p>
+              </div>
+
+              {reference ? (
+                <div className="border border-line bg-surface-2 px-8 py-10">
+                  <div className={`${kicker} text-deep mb-3`}>{t.qpage.sentT}</div>
+                  <h3 className="font-serif font-medium text-[26px] leading-snug text-ink m-0 mb-3">
+                    {t.qpage.sentS}
+                  </h3>
+                  {reference !== '—' && (
+                    <p className="font-mono text-[12px] tracking-[0.12em] text-muted m-0">REF · {reference}</p>
+                  )}
+                  <button
+                    onClick={resetForm}
+                    className="mt-6 border border-line-strong text-ink font-semibold text-[13px] px-5 h-11 transition-colors hover:border-deep"
+                  >
+                    {t.qpage.again}
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>{t.qpage.name}</label>
+                    <input
+                      aria-label={t.qpage.name}
+                      value={form.name}
+                      onChange={set('name')}
+                      onBlur={blur('name')}
+                      aria-invalid={!!errors.name}
+                      className={`${field} ${errors.name ? 'border-larsen-red focus:border-larsen-red' : ''}`}
+                    />
+                    {errors.name && <span className={errCls}>{errors.name}</span>}
+                  </div>
+                  <div>
+                    <label className={labelCls}>{t.qpage.company}</label>
+                    <input aria-label={t.qpage.company} value={form.company} onChange={set('company')} className={field} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>{t.qpage.email}</label>
+                    <input
+                      type="email"
+                      aria-label={t.qpage.email}
+                      value={form.email}
+                      onChange={set('email')}
+                      onBlur={blur('email')}
+                      aria-invalid={!!errors.email}
+                      className={`${field} ${errors.email ? 'border-larsen-red focus:border-larsen-red' : ''}`}
+                    />
+                    {errors.email && <span className={errCls}>{errors.email}</span>}
+                  </div>
+                  <div>
+                    <label className={labelCls}>{t.qpage.phone}</label>
+                    <input
+                      aria-label={t.qpage.phone}
+                      value={form.phone}
+                      onChange={set('phone')}
+                      onBlur={blur('phone')}
+                      aria-invalid={!!errors.phone}
+                      className={`${field} ${errors.phone ? 'border-larsen-red focus:border-larsen-red' : ''}`}
+                    />
+                    {errors.phone && <span className={errCls}>{errors.phone}</span>}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>{t.qpage.machine}</label>
+                    <select aria-label={t.qpage.machine} value={form.machine} onChange={set('machine')} className={field}>
+                      <option value="">{t.qpage.choose}</option>
+                      {machines.map((m) => (
+                        <option key={m.id} value={m.name}>{m.name}</option>
+                      ))}
+                      <option value="other">{t.qpage.other}</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>{t.qpage.message}</label>
+                    <textarea
+                      aria-label={t.qpage.message}
+                      rows={4}
+                      value={form.message}
+                      onChange={set('message')}
+                      className={`${fieldBase} min-h-[112px] py-2.5 resize-y`}
+                    />
+                  </div>
+                  {/* honeypot */}
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="hidden"
+                    value={form.website}
+                    onChange={set('website')}
+                  />
+                  {submitError && (
+                    <p className="sm:col-span-2 text-[13px] text-larsen-red m-0">{t.qpage.errorMsg}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] h-12 transition-colors disabled:opacity-60"
+                  >
+                    {submitting ? t.qpage.sending : t.qpage.submit}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* HOW WE WORK */}
-      <section className="max-w-[1240px] mx-auto px-7 py-14">
-        <Reveal className="text-center mb-[46px]">
-          <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-3.5">{t.how.k}</div>
-          <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,44px)] tracking-[-0.02em] text-ink m-0 mb-2.5">{t.how.t}</h2>
-          <p className="text-base text-muted m-0 mx-auto max-w-[520px]">{t.how.s}</p>
-        </Reveal>
-        <div className="grid md:grid-cols-3 gap-[22px]">
-          {t.how.steps.map((step) => (
-            <Reveal key={step.n} className="px-[26px] py-[30px] border-t-2 border-deep bg-surface-2 rounded-b-[14px]">
-              <div className="font-mono text-[13px] font-bold text-larsen-red mb-[18px]">{step.n}</div>
-              <h3 className="font-serif font-semibold text-[23px] text-ink m-0 mb-2.5">{step.title}</h3>
-              <p className="text-[14.5px] leading-[1.6] text-muted m-0">{step.text}</p>
-            </Reveal>
+      {/* ================= CAPABILITY STRIP ================= */}
+      <section className={`${PLATE} py-14 md:py-[88px]`}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line">
+          {t.home.caps.map((c) => (
+            <div key={c.k} className="bg-bg p-6">
+              <div className={`${kicker} text-deep mb-3`}>{c.k}</div>
+              <p className="text-[14px] leading-[1.55] text-text2 m-0">{c.t}</p>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* WARRANTY BAND */}
-      <section className="max-w-[1240px] mx-auto mt-[30px] mb-14 px-7">
-        <Reveal
-          className="bg-larsen-blue rounded-3xl px-12 py-14 relative overflow-hidden grid md:grid-cols-[1.4fr_1fr] gap-10 items-center"
-        >
-          <div aria-hidden="true" className="absolute -top-[60px] -right-[30px] font-serif font-medium text-[280px] leading-[0.7] pointer-events-none text-white/5">365</div>
-          <div className="relative z-[1]">
-            <div className="font-mono text-xs tracking-[0.08em] text-larsen-pink uppercase mb-4">{t.warranty.k}</div>
-            <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,46px)] tracking-[-0.02em] text-white m-0 mb-4">{t.warranty.t}</h2>
-            <p className="text-[16.5px] leading-[1.6] text-white/80 m-0 max-w-[480px]">{t.warranty.s}</p>
-          </div>
-          <div className="relative z-[1]">
-            <div className="bg-white/10 border border-white/15 rounded-2xl p-[26px] backdrop-blur-custom">
-              <div className="inline-flex items-center gap-2 bg-larsen-red text-white text-[12.5px] font-semibold px-3.5 py-2 rounded-full">{t.warranty.badge}</div>
+      {/* ================= BRAND MARQUEE ================= */}
+      <section className="border-t border-line py-14 md:py-[72px] overflow-hidden">
+        <div className={`${PLATE} mb-8`}>
+          <div className={`${kicker} text-muted`}>{t.home.marquee}</div>
+        </div>
+        <div className="flex w-max lz-marquee">
+          {[0, 1].map((dup) => (
+            <div key={dup} className="flex items-center gap-16 pr-16 shrink-0" aria-hidden={dup === 1}>
+              {brands.map((b) => (
+                <img
+                  key={b.name}
+                  src={b.image}
+                  alt={b.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="lz-logo w-auto object-contain shrink-0"
+                  style={{ maxHeight: `${48 * (b.logoScale ?? 1)}px` }}
+                />
+              ))}
             </div>
-          </div>
-        </Reveal>
+          ))}
+        </div>
       </section>
-
-      {/* FINAL CTA */}
-      <section className="max-w-[1240px] mx-auto px-7 pt-[30px] pb-20">
-        <Reveal className="text-center py-[30px]">
-          <h2 className="font-serif font-medium text-[clamp(32px,4vw,52px)] tracking-[-0.02em] text-ink m-0 mb-4">{t.cend.t}</h2>
-          <p className="text-[18px] text-muted m-0 mx-auto mb-[30px] max-w-[540px]">{t.cend.s}</p>
-          <button
-            onClick={() => navigate('/cotizacion')}
-            className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-base px-[38px] py-[17px] rounded-full transition-all duration-200 hover:-translate-y-0.5"
-            style={{ boxShadow: '0 10px 26px rgba(216,30,42,0.28)' }}
-          >
-            {t.cend.b}
-          </button>
-        </Reveal>
-      </section>
-
     </>
   );
 };

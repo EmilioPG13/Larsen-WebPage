@@ -2,38 +2,35 @@ import { Link } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 
+const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
+
 const NotFoundPage = () => {
   const t = useT();
   useDocumentMeta(t.meta.notFound.title, t.meta.notFound.desc);
 
   return (
-    <section className="relative max-w-[1240px] mx-auto px-7 min-h-[70vh] flex flex-col items-center justify-center text-center overflow-hidden">
-      <div
-        aria-hidden="true"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif font-medium leading-[0.8] pointer-events-none select-none z-0 text-[clamp(160px,30vw,420px)]"
-        style={{ color: 'var(--ghost)' }}
-      >
-        404
-      </div>
-      <div className="relative z-[1] max-w-[560px]">
-        <div className="inline-flex items-center gap-[9px] font-mono text-xs tracking-[0.04em] text-larsen-red uppercase mb-6">
-          <span className="w-[26px] h-px bg-larsen-red inline-block" />{t.notFound.tag}
+    <section className="max-w-[1280px] mx-auto px-7 py-20 md:py-32 flex justify-center">
+      <div className="border border-line bg-surface p-10 md:p-14 w-full max-w-[620px]">
+        <div className={`${kicker} text-larsen-red mb-5`}>{t.notFound.tag}</div>
+        <div className="font-mono font-bold text-[clamp(64px,12vw,120px)] leading-none tracking-[-0.02em] text-ink">
+          404
         </div>
-        <h1 className="font-serif font-medium text-[clamp(40px,6vw,72px)] leading-none tracking-[-0.025em] text-ink m-0 mb-5">{t.notFound.t}</h1>
-        <p className="text-[18px] leading-[1.6] text-text2 m-0 mb-9 mx-auto max-w-[460px]">{t.notFound.s}</p>
-        <div className="flex flex-wrap gap-3.5 justify-center">
+        <h1 className="font-serif font-medium text-[clamp(26px,4vw,40px)] leading-[1.05] tracking-[-0.01em] text-ink m-0 mt-5 mb-4">
+          {t.notFound.t}
+        </h1>
+        <p className="text-[15px] leading-[1.6] text-muted max-w-[42ch] m-0 mb-8">{t.notFound.s}</p>
+        <div className="flex flex-wrap gap-3">
           <Link
             to="/"
             onClick={() => window.scrollTo(0, 0)}
-            className="bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[15px] px-7 py-[15px] rounded-full transition-all duration-200 hover:-translate-y-0.5"
-            style={{ boxShadow: '0 8px 22px rgba(216,30,42,0.24)' }}
+            className="inline-flex items-center bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] h-12 px-7 transition-colors"
           >
             {t.notFound.home}
           </Link>
           <Link
             to="/maquinas"
             onClick={() => window.scrollTo(0, 0)}
-            className="bg-transparent text-ink font-semibold text-[15px] px-7 py-[15px] rounded-full border-[1.5px] border-line-strong transition-colors duration-200 hover:border-larsen-red hover:bg-larsen-red/5"
+            className={`${kicker} inline-flex items-center h-12 px-5 border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`}
           >
             {t.notFound.machines}
           </Link>

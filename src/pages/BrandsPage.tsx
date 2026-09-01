@@ -1,8 +1,11 @@
-import Reveal from '../components/ui/Reveal';
+import { Link } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { useLanguage } from '../i18n/LanguageContext';
 import { brands } from '../data/brands';
+
+const PLATE = 'max-w-[1280px] mx-auto px-7';
+const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
 
 const BrandsPage = () => {
   const t = useT();
@@ -10,43 +13,56 @@ const BrandsPage = () => {
   const { lang } = useLanguage();
 
   return (
-    <div className="max-w-[1240px] mx-auto px-7 pt-[74px] pb-20">
-      <Reveal className="max-w-[640px] mb-[52px]">
-        <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-4">{t.bpage.k}</div>
-        <h1 className="font-serif font-medium text-[clamp(40px,5vw,64px)] tracking-[-0.025em] text-ink m-0 mb-4">{t.bpage.t}</h1>
-        <p className="text-[18px] leading-[1.6] text-text2 m-0">{t.bpage.s}</p>
-      </Reveal>
+    <>
+      <section className="border-b border-line bg-surface">
+        <div className={`${PLATE} pt-14 md:pt-[72px] pb-10 md:pb-14`}>
+          <div className={`${kicker} text-deep mb-4`}>{t.bpage.k}</div>
+          <h1 className="font-serif font-medium text-[clamp(38px,5vw,56px)] leading-[1.02] tracking-[-0.01em] text-ink m-0 mb-4">
+            {t.bpage.t}
+          </h1>
+          <p className="text-[15px] leading-[1.6] text-text2 max-w-[52ch] m-0">{t.bpage.s}</p>
+        </div>
+      </section>
 
-      <div className="grid md:grid-cols-2 gap-[22px]">
-        {brands.map((b) => (
-          <Reveal
-            key={b.name}
-            className="bg-surface border border-line rounded-[18px] p-8 flex gap-[26px] items-center transition-all duration-300 hover:-translate-y-1 hover:border-deep/25"
-          >
-            <div
-              className="shrink-0 w-[196px] h-[132px] border border-line rounded-[14px] flex items-center justify-center p-3 overflow-hidden"
-              style={{ background: 'var(--logo-bg)' }}
+      {/* separate plates — cards lift on hover, so 24px gaps rather than a 1px ruled grid */}
+      <div className={`${PLATE} py-14 md:py-[88px]`}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {brands.map((b) => (
+            <Link
+              key={b.name}
+              to={`/maquinas?brand=${encodeURIComponent(b.name)}`}
+              onClick={() => window.scrollTo(0, 0)}
+              data-brand-card=""
+              className="group bg-surface border border-line flex flex-col"
             >
-              <img
-                src={b.image}
-                alt={b.name}
-                loading="lazy"
-                decoding="async"
-                className="lz-logo-lg max-w-full object-contain"
-                style={{ maxHeight: `${78 * (b.name === 'Scheller' ? 1.3 : b.logoScale ?? 1)}px` }}
-              />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-baseline gap-2.5 mb-2">
-                <h2 className="font-serif font-semibold text-2xl text-ink m-0">{b.name}</h2>
-                <span className="font-mono text-[11px] tracking-[0.05em] text-larsen-red uppercase">{b.origin[lang]}</span>
+              <div className="h-[132px] flex items-center justify-center border-b border-line-soft bg-surface-2 overflow-hidden px-6">
+                <img
+                  src={b.image}
+                  alt={b.name}
+                  loading="lazy"
+                  decoding="async"
+                  data-brand-logo=""
+                  className="w-auto max-w-[64%] object-contain"
+                  style={{ maxHeight: `${60 * (b.logoScale ?? 1)}px` }}
+                />
               </div>
-              <p className="text-[14.5px] leading-[1.58] text-muted m-0">{b.blurb[lang]}</p>
-            </div>
-          </Reveal>
-        ))}
+              <div className="p-6 flex flex-col flex-1">
+                <div className={`${kicker} text-faint`}>{b.origin[lang]}</div>
+                <h2 className="font-serif font-medium text-[22px] text-ink m-0 mt-2 mb-2 transition-colors group-hover:text-deep">
+                  {b.name}
+                </h2>
+                <p className="text-[13.5px] leading-[1.6] text-muted m-0">{b.blurb[lang]}</p>
+                <span
+                  className={`${kicker} text-ink mt-4 inline-flex items-center gap-1.5 transition-colors group-hover:text-deep`}
+                >
+                  {t.bpage.cta} <span aria-hidden="true">→</span>
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

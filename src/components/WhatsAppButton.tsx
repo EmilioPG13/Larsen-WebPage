@@ -17,10 +17,10 @@ const WhatsAppButton = () => {
       aria-label={t.whatsapp.label}
       title={t.whatsapp.label}
       onClick={() => track('click_whatsapp', { source: 'floating_button' })}
-      className="fixed bottom-5 right-5 z-[90] w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center transition-transform duration-200 hover:scale-110"
-      style={{ boxShadow: '0 8px 22px rgba(37,211,102,0.45)' }}
+      className="fixed bottom-6 right-6 z-50 w-[54px] h-[54px] rounded-full bg-larsen-blue text-white flex items-center justify-center transition-transform duration-200 hover:scale-[1.06] motion-reduce:transition-none motion-reduce:hover:scale-100"
+      style={{ boxShadow: '0 8px 22px rgba(40,50,123,0.32)' }}
     >
-      <Whatsapp size={30} />
+      <Whatsapp size={28} />
     </a>
   );
 };

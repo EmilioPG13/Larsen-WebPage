@@ -1,12 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import Reveal from '../components/ui/Reveal';
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
 import { getMachines } from '../services/api';
 import { sendQuoteLead } from '../services/leads';
 import { track } from '../services/analytics';
-import { Check, Clock, MessageCircle, Phone } from '../components/ui/icons';
-import { FileText, BarChart, DollarSign, Package } from '../components/ui/icons';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface QuoteForm {
   name: string;
@@ -14,29 +14,30 @@ interface QuoteForm {
   email: string;
   phone: string;
   machine: string;
+  mtype: string;
+  volume: string;
   message: string;
   website: string; // honeypot — must stay empty
 }
+const EMPTY: QuoteForm = {
+  name: '', company: '', email: '', phone: '', machine: '', mtype: '', volume: '', message: '', website: '',
+};
 
-const EMPTY: QuoteForm = { name: '', company: '', email: '', phone: '', machine: '', message: '', website: '' };
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-type FieldErrors = Partial<Record<'name' | 'email' | 'phone', string>>;
-
-const inputClass =
-  'font-sans text-[14.5px] px-3.5 py-3 border-[1.5px] border-line-strong rounded-[10px] bg-field text-ink outline-none transition-colors duration-200 focus:border-deep';
-const labelClass = 'text-[12.5px] font-semibold text-text2';
+type FieldKey = 'name' | 'email' | 'phone';
+type FieldErrors = Partial<Record<FieldKey, string>>;
 
 const QuotePage = () => {
   const t = useT();
   useDocumentMeta(t.meta.quote.title, t.meta.quote.desc);
-  const [form, setForm] = useState<QuoteForm>(EMPTY);
+  const [params] = useSearchParams();
+  const preMachine = params.get('machine') ?? '';
+
   const [machineOptions, setMachineOptions] = useState<string[]>([]);
-  const [sent, setSent] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(false);
+  const [form, setForm] = useState<QuoteForm>({ ...EMPTY, machine: preMachine });
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -49,290 +50,183 @@ const QuotePage = () => {
     })();
   }, []);
 
-  const upd = (k: keyof QuoteForm) => (e: { target: { value: string } }) => {
-    setForm((f) => ({ ...f, [k]: e.target.value }));
-    if (k === 'name' || k === 'email' || k === 'phone') {
-      setErrors((prev) => ({ ...prev, [k]: undefined }));
-    }
-  };
+  const machineChoices = useMemo(() => {
+    if (preMachine && !machineOptions.includes(preMachine)) return [preMachine, ...machineOptions];
+    return machineOptions;
+  }, [machineOptions, preMachine]);
 
-  const validate = (): FieldErrors => {
-    const next: FieldErrors = {};
-    if (!form.name.trim()) next.name = t.qpage.req;
-    if (!form.email.trim()) next.email = t.qpage.req;
-    else if (!EMAIL_RE.test(form.email.trim())) next.email = t.qpage.invalidEmail;
-    if (!form.phone.trim()) next.phone = t.qpage.req;
-    return next;
+  const set =
+    (k: keyof QuoteForm) =>
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      setForm((f) => ({ ...f, [k]: e.target.value }));
+      if (k === 'name' || k === 'email' || k === 'phone') {
+        setErrors((prev) => ({ ...prev, [k]: undefined }));
+      }
+    };
+
+  const fieldError = (k: FieldKey, value: string): string | undefined => {
+    if (!value.trim()) return t.qpage.req;
+    if (k === 'email' && !EMAIL_RE.test(value.trim())) return t.qpage.invalidEmail;
+    return undefined;
   };
+  const blur = (k: FieldKey) => () =>
+    setErrors((prev) => ({ ...prev, [k]: fieldError(k, form[k]) }));
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (form.website) { setReference('—'); return; } // honeypot
 
-    // Honeypot: a real user never fills this hidden field. Silently accept
-    // to avoid tipping off bots, but don't send anything.
-    if (form.website) {
-      setSent(true);
-      return;
-    }
-
-    const nextErrors = validate();
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
+    const next: FieldErrors = {
+      name: fieldError('name', form.name),
+      email: fieldError('email', form.email),
+      phone: fieldError('phone', form.phone),
+    };
+    setErrors(next);
+    if (Object.values(next).some(Boolean)) return;
 
     setSubmitting(true);
-    setError(false);
+    setSubmitError(false);
     try {
-      const machineLine = form.machine ? `${t.qpage.machine}: ${form.machine}\n` : '';
+      const lines = [
+        form.machine && `${t.qpage.machine}: ${form.machine}`,
+        form.mtype && `${t.qpage.mtypeLabel}: ${form.mtype}`,
+        form.volume && `${t.qpage.volumeLabel}: ${form.volume}`,
+        form.message,
+      ].filter(Boolean);
       await sendQuoteLead({
         name: form.name,
         company: form.company,
         email: form.email,
         phone: form.phone,
         machine: form.machine,
-        message: `${machineLine}${form.message}`.trim(),
+        message: lines.join('\n'),
+        source: 'quote-page',
       });
-      track('submit_quote', { machine: form.machine || 'none' });
-      setSent(true);
+      track('submit_quote', { machine: form.machine || 'none', source: 'quote' });
+      setReference(`LZ-${Date.now().toString(36).toUpperCase()}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error('Error sending quote request:', err);
-      setError(true);
+      setSubmitError(true);
     } finally {
       setSubmitting(false);
     }
   };
 
   const resetForm = () => {
-    setForm(EMPTY);
+    setForm({ ...EMPTY, machine: preMachine });
     setErrors({});
-    setError(false);
-    setSent(false);
+    setSubmitError(false);
+    setReference(null);
   };
 
-  const processSteps = [
-    { n: 1, Icon: FileText, title: t.qpage.s1t, text: t.qpage.s1d },
-    { n: 2, Icon: BarChart, title: t.qpage.s2t, text: t.qpage.s2d },
-    { n: 3, Icon: DollarSign, title: t.qpage.s3t, text: t.qpage.s3d },
-    { n: 4, Icon: Package, title: t.qpage.s4t, text: t.qpage.s4d },
-  ];
+  const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
+  const labelCls = `${kicker} text-muted mb-1.5 block`;
+  const fieldBase =
+    'w-full px-3 bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep';
+  const field = `${fieldBase} h-11`;
+  const errCls = 'block text-[12px] text-larsen-red mt-1';
+  const invalid = (k: FieldKey) => (errors[k] ? ' border-larsen-red focus:border-larsen-red' : '');
 
   return (
-    <div>
-      {/* FORM + CONTACT */}
-      <div className="max-w-[1240px] mx-auto px-7 pt-[74px] pb-[90px]">
-        <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-[60px] items-start">
-          {/* Left: contact info */}
-          <Reveal>
-            <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-4">{t.qpage.k}</div>
-            <h1 className="font-serif font-medium text-[clamp(38px,4.6vw,58px)] tracking-[-0.025em] text-ink m-0 mb-[18px]">{t.qpage.t}</h1>
-            <p className="text-[18px] leading-[1.6] text-text2 m-0 mb-6">{t.qpage.s}</p>
-            <div className="flex flex-wrap gap-3 mb-[34px]">
-              <span className="inline-flex items-center gap-[9px] text-[#1F8A5B] border border-[#1F8A5B]/20 text-[13.5px] font-semibold px-4 py-[9px] rounded-full" style={{ background: 'rgba(31,138,91,0.1)' }}>
-                <Check size={15} />{t.qpage.pill1}
-              </span>
-              <span className="inline-flex items-center gap-[9px] text-deep border border-deep/20 text-[13.5px] font-semibold px-4 py-[9px] rounded-full" style={{ background: 'var(--deep-soft)' }}>
-                <Clock size={15} />{t.qpage.pill2}
-              </span>
-            </div>
-            <div className="border-t border-line pt-[26px] flex flex-col gap-[18px]">
-              <div className="flex items-start gap-3.5">
-                <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">TEL</span>
-                <span className="flex flex-col gap-[3px]">
-                  <span className="text-[14.5px] font-semibold text-ink">+52 775 365 0376</span>
-                  <span className="text-[13.5px] text-muted">+39 348 6907430</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-3.5">
-                <span className="font-mono text-[11px] text-faint w-[54px]">EMAIL</span>
-                <span className="text-[15px] text-ink">admin@larsenitaliana.com</span>
-              </div>
-              <div className="flex items-start gap-3.5">
-                <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">MX</span>
-                <span className="text-[15px] text-ink">{t.contact.mexico}</span>
-              </div>
-              <div className="flex items-start gap-3.5">
-                <span className="font-mono text-[11px] text-faint w-[54px] mt-0.5">IT</span>
-                <span className="text-[15px] text-muted">{t.contact.italy}</span>
-              </div>
-            </div>
-          </Reveal>
+    <div className="max-w-[720px] mx-auto px-7 pt-14 md:pt-[72px] pb-14 md:pb-[88px]">
+      <header className="mb-10">
+        <div className={`${kicker} text-deep mb-4`}>{t.qpage.k}</div>
+        <h1 className="font-serif font-medium text-[clamp(34px,4.4vw,52px)] tracking-[-0.01em] text-ink m-0 mb-4">
+          {t.qpage.t}
+        </h1>
+        <p className="text-[15px] leading-[1.6] text-text2 m-0">{t.qpage.s}</p>
+      </header>
 
-          {/* Right: form or success */}
-          <Reveal>
-            {sent ? (
-              <div className="bg-surface border border-line rounded-[22px] px-10 py-14 text-center" style={{ boxShadow: '0 20px 50px rgba(26,26,31,0.08)' }}>
-                <div className="w-16 h-16 mx-auto mb-[22px] rounded-full flex items-center justify-center text-[30px] text-[#1F8A5B]" style={{ background: 'rgba(31,138,91,0.12)' }}>✓</div>
-                <h2 className="font-serif font-semibold text-[30px] text-ink m-0 mb-3">{t.qpage.sentT}</h2>
-                <p className="text-base leading-[1.6] text-muted m-0 mb-7 max-w-[360px] mx-auto">{t.qpage.sentS}</p>
-                <button onClick={resetForm} className="bg-transparent border-[1.5px] border-line-strong text-ink font-semibold text-sm px-6 py-3 rounded-full transition-colors duration-200 hover:border-deep hover:bg-deep/5">
-                  {t.qpage.again}
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="bg-surface border border-line rounded-[22px] p-[34px] grid grid-cols-1 sm:grid-cols-2 gap-[18px]" style={{ boxShadow: '0 20px 50px rgba(26,26,31,0.08)' }}>
-                <div className="flex flex-col gap-[7px]">
-                  <label className={labelClass}>{t.qpage.name}</label>
-                  <input
-                    value={form.name}
-                    onChange={upd('name')}
-                    aria-invalid={!!errors.name}
-                    className={`${inputClass} ${errors.name ? 'border-larsen-red focus:border-larsen-red' : ''}`}
-                  />
-                  {errors.name && <span className="text-[12px] text-larsen-red">{errors.name}</span>}
-                </div>
-                <div className="flex flex-col gap-[7px]">
-                  <label className={labelClass}>{t.qpage.company}</label>
-                  <input value={form.company} onChange={upd('company')} className={inputClass} />
-                </div>
-                <div className="flex flex-col gap-[7px]">
-                  <label className={labelClass}>{t.qpage.email}</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={upd('email')}
-                    aria-invalid={!!errors.email}
-                    className={`${inputClass} ${errors.email ? 'border-larsen-red focus:border-larsen-red' : ''}`}
-                  />
-                  {errors.email && <span className="text-[12px] text-larsen-red">{errors.email}</span>}
-                </div>
-                <div className="flex flex-col gap-[7px]">
-                  <label className={labelClass}>{t.qpage.phone}</label>
-                  <input
-                    value={form.phone}
-                    onChange={upd('phone')}
-                    aria-invalid={!!errors.phone}
-                    className={`${inputClass} ${errors.phone ? 'border-larsen-red focus:border-larsen-red' : ''}`}
-                  />
-                  {errors.phone && <span className="text-[12px] text-larsen-red">{errors.phone}</span>}
-                </div>
-
-                {/* Honeypot: hidden from users, catches bots */}
-                <input
-                  type="text"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  aria-hidden="true"
-                  value={form.website}
-                  onChange={upd('website')}
-                  className="hidden"
-                />
-                <div className="flex flex-col gap-[7px] sm:col-span-2">
-                  <label className={labelClass}>{t.qpage.machine}</label>
-                  <select value={form.machine} onChange={upd('machine')} className={inputClass}>
-                    <option value="">{t.qpage.choose}</option>
-                    {machineOptions.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                    <option value="other">{t.qpage.other}</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-[7px] sm:col-span-2">
-                  <label className={labelClass}>{t.qpage.message}</label>
-                  <textarea rows={4} value={form.message} onChange={upd('message')} className={`${inputClass} resize-y`} />
-                </div>
-                {error && (
-                  <div className="sm:col-span-2 text-[13.5px] text-larsen-red">{t.qpage.errorMsg}</div>
-                )}
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[15.5px] py-[15px] rounded-xl transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
-                  style={{ boxShadow: '0 8px 22px rgba(216,30,42,0.24)' }}
-                >
-                  {submitting ? t.qpage.sending : t.qpage.submit}
-                </button>
-              </form>
-            )}
-          </Reveal>
-        </div>
-      </div>
-
-      {/* PROCESS */}
-      <div className="max-w-[1240px] mx-auto px-7 pt-[18px] pb-[72px]">
-        <Reveal className="text-center mb-[58px]">
-          <div className="font-mono text-xs tracking-[0.08em] text-larsen-red uppercase mb-3.5">{t.qpage.procK}</div>
-          <h2 className="font-serif font-medium text-[clamp(30px,3.6vw,44px)] tracking-[-0.02em] text-ink m-0 mb-2.5">
-            {t.qpage.procT1} <span className="italic text-larsen-red">{t.qpage.procT2}</span>
+      {reference ? (
+        <div className="border border-line bg-surface px-8 py-12 text-center">
+          <div className={`${kicker} text-deep mb-4`}>{t.qpage.sentT}</div>
+          <h2 className="font-serif font-medium text-[clamp(24px,3vw,32px)] leading-snug text-ink m-0 mb-4 max-w-[34ch] mx-auto">
+            {t.qpage.sentS}
           </h2>
-          <p className="text-base text-muted m-0 mx-auto max-w-[560px]">{t.qpage.procS}</p>
-        </Reveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {processSteps.map(({ n, Icon, title, text }) => (
-            <Reveal
-              key={n}
-              className="relative bg-surface border border-line rounded-[18px] px-[26px] pt-9 pb-7 transition-all duration-300 hover:-translate-y-[5px] hover:border-deep/25"
-            >
-              <div
-                className="absolute -top-4 left-6 w-[34px] h-[34px] rounded-full text-white flex items-center justify-center font-mono text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg,#28327B,#D81E2A)', boxShadow: '0 8px 18px rgba(40,50,123,0.3)' }}
-              >
-                {n}
-              </div>
-              <div className="w-[54px] h-[54px] rounded-[14px] flex items-center justify-center text-larsen-red my-[6px] mb-5" style={{ background: 'rgba(216,30,42,0.08)' }}>
-                <Icon size={26} />
-              </div>
-              <h3 className="font-serif font-semibold text-[22px] text-ink m-0 mb-[9px]">{title}</h3>
-              <p className="text-sm leading-[1.58] text-muted m-0">{text}</p>
-            </Reveal>
-          ))}
+          {reference !== '—' && (
+            <p className="font-mono text-[12px] tracking-[0.14em] text-muted m-0">REF · {reference}</p>
+          )}
+          <button
+            onClick={resetForm}
+            className={`${kicker} mt-8 h-11 px-5 border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`}
+          >
+            {t.qpage.again}
+          </button>
         </div>
-      </div>
-
-      {/* DIRECT CONTACT (dark) */}
-      <div className="bg-[#161e61]">
-        <div className="max-w-[1240px] mx-auto px-7 pt-[74px] pb-20">
-          <Reveal className="text-center mb-[46px]">
-            <h2 className="font-serif font-medium text-[clamp(30px,3.8vw,46px)] tracking-[-0.02em] text-white m-0 mb-3">
-              {t.qpage.directT1} <span className="italic text-larsen-red">{t.qpage.directT2}</span>
-            </h2>
-            <p className="text-[16.5px] text-white/60 m-0">{t.qpage.directS}</p>
-          </Reveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-[22px]">
-            {/* WhatsApp */}
-            <div className="bg-surface border border-line rounded-[18px] px-7 py-[38px] text-center flex flex-col items-center transition-transform duration-300 hover:-translate-y-[5px]">
-              <div className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center text-[#1F8A5B] mb-5" style={{ background: 'rgba(31,138,91,0.12)' }}>
-                <MessageCircle size={28} />
-              </div>
-              <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2">{t.qpage.waT}</h3>
-              <p className="text-[14.5px] text-muted m-0 mb-[18px]">{t.qpage.waS}</p>
-              <a href="https://wa.me/527753650376" target="_blank" rel="noopener noreferrer" onClick={() => track('click_whatsapp', { source: 'quote_direct' })} className="mt-auto text-[15px] font-semibold text-[#1F8A5B] transition-opacity duration-200 hover:opacity-70">
-                {t.qpage.waLink}
-              </a>
-            </div>
-            {/* Phone */}
-            <div className="bg-surface border border-line rounded-[18px] px-7 py-[38px] text-center flex flex-col items-center transition-transform duration-300 hover:-translate-y-[5px]">
-              <div className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center text-deep mb-5" style={{ background: 'var(--deep-soft)' }}>
-                <Phone size={28} />
-              </div>
-              <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-2">{t.qpage.telT}</h3>
-              <p className="text-[14.5px] text-muted m-0 mb-[18px]">{t.qpage.telS}</p>
-              <div className="mt-auto flex flex-col items-center gap-1.5">
-                <a href="tel:+527753650376" onClick={() => track('click_phone', { source: 'quote_direct' })} className="text-base font-bold text-deep transition-opacity duration-200 hover:opacity-70">{t.qpage.telNum}</a>
-                <a href="tel:+393486907430" className="text-sm font-medium text-muted transition-opacity duration-200 hover:opacity-70">+39 348 6907430</a>
-              </div>
-            </div>
-            {/* Hours */}
-            <div className="bg-surface border border-line rounded-[18px] px-7 py-[38px] text-center flex flex-col items-center transition-transform duration-300 hover:-translate-y-[5px]">
-              <div className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center text-larsen-red mb-5" style={{ background: 'rgba(216,30,42,0.08)' }}>
-                <Clock size={28} />
-              </div>
-              <h3 className="font-serif font-semibold text-2xl text-ink m-0 mb-3.5">{t.qpage.hrsT}</h3>
-              <div className="text-sm text-text2 leading-[1.55]">
-                <div className="font-bold text-ink">{t.qpage.hrsRow1}</div>
-                <div className="text-muted mb-2">{t.qpage.hrsRow1v}</div>
-                <div className="font-bold text-ink">{t.qpage.hrsRow2}</div>
-                <div className="text-muted">{t.qpage.hrsRow2v}</div>
-                <div className="font-mono text-[11.5px] text-faint mt-3">{t.qpage.hrsZone}</div>
-              </div>
-            </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="border border-line bg-surface p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-5"
+        >
+          <div>
+            <label className={labelCls}>{t.qpage.name}</label>
+            <input aria-label={t.qpage.name} value={form.name} onChange={set('name')} onBlur={blur('name')} aria-invalid={!!errors.name} className={field + invalid('name')} />
+            {errors.name && <span className={errCls}>{errors.name}</span>}
           </div>
-          <p className="text-center text-sm text-white/55 mt-[42px]">
-            <span className="text-larsen-red font-semibold">Tip · </span>{t.qpage.tip}
-          </p>
-        </div>
-      </div>
+          <div>
+            <label className={labelCls}>{t.qpage.company}</label>
+            <input aria-label={t.qpage.company} value={form.company} onChange={set('company')} className={field} />
+          </div>
+          <div>
+            <label className={labelCls}>{t.qpage.email}</label>
+            <input type="email" aria-label={t.qpage.email} value={form.email} onChange={set('email')} onBlur={blur('email')} aria-invalid={!!errors.email} className={field + invalid('email')} />
+            {errors.email && <span className={errCls}>{errors.email}</span>}
+          </div>
+          <div>
+            <label className={labelCls}>{t.qpage.phone}</label>
+            <input aria-label={t.qpage.phone} value={form.phone} onChange={set('phone')} onBlur={blur('phone')} aria-invalid={!!errors.phone} className={field + invalid('phone')} />
+            {errors.phone && <span className={errCls}>{errors.phone}</span>}
+          </div>
+
+          <div>
+            <label className={labelCls}>{t.qpage.mtypeLabel}</label>
+            <select aria-label={t.qpage.mtypeLabel} value={form.mtype} onChange={set('mtype')} className={field}>
+              <option value="">{t.qpage.pick}</option>
+              {t.qpage.mtypeOpts.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>{t.qpage.volumeLabel}</label>
+            <select aria-label={t.qpage.volumeLabel} value={form.volume} onChange={set('volume')} className={field}>
+              <option value="">{t.qpage.pick}</option>
+              {t.qpage.volumeOpts.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>{t.qpage.machine}</label>
+            <select aria-label={t.qpage.machine} value={form.machine} onChange={set('machine')} className={field}>
+              <option value="">{t.qpage.choose}</option>
+              {machineChoices.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+              <option value="other">{t.qpage.other}</option>
+            </select>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>{t.qpage.message}</label>
+            <textarea aria-label={t.qpage.message} rows={4} value={form.message} onChange={set('message')} className={`${fieldBase} min-h-[112px] py-2.5 resize-y`} />
+          </div>
+
+          {/* honeypot */}
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value={form.website} onChange={set('website')} />
+
+          {submitError && <p className="sm:col-span-2 text-[13px] text-larsen-red m-0">{t.qpage.errorMsg}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] h-12 transition-colors disabled:opacity-60"
+          >
+            {submitting ? t.qpage.sending : t.qpage.submit}
+          </button>
+        </form>
+      )}
+
+      {!reference && (
+        <p className="text-[13px] text-muted mt-6">{t.qpage.talkTo}</p>
+      )}
     </div>
   );
 };

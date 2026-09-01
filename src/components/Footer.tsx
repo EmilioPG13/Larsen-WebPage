@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useT } from '../i18n/useT';
 import { track } from '../services/analytics';
+import { brands } from '../data/brands';
 import { Phone, Mail, MapPin, Linkedin, Instagram } from './ui/icons';
 
 const NAV: { key: 'home' | 'machines' | 'brands' | 'quote' | 'about'; path: string }[] = [
@@ -11,30 +12,33 @@ const NAV: { key: 'home' | 'machines' | 'brands' | 'quote' | 'about'; path: stri
   { key: 'about', path: '/nosotros' },
 ];
 
+const kickerClass = 'font-mono text-[11px] tracking-[0.14em] uppercase text-white/45 mb-[18px]';
+const linkClass = 'text-[14px] text-white/60 transition-colors duration-200 hover:text-white';
+
 const Footer = () => {
   const t = useT();
 
   return (
-    <footer className="bg-[#1a1a1f] text-white">
-      <div className="max-w-[1240px] mx-auto px-7 pt-[60px] pb-[30px] grid grid-cols-1 md:grid-cols-[1.6fr_1fr_1fr] gap-12">
-        {/* Brand */}
+    <footer className="bg-footer text-white">
+      <div className="max-w-[1280px] mx-auto px-7 pt-[60px] pb-[30px] grid grid-cols-1 md:grid-cols-[1.7fr_1fr_1fr_1fr] gap-x-10 gap-y-12">
+        {/* Identity */}
         <div>
           <img
             src="/images/logo/larsen-logo-2.png"
             alt="Larsen Italiana"
             loading="lazy"
             decoding="async"
-            className="h-10 w-auto object-contain mb-5"
+            className="h-9 w-auto object-contain mb-5"
             style={{ filter: 'brightness(0) invert(1)' }}
           />
-          <p className="text-[14.5px] leading-[1.62] text-white/55 mb-[22px] max-w-[340px]">{t.foot.blurb}</p>
+          <p className="text-[14px] leading-[1.62] text-white/55 mb-[22px] max-w-[320px]">{t.foot.blurb}</p>
           <div className="flex items-center gap-2.5">
             <a
               href="https://www.linkedin.com/company/larsen-italiana-soc-arl"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn"
-              className="inline-flex w-[38px] h-[38px] border border-white/20 rounded-[9px] items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-blue hover:text-white hover:border-larsen-blue"
+              className="inline-flex w-[38px] h-[38px] border border-white/20 items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-blue hover:text-white hover:border-larsen-blue"
             >
               <Linkedin size={17} />
             </a>
@@ -43,7 +47,7 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="inline-flex w-[38px] h-[38px] border border-white/20 rounded-[9px] items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-red hover:text-white hover:border-larsen-red"
+              className="inline-flex w-[38px] h-[38px] border border-white/20 items-center justify-center text-white/70 transition-colors duration-200 hover:bg-larsen-blue hover:text-white hover:border-larsen-blue"
             >
               <Instagram size={17} />
             </a>
@@ -52,14 +56,14 @@ const Footer = () => {
 
         {/* Navigation */}
         <div>
-          <h4 className="font-mono text-xs tracking-[0.06em] uppercase text-white/50 mb-[18px]">{t.foot.prod}</h4>
+          <h4 className={kickerClass}>{t.foot.prod}</h4>
           <div className="flex flex-col gap-[11px]">
             {NAV.map((item) => (
               <Link
                 key={item.key}
                 to={item.path}
                 onClick={() => window.scrollTo(0, 0)}
-                className="text-[14.5px] text-white/60 transition-colors duration-200 hover:text-white"
+                className={linkClass}
               >
                 {t.nav[item.key]}
               </Link>
@@ -67,26 +71,47 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Brands */}
+        <div>
+          <h4 className={kickerClass}>{t.bpage.k}</h4>
+          <div className="flex flex-col gap-[11px]">
+            {brands.map((b) => (
+              <Link
+                key={b.name}
+                to="/marcas"
+                onClick={() => window.scrollTo(0, 0)}
+                className={linkClass}
+              >
+                {b.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {/* Contact */}
         <div>
-          <h4 className="font-mono text-xs tracking-[0.06em] uppercase text-white/50 mb-[18px]">{t.foot.contact}</h4>
-          <div className="flex flex-col gap-[15px] text-[14.5px] text-white/60">
-            <a href="tel:+527753650376" onClick={() => track('click_phone', { source: 'footer' })} className="flex items-start gap-3 transition-colors duration-200 hover:text-white">
-              <Phone size={17} className="shrink-0 mt-[3px] text-larsen-red" />
+          <h4 className={kickerClass}>{t.foot.contact}</h4>
+          <div className="flex flex-col gap-[15px] text-[14px] text-white/60">
+            <a
+              href="tel:+527753650376"
+              onClick={() => track('click_phone', { source: 'footer' })}
+              className="flex items-start gap-3 transition-colors duration-200 hover:text-white"
+            >
+              <Phone size={16} className="shrink-0 mt-[3px] text-white/40" />
               <span className="flex flex-col gap-[3px]">
                 <span>+52 775 365 0376</span>
-                <span className="text-white/40 text-[13.5px]">+39 348 6907430</span>
+                <span className="text-white/35 text-[13px]">+39 348 6907430</span>
               </span>
             </a>
             <a href="mailto:admin@larsenitaliana.com" className="flex items-center gap-3 transition-colors duration-200 hover:text-white">
-              <Mail size={17} className="shrink-0 text-larsen-red" />
+              <Mail size={16} className="shrink-0 text-white/40" />
               <span>admin@larsenitaliana.com</span>
             </a>
             <div className="flex items-start gap-3">
-              <MapPin size={17} className="shrink-0 mt-[3px] text-larsen-red" />
+              <MapPin size={16} className="shrink-0 mt-[3px] text-white/40" />
               <span className="flex flex-col gap-[3px]">
                 <span>{t.contact.office}: {t.contact.mexico}</span>
-                <span className="text-white/40 text-[13.5px]">{t.contact.workshop}: {t.contact.italy}</span>
+                <span className="text-white/35 text-[13px]">{t.contact.workshop}: {t.contact.italy}</span>
               </span>
             </div>
           </div>
@@ -94,12 +119,12 @@ const Footer = () => {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="max-w-[1240px] mx-auto px-7 py-[22px] flex flex-wrap justify-between items-center gap-3.5">
-          <p className="text-[13px] text-white/45 m-0">© {new Date().getFullYear()} Larsen Italiana. {t.foot.rights}</p>
-          <div className="flex gap-[26px] text-[13px]">
-            <a href="#" className="text-white/45 transition-colors duration-200 hover:text-white">{t.foot.privacy}</a>
-            <a href="#" className="text-white/45 transition-colors duration-200 hover:text-white">{t.foot.terms}</a>
-            <a href="#" className="text-white/45 transition-colors duration-200 hover:text-white">{t.foot.cookies}</a>
+        <div className="max-w-[1280px] mx-auto px-7 py-[22px] flex flex-wrap justify-between items-center gap-3.5 font-mono text-[11px] tracking-[0.08em] uppercase text-white/40">
+          <p className="m-0">© {new Date().getFullYear()} Larsen Italiana · {t.foot.rights}</p>
+          <div className="flex gap-[26px]">
+            <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.privacy}</a>
+            <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.terms}</a>
+            <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.cookies}</a>
           </div>
         </div>
       </div>

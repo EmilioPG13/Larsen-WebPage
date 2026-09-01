@@ -9,15 +9,25 @@ export interface BrandEntry {
   logoScale?: number;
 }
 
-// Ported from the Claude Design source (rawBrands()).
+// Ported from the Claude Design source (BRANDS[]). Order leads with Steiger —
+// the Aries/Vesta line is the core of the refurbished catalogue.
 export const brands: BrandEntry[] = [
+  {
+    name: 'Steiger',
+    origin: { es: 'Suiza', en: 'Switzerland' },
+    image: '/images/brands/Steiger ZAMARK.png',
+    blurb: {
+      es: 'Rectilíneas Aries y Vesta. La base de nuestra línea reacondicionada.',
+      en: 'Aries and Vesta flat-knitting. The core of our refurbished line.',
+    },
+  },
   {
     name: 'Shima Seiki',
     origin: { es: 'Japón', en: 'Japan' },
     image: '/images/brands/SHIMA SEIKI.png',
     blurb: {
-      es: 'Pionero japonés del tejido rectilíneo computarizado y la tecnología WHOLEGARMENT.',
-      en: 'Japanese pioneer of computerised flat knitting and WHOLEGARMENT technology.',
+      es: 'Referente mundial en whole garment y programación de punto.',
+      en: 'The world reference in whole garment and knit programming.',
     },
   },
   {
@@ -25,37 +35,28 @@ export const brands: BrandEntry[] = [
     origin: { es: 'Alemania', en: 'Germany' },
     image: '/images/brands/STOLL.png',
     blurb: {
-      es: 'Referente alemán en máquinas de tejido rectilíneo electrónico de altas prestaciones.',
-      en: 'German benchmark in high-performance electronic flat-knitting machines.',
+      es: 'CMS de alta precisión para producción industrial exigente.',
+      en: 'High-precision CMS for demanding industrial production.',
     },
     logoScale: 0.62,
-  },
-  {
-    name: 'Steiger',
-    origin: { es: 'Suiza', en: 'Switzerland' },
-    image: '/images/brands/Steiger ZAMARK.png',
-    blurb: {
-      es: 'Fabricante suizo de máquinas rectilíneas electrónicas precisas y versátiles.',
-      en: 'Swiss maker of precise, versatile electronic flat-knitting machines.',
-    },
   },
   {
     name: 'Protti',
     origin: { es: 'Italia', en: 'Italy' },
     image: '/images/brands/PROTTI.png',
     blurb: {
-      es: 'Histórica marca italiana de máquinas de tejido rectilíneo.',
-      en: 'Historic Italian flat-knitting machine brand.',
+      es: 'Rectilíneas italianas robustas y fáciles de mantener.',
+      en: 'Robust Italian flat-knitting, straightforward to maintain.',
     },
     logoScale: 0.62,
   },
   {
     name: 'Scheller',
-    origin: { es: 'Europa', en: 'Europe' },
+    origin: { es: 'Alemania', en: 'Germany' },
     image: '/images/brands/Scheller.png',
     blurb: {
-      es: 'Maquinaria textil europea para tejido de punto y confección.',
-      en: 'European textile machinery for knitting and garment-making.',
+      es: 'Equipo auxiliar y de acabado para el taller de punto.',
+      en: 'Auxiliary and finishing equipment for the knitting floor.',
     },
   },
 ];

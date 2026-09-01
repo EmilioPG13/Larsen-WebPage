@@ -6,44 +6,72 @@
    ============================================================ */
 :root,
 [data-theme="light"] {
-  --bg: #ECEDF0;
-  --bg-blur: rgba(236, 237, 240, 0.82);
-  --surface: #ffffff;
-  --surface-2: rgba(255, 255, 255, 0.55);
+  /* Surfaces */
+  --bg: #ECEDF0;                        /* page ground */
+  --bg-blur: rgba(236, 237, 240, 0.93); /* sticky header backdrop */
+  --surface: #ffffff;                   /* plates, cards, form fields */
+  --surface-2: #F6F7F9;                 /* recessed / alternate plate */
+  --footer: #1b1c20;                    /* footer field */
+
+  /* Text */
+  --ink: #1b1c20;   /* primary text */
+  --text2: #4c4f55; /* secondary text */
+  --muted: #696c72; /* meta, labels */
+  --faint: #9a9da3; /* disabled, fine print */
+
+  /* Hairlines */
+  --line: rgba(20, 22, 28, 0.17);        /* standard hairline border */
+  --line-soft: rgba(20, 22, 28, 0.12);   /* inner dividers */
+  --line-strong: rgba(20, 22, 28, 0.30); /* emphasized rule */
+
+  /* Larsen navy — accent, links */
+  --deep: #28327B;
+  --deep-soft: rgba(40, 50, 123, 0.06); /* navy tint fill */
+  --deep-line: rgba(40, 50, 123, 0.32); /* navy border */
+
+  /* Text selection */
+  --select: rgba(40, 50, 123, 0.18);
+
+  /* Codebase helpers — retained for screens not yet rebuilt (steps 3–5) */
   --field: #F3F4F6;
   --plate: linear-gradient(160deg, #EEEFF2, #E0E2E7);
   --logo-bg: linear-gradient(160deg, #F8F9FB, #EDEEF1);
-  --ink: #1b1c20;
-  --text2: #4c4f55;
-  --muted: #696c72;
-  --faint: #9a9da3;
-  --line: rgba(20, 22, 28, 0.10);
-  --line-strong: rgba(20, 22, 28, 0.17);
   --fill: rgba(20, 22, 28, 0.05);
-  --deep: #28327B;
-  --deep-soft: rgba(40, 50, 123, 0.05);
-  --deep-line: rgba(40, 50, 123, 0.14);
   --ghost: rgba(40, 50, 123, 0.05);
 }
 
 [data-theme="dark"] {
+  /* Surfaces */
   --bg: #121318;
-  --bg-blur: rgba(18, 19, 24, 0.82);
+  --bg-blur: rgba(18, 19, 24, 0.90);
   --surface: #1d1e26;
-  --surface-2: rgba(255, 255, 255, 0.035);
-  --field: #16171d;
-  --plate: linear-gradient(160deg, #272834, #1a1b22);
-  --logo-bg: linear-gradient(160deg, #F6F2EA, #EBE4D6);
+  --surface-2: #23242e;
+  --footer: #0d0e12;
+
+  /* Text */
   --ink: #F2EFE9;
   --text2: #C7C2B9;
   --muted: #9C978D;
   --faint: #7C776E;
-  --line: rgba(255, 255, 255, 0.10);
-  --line-strong: rgba(255, 255, 255, 0.17);
-  --fill: rgba(255, 255, 255, 0.06);
+
+  /* Hairlines */
+  --line: rgba(255, 255, 255, 0.16);
+  --line-soft: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.28);
+
+  /* Larsen navy — lifted for contrast on dark */
   --deep: #94A0F0;
-  --deep-soft: rgba(148, 160, 240, 0.10);
-  --deep-line: rgba(148, 160, 240, 0.24);
+  --deep-soft: rgba(148, 160, 240, 0.12);
+  --deep-line: rgba(148, 160, 240, 0.34);
+
+  /* Text selection */
+  --select: rgba(148, 160, 240, 0.24);
+
+  /* Codebase helpers — retained for screens not yet rebuilt (steps 3–5) */
+  --field: #16171d;
+  --plate: linear-gradient(160deg, #272834, #1a1b22);
+  --logo-bg: linear-gradient(160deg, #F6F2EA, #EBE4D6);
+  --fill: rgba(255, 255, 255, 0.06);
   --ghost: rgba(148, 160, 240, 0.07);
 }
 
@@ -59,15 +87,19 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-footer: var(--footer);
   --color-field: var(--field);
   --color-ink: var(--ink);
   --color-text2: var(--text2);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
   --color-line-strong: var(--line-strong);
   --color-fill: var(--fill);
   --color-deep: var(--deep);
+  --color-deep-soft: var(--deep-soft);
+  --color-deep-line: var(--deep-line);
 
   --color-larsen-blue: #28327B;
   --color-larsen-red: #D81E2A;
@@ -83,19 +115,30 @@
 
   body {
     font-family: 'Archivo', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
     margin: 0;
     padding: 0;
     background-color: var(--bg);
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
-    transition: background-color 0.45s ease, color 0.45s ease;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Visible keyboard focus for all interactive elements */
+  /* Serif display headings: let the browser balance wraps */
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: pretty;
+  }
+
+  /* Visible keyboard focus — navy ring, square (structural elements have 0 radius) */
   :focus-visible {
     outline: 2px solid var(--deep);
     outline-offset: 2px;
-    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--select);
   }
 }
 
@@ -122,6 +165,10 @@
   from { transform: translateY(22px); }
   to { transform: translateY(0); }
 }
+@keyframes lz-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
 
 [data-rise] {
   animation: lz-up 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -131,11 +178,34 @@
   animation-timeline: view();
   animation-range: entry 0% cover 24%;
 }
+/* Carousel slide enter — see the design's motion table */
+[data-slide] {
+  animation: lz-slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Horizontal logo marquee — duplicated track drifts 0 → -50% */
+.lz-marquee {
+  animation: lz-drift 40s linear infinite;
+}
+.lz-marquee:hover {
+  animation-play-state: paused;
+}
 
 @media (prefers-reduced-motion: reduce) {
   [data-rise],
-  [data-reveal] {
+  [data-reveal],
+  [data-slide] {
     animation: none;
+  }
+  .lz-marquee {
+    animation: none;
+  }
+  [data-brand-card],
+  [data-brand-logo] {
+    transition: none;
+  }
+  [data-brand-card]:hover {
+    transform: none;
   }
 }
 
@@ -161,12 +231,33 @@
   transform: scale(1.04);
 }
 
+/* Brands page — card lifts and its logo regains colour on hover (design spec §Brands). */
+[data-brand-card] {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s, border-color 0.3s;
+}
+[data-brand-card]:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 34px rgba(26, 26, 31, 0.14);
+  border-color: var(--deep-line);
+}
+[data-brand-logo] {
+  filter: grayscale(1);
+  opacity: 0.72;
+  transition: filter 0.45s ease, opacity 0.45s ease, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+[data-brand-card]:hover [data-brand-logo] {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: scale(1.06);
+}
+
 /* ============================================================
    Utilities (retained from previous build + page transitions)
    ============================================================ */
 @layer components {
+  /* Canonical content wrapper — 1280px max, flat 28px gutters (design tokens) */
   .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-[1280px] mx-auto px-7;
   }
 
   .line-clamp-2 {
@@ -190,8 +281,8 @@
 
 @layer utilities {
   .backdrop-blur-custom {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   /* Page transition animations */

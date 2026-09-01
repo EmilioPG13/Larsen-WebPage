@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { submitContact } from '../services/api';
+import { X } from './ui/icons';
 import type { Product, ContactFormData } from '../types';
 
 interface ContactModalProps {
@@ -7,6 +8,13 @@ interface ContactModalProps {
   onClose: () => void;
   product?: Product;
 }
+
+const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
+const labelCls = `${kicker} text-muted mb-1.5 block`;
+const fieldCls =
+  'w-full px-3 h-11 bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep';
+const textareaCls =
+  'w-full px-3 py-2.5 min-h-[112px] bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep resize-y';
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -33,52 +41,36 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
     }, 300); // Match animation duration
   };
 
-  // Center modal in viewport when opened
+  // Center modal in viewport when opened + lock body scroll
   useEffect(() => {
     if (isOpen && modalRef.current) {
-      // Reset closing state when modal opens
       setIsClosing(false);
-      
-      // Prevent body scroll when modal is open
+
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-      
-      // Ensure modal is centered - scroll to top of viewport then the modal will be centered
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // After a brief delay, ensure modal is visible (for mobile especially)
-      setTimeout(() => {
+
+      const timer = setTimeout(() => {
         const modalElement = modalRef.current;
         if (modalElement) {
           const rect = modalElement.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
-          
-          // If modal is not fully visible, scroll it into view
-          if (rect.top < 0 || rect.bottom > viewportHeight) {
-            modalElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center',
-              inline: 'nearest'
-            });
+          if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            modalElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
           }
         }
       }, 100);
 
       return () => {
+        clearTimeout(timer);
         document.body.style.overflow = originalOverflow || 'unset';
       };
-    } else {
-      // Restore body scroll when modal is closed
-      document.body.style.overflow = 'unset';
     }
+    document.body.style.overflow = 'unset';
   }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,10 +89,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
         productName: formData.productName,
       });
 
-      console.log('Contact form submitted successfully');
       setSubmitStatus('success');
-      
-      // Reset form after successful submission
+
       setTimeout(() => {
         setFormData({
           name: '',
@@ -114,7 +104,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
         setSubmitStatus('idle');
         handleClose();
       }, 2000);
-
     } catch (error) {
       console.error('Error submitting contact form:', error);
       setSubmitStatus('error');
@@ -126,167 +115,144 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       ref={backdropRef}
-      className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 ${
         isClosing ? 'animate-modal-backdrop-exit' : 'animate-modal-backdrop-enter'
       }`}
-      style={{ 
-        scrollBehavior: 'smooth',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        paddingTop: 'max(1rem, env(safe-area-inset-top))',
-        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
-        display: 'flex',
-        position: 'fixed',
-      }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          handleClose();
-        }
+        if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div 
+      <div
         ref={modalRef}
-        className={`bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Solicitar información"
+        className={`relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto bg-surface border border-line ${
           isClosing ? 'animate-modal-exit' : 'animate-modal-enter'
         }`}
+        style={{ boxShadow: '0 24px 60px rgba(0,0,0,0.28)' }}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          margin: 'auto',
-          maxHeight: 'calc(100vh - 2rem)',
-        }}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Solicitar Información
-            </h2>
+        <div className="p-6 border-b border-line">
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="font-serif font-medium text-[22px] text-ink m-0">Solicitar información</h2>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 group"
+              aria-label="Cerrar"
+              className="shrink-0 w-9 h-9 flex items-center justify-center text-muted transition-colors hover:text-ink hover:bg-fill"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={18} strokeWidth={1.5} />
             </button>
           </div>
           {product && (
-            <p className="text-sm text-gray-600 mt-2">
-              Interesado en: <span className="font-medium text-larsen-red">{product.name}</span>
+            <p className="text-[13px] text-muted mt-2 m-0">
+              Interesado en: <span className={`${kicker} text-deep`}>{product.name}</span>
             </p>
           )}
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 gap-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cm-name" className={labelCls}>
               Nombre completo *
             </label>
             <input
               type="text"
-              id="name"
+              id="cm-name"
               name="name"
               required
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
-              placeholder="Su nombre completo"
+              className={fieldCls}
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cm-email" className={labelCls}>
               Correo electrónico *
             </label>
             <input
               type="email"
-              id="email"
+              id="cm-email"
               name="email"
               required
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
-              placeholder="su.email@ejemplo.com"
+              className={fieldCls}
             />
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cm-phone" className={labelCls}>
               Teléfono
             </label>
             <input
               type="tel"
-              id="phone"
+              id="cm-phone"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
-              placeholder="+1 (555) 123-4567"
+              className={fieldCls}
             />
           </div>
 
           <div>
-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cm-company" className={labelCls}>
               Empresa
             </label>
             <input
               type="text"
-              id="company"
+              id="cm-company"
               name="company"
               value={formData.company}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
-              placeholder="Nombre de su empresa"
+              className={fieldCls}
             />
           </div>
 
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cm-message" className={labelCls}>
               Mensaje
             </label>
             <textarea
-              id="message"
+              id="cm-message"
               name="message"
               rows={4}
               value={formData.message}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent resize-none"
-              placeholder="Cuéntenos sobre sus necesidades específicas..."
+              className={textareaCls}
             />
           </div>
 
-          {/* Submit Status */}
           {submitStatus === 'success' && (
-            <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-              ¡Mensaje enviado exitosamente! Nos pondremos en contacto pronto.
-            </div>
+            <p className="text-[13px] text-deep border border-deep-line bg-deep-soft px-3 py-2 m-0">
+              ¡Mensaje enviado! Nos pondremos en contacto pronto.
+            </p>
           )}
-
           {submitStatus === 'error' && (
-            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              Error al enviar el mensaje. Por favor, inténtelo de nuevo.
-            </div>
+            <p className="text-[13px] text-larsen-red border border-larsen-red px-3 py-2 m-0">
+              Error al enviar el mensaje. Por favor, inténtalo de nuevo.
+            </p>
           )}
 
-          {/* Submit Button */}
-          <div className="flex space-x-3 pt-4">
+          <div className="flex gap-3 pt-1">
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-6 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95"
+              className={`${kicker} flex-1 h-11 border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 h-11 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] transition-colors disabled:opacity-60"
             >
-              {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
+              {isSubmitting ? 'Enviando...' : 'Enviar solicitud'}
             </button>
           </div>
         </form>
