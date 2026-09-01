@@ -30,3 +30,6 @@ docs
 # Playwright CLI (local visual testing) — session artifacts and config
 .playwright/
 .playwright-cli/
+
+# graphify knowledge-graph output (regenerable local cache)
+graphify-out/
