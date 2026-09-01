@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import MachinesPage from '../MachinesPage';
 import { LanguageProvider } from '../../i18n/LanguageContext';
 import { ThemeProvider } from '../../context/ThemeContext';
+import { es } from '../../i18n/dictionary';
 import * as api from '../../services/api';
 
 vi.mock('../../services/api', () => ({
@@ -122,5 +123,23 @@ describe('MachinesPage', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Test Brand').length).toBeGreaterThan(0);
     });
+  });
+
+  it('shows a named empty state when a ?brand= filter matches no stock', async () => {
+    render(
+      <ThemeProvider>
+        <LanguageProvider>
+          <MemoryRouter initialEntries={['/maquinas?brand=Nonexistent']}>
+            <MachinesPage />
+          </MemoryRouter>
+        </LanguageProvider>
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByText(/Nonexistent/)).toBeInTheDocument());
+    expect(screen.queryByText('Test Machine')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: es.mpage.viewAll }));
+    expect(screen.getByText('Test Machine')).toBeInTheDocument();
   });
 });
