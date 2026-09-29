@@ -1,16 +1,65 @@
 import api from '../../services/api';
+import { storeSession, clearSession, type AdminRole, type AdminUser } from './session';
+
+export interface ManagedUser {
+  id: string;
+  email: string;
+  name: string | null;
+  role: AdminRole;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export const adminApi = {
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
-    if (response.data.token) {
-      localStorage.setItem('admin_token', response.data.token);
-    }
+    storeSession(response.data.token ?? null, response.data.user ?? null);
     return response.data;
   },
 
   logout: () => {
-    localStorage.removeItem('admin_token');
+    clearSession();
+  },
+
+  /** Current user from the server. Also refreshes the stored user. */
+  getMe: async (): Promise<AdminUser & { active: boolean }> => {
+    const response = await api.get('/auth/me');
+    storeSession(null, response.data);
+    return response.data;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await api.put('/auth/password', { currentPassword, newPassword });
+    return response.data;
+  },
+
+  getUsers: async (): Promise<ManagedUser[]> => {
+    const response = await api.get('/users');
+    return response.data;
+  },
+
+  createUser: async (data: {
+    email: string;
+    name?: string;
+    role: AdminRole;
+    password: string;
+  }): Promise<ManagedUser> => {
+    const response = await api.post('/users', data);
+    return response.data;
+  },
+
+  updateUser: async (
+    id: string,
+    data: { name?: string; role?: AdminRole; active?: boolean }
+  ): Promise<ManagedUser> => {
+    const response = await api.put(`/users/${id}`, data);
+    return response.data;
+  },
+
+  resetUserPassword: async (id: string, password: string) => {
+    const response = await api.put(`/users/${id}/password`, { password });
+    return response.data;
   },
 
   getStats: async () => {

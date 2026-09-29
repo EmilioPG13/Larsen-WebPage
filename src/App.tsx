@@ -16,6 +16,8 @@ import AdminProducts from './admin/pages/Products';
 import AdminMachines from './admin/pages/Machines';
 import AdminBrands from './admin/pages/Brands';
 import AdminLeads from './admin/pages/Leads';
+import AdminUsers from './admin/pages/Users';
+import AdminInventory from './admin/pages/Inventory';
 import AdminLayout from './admin/components/AdminLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 import { useT } from './i18n/useT';
@@ -86,7 +88,7 @@ function AppContent() {
           <Route
             path="/admin/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['ADMIN']}>
                 <AdminLayout>
                   <AdminDashboard />
                 </AdminLayout>
@@ -96,7 +98,7 @@ function AppContent() {
           <Route
             path="/admin/products"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['ADMIN']}>
                 <AdminLayout>
                   <AdminProducts />
                 </AdminLayout>
@@ -106,7 +108,7 @@ function AppContent() {
           <Route
             path="/admin/machines"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['ADMIN']}>
                 <AdminLayout>
                   <AdminMachines />
                 </AdminLayout>
@@ -116,7 +118,7 @@ function AppContent() {
           <Route
             path="/admin/brands"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['ADMIN']}>
                 <AdminLayout>
                   <AdminBrands />
                 </AdminLayout>
@@ -126,9 +128,30 @@ function AppContent() {
           <Route
             path="/admin/leads"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['ADMIN']}>
                 <AdminLayout>
                   <AdminLeads />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <AdminLayout>
+                  <AdminUsers />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/inventario"
+            element={
+              <ProtectedRoute roles={['ADMIN', 'INVENTARIO']}>
+                <AdminLayout>
+                  <AdminInventory />
                 </AdminLayout>
               </ProtectedRoute>
             }

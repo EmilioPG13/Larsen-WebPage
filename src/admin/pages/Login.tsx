@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../services/adminApi';
+import { roleHome } from '../services/session';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await adminApi.login(email, password);
-      navigate('/admin/dashboard');
+      const { user } = await adminApi.login(email, password);
+      navigate(roleHome(user?.role ?? 'ADMIN'));
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
     } finally {
