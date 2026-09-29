@@ -13,26 +13,32 @@ jest.mock('../config/env', () => ({
   },
 }));
 
-jest.mock('../config/database', () => ({
-  __esModule: true,
-  default: {
-    user: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      count: jest.fn(),
+jest.mock('../config/database', () => {
+  const model = () => ({
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+  });
+  return {
+    __esModule: true,
+    default: {
+      user: model(),
+      brand: model(),
+      product: model(),
+      machine: model(),
+      lead: model(),
+      contactSubmission: model(),
+      $transaction: jest.fn(),
     },
-    brand: {
-      delete: jest.fn(),
-      findMany: jest.fn(),
-    },
-    lead: {
-      findMany: jest.fn(),
-      count: jest.fn(),
-    },
-  },
-}));
+  };
+});
 
 const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
+
+const DATA_MODELS = ['brand', 'product', 'machine', 'lead', 'contactSubmission', 'user'];
 
 const tokenFor = (userId: string) =>
   jwt.sign({ userId, email: `${userId}@example.com` }, 'test-secret');
@@ -139,5 +145,77 @@ describe('role enforcement on admin routes', () => {
       .get('/api/leads')
       .set('Authorization', `Bearer ${tokenFor('u1')}`)
       .expect(401);
+  });
+});
+
+/**
+ * Every route that requires the ADMIN role. Keep in sync with the routers: a
+ * new admin route must be added here so its protection is covered.
+ */
+const ADMIN_ROUTES: [method: 'get' | 'post' | 'put' | 'delete', path: string][] = [
+  ['post', '/api/products'],
+  ['put', '/api/products/p1'],
+  ['delete', '/api/products/p1'],
+  ['put', '/api/products/p1/stock'],
+  ['post', '/api/machines'],
+  ['put', '/api/machines/m1'],
+  ['delete', '/api/machines/m1'],
+  ['put', '/api/machines/m1/stock'],
+  ['post', '/api/brands'],
+  ['put', '/api/brands/b1'],
+  ['delete', '/api/brands/b1'],
+  ['get', '/api/leads'],
+  ['get', '/api/leads/stats'],
+  ['get', '/api/leads/l1'],
+  ['put', '/api/leads/l1/status'],
+  ['get', '/api/users'],
+  ['post', '/api/users'],
+  ['put', '/api/users/u2'],
+  ['put', '/api/users/u2/password'],
+];
+
+/** Fails if any model method was called, except the user lookup requireRole makes. */
+const expectNoDataAccess = () => {
+  for (const model of DATA_MODELS) {
+    for (const [method, fn] of Object.entries(prisma[model])) {
+      if (model === 'user' && method === 'findUnique') continue;
+      expect([model, method, fn.mock.calls.length]).toEqual([model, method, 0]);
+    }
+  }
+  expect(prisma.$transaction).not.toHaveBeenCalled();
+};
+
+describe('every admin route is closed to non-admins', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it.each(ADMIN_ROUTES)('%s %s answers 401 without a token', async (method, path) => {
+    await request(app)[method](path).send({}).expect(401);
+
+    expectNoDataAccess();
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+  });
+
+  it.each(ADMIN_ROUTES)('%s %s answers 403 to an INVENTARIO user', async (method, path) => {
+    asUser('INVENTARIO');
+
+    await request(app)[method](path)
+      .set('Authorization', `Bearer ${tokenFor('u1')}`)
+      .send({})
+      .expect(403);
+
+    expectNoDataAccess();
+  });
+
+  it.each(ADMIN_ROUTES)('%s %s answers 403 to a deactivated ADMIN', async (method, path) => {
+    asUser('ADMIN', false);
+
+    await request(app)[method](path)
+      .set('Authorization', `Bearer ${tokenFor('u1')}`)
+      .send({})
+      .expect(403);
+
+    expectNoDataAccess();
   });
 });
