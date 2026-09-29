@@ -6,7 +6,7 @@ import {
   updateBrand,
   deleteBrand,
 } from '../controllers/brands.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken, requireRole } from '../middleware/auth.middleware';
 import { errorHandler } from '../middleware/error.middleware';
 
 const router = express.Router();
@@ -16,9 +16,9 @@ router.get('/', getBrands);
 router.get('/:id', getBrandById);
 
 // Admin routes
-router.post('/', authenticateToken, createBrand);
-router.put('/:id', authenticateToken, updateBrand);
-router.delete('/:id', authenticateToken, deleteBrand);
+router.post('/', authenticateToken, requireRole('ADMIN'), createBrand);
+router.put('/:id', authenticateToken, requireRole('ADMIN'), updateBrand);
+router.delete('/:id', authenticateToken, requireRole('ADMIN'), deleteBrand);
 
 router.use(errorHandler);
 

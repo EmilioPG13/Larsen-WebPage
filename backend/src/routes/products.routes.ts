@@ -7,7 +7,7 @@ import {
   deleteProduct,
   updateProductStock,
 } from '../controllers/products.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken, requireRole } from '../middleware/auth.middleware';
 import { errorHandler } from '../middleware/error.middleware';
 
 const router = express.Router();
@@ -17,10 +17,10 @@ router.get('/', getProducts);
 router.get('/:id', getProductById);
 
 // Admin routes
-router.post('/', authenticateToken, createProduct);
-router.put('/:id', authenticateToken, updateProduct);
-router.delete('/:id', authenticateToken, deleteProduct);
-router.put('/:id/stock', authenticateToken, updateProductStock);
+router.post('/', authenticateToken, requireRole('ADMIN'), createProduct);
+router.put('/:id', authenticateToken, requireRole('ADMIN'), updateProduct);
+router.delete('/:id', authenticateToken, requireRole('ADMIN'), deleteProduct);
+router.put('/:id/stock', authenticateToken, requireRole('ADMIN'), updateProductStock);
 
 router.use(errorHandler);
 

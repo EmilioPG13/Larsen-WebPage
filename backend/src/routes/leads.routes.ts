@@ -7,7 +7,7 @@ import {
   createContactSubmission,
   getStats,
 } from '../controllers/leads.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken, requireRole } from '../middleware/auth.middleware';
 import { errorHandler } from '../middleware/error.middleware';
 
 const router = express.Router();
@@ -16,10 +16,10 @@ const router = express.Router();
 router.post('/', createLead); // Quote form submission
 
 // Admin routes
-router.get('/', authenticateToken, getLeads);
-router.get('/stats', authenticateToken, getStats);
-router.get('/:id', authenticateToken, getLeadById);
-router.put('/:id/status', authenticateToken, updateLeadStatus);
+router.get('/', authenticateToken, requireRole('ADMIN'), getLeads);
+router.get('/stats', authenticateToken, requireRole('ADMIN'), getStats);
+router.get('/:id', authenticateToken, requireRole('ADMIN'), getLeadById);
+router.put('/:id/status', authenticateToken, requireRole('ADMIN'), updateLeadStatus);
 
 router.use(errorHandler);
 
