@@ -7,6 +7,13 @@ import { AppError } from '../middleware/error.middleware';
 /** Same minimum as ADMIN_PASSWORD in prisma/seed.ts. */
 export const MIN_PASSWORD_LENGTH = 12;
 
+/**
+ * Valid bcrypt hash (cost 10) of a random string nobody knows. Compared against
+ * when the account is missing or inactive so those requests take as long as a
+ * wrong password, and response time does not reveal which emails exist.
+ */
+const DUMMY_PASSWORD_HASH = '$2a$10$VpeKULXITapd04hyplT1ze0quxBDQSC5K7GDcLvSVZovLDL06B62a';
+
 export const generateToken = (userId: string, email: string): string => {
   return jwt.sign({ userId, email }, env.JWT_SECRET, {
     // JWT_EXPIRES_IN is validated as a string ('7d'); the types want the
@@ -20,9 +27,10 @@ export const login = async (email: string, password: string) => {
     where: { email },
   });
 
-  // An inactive account gets the same answer as a wrong password so the
-  // response does not reveal that the account exists.
+  // A missing or inactive account gets the same answer, and takes the same
+  // time, as a wrong password so the response does not reveal it exists.
   if (!user || !user.active) {
+    await comparePassword(password, DUMMY_PASSWORD_HASH);
     throw new AppError('Invalid email or password', 401);
   }
 

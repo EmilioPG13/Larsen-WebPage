@@ -1,6 +1,12 @@
 import prismaClient from '../config/database';
 import { login, getCurrentUser, changePassword } from '../services/auth.service';
-import { hashPassword } from '../services/password';
+import { hashPassword, comparePassword } from '../services/password';
+
+// Keep the real implementation but make calls observable.
+jest.mock('../services/password', () => {
+  const actual = jest.requireActual('../services/password');
+  return { ...actual, comparePassword: jest.fn(actual.comparePassword) };
+});
 
 jest.mock('../config/env', () => ({
   __esModule: true,
@@ -67,6 +73,26 @@ describe('auth service', () => {
         status: 401,
         message: 'Invalid email or password',
       });
+    });
+
+    it('still runs a bcrypt comparison when the user does not exist', async () => {
+      mockFindUnique.mockResolvedValue(null);
+
+      await expect(login('nobody@example.com', PASSWORD)).rejects.toMatchObject({ status: 401 });
+
+      expect(comparePassword).toHaveBeenCalledTimes(1);
+      const [, hash] = (comparePassword as jest.Mock).mock.calls[0];
+      expect(hash).toMatch(/^\$2[aby]\$10\$/);
+    });
+
+    it('still runs a bcrypt comparison when the user is inactive', async () => {
+      mockFindUnique.mockResolvedValue(makeUser({ active: false }));
+
+      await expect(login('admin@example.com', PASSWORD)).rejects.toMatchObject({ status: 401 });
+
+      expect(comparePassword).toHaveBeenCalledTimes(1);
+      // Compared against the dummy hash, not the inactive user's real hash.
+      expect((comparePassword as jest.Mock).mock.calls[0][1]).not.toBe(passwordHash);
     });
 
     it('answers a wrong password and an unknown email identically', async () => {
