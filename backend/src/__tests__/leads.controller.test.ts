@@ -117,11 +117,13 @@ describe('Leads Controller', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(201);
     });
 
-    it('should return error when required fields are missing', async () => {
-      mockRequest.body = {
-        name: 'John Doe',
-        // Missing email, phone, company, budget, purchaseDate
-      };
+    it.each([
+      ['email and phone', { name: 'John Doe' }],
+      ['email', { name: 'John Doe', phone: '+1 555 123 4567' }],
+      ['phone', { name: 'John Doe', email: 'john@example.com' }],
+      ['name', { email: 'john@example.com', phone: '+1 555 123 4567' }],
+    ])('should return error when %s is missing', async (_label, body) => {
+      mockRequest.body = body;
 
       await createLead(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -132,6 +134,37 @@ describe('Leads Controller', () => {
           status: 400,
         })
       );
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('should create a lead without company, budget or purchaseDate using defaults', async () => {
+      const body = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1 (555) 123-4567',
+      };
+      const createdLead = { id: '1', ...body, status: 'new' };
+
+      mockRequest.body = body;
+      mockCreate.mockResolvedValue(createdLead);
+
+      await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockCreate).toHaveBeenCalledWith({
+        data: {
+          ...body,
+          company: '',
+          industry: null,
+          productionVolume: null,
+          budget: 'No especificado',
+          purchaseDate: 'No especificado',
+          message: null,
+          status: 'new',
+        },
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+      expect(mockResponse.json).toHaveBeenCalledWith(createdLead);
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
     it('should handle database errors', async () => {

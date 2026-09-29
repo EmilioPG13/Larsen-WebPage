@@ -16,7 +16,7 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
       message,
     } = req.body;
 
-    if (!name || !email || !phone || !company || !budget || !purchaseDate) {
+    if (!name || !email || !phone) {
       throw new AppError('Missing required fields', 400);
     }
 
@@ -25,11 +25,11 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
         name,
         email,
         phone,
-        company,
+        company: company || '',
         industry: industry || null,
         productionVolume: productionVolume || null,
-        budget,
-        purchaseDate,
+        budget: budget || 'No especificado',
+        purchaseDate: purchaseDate || 'No especificado',
         message: message || null,
         status: 'new',
       },
