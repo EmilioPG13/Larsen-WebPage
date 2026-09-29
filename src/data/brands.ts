@@ -31,16 +31,6 @@ export const brands: BrandEntry[] = [
     },
   },
   {
-    name: 'Stoll',
-    origin: { es: 'Alemania', en: 'Germany' },
-    image: '/images/brands/STOLL.png',
-    blurb: {
-      es: 'CMS de alta precisión para producción industrial exigente.',
-      en: 'High-precision CMS for demanding industrial production.',
-    },
-    logoScale: 0.62,
-  },
-  {
     name: 'Protti',
     origin: { es: 'Italia', en: 'Italy' },
     image: '/images/brands/PROTTI.png',

@@ -22,7 +22,7 @@ export const es = {
     caps: [
       { k: 'Reacondicionamiento', t: 'Cada máquina renovada pieza por pieza antes del despacho.' },
       { k: 'Garantía 365', t: 'Un año completo de cobertura y repuestos originales.' },
-      { k: 'Refacciones', t: 'Agujas, platinas y componentes para Steiger, Stoll, Shima Seiki y Protti.' },
+      { k: 'Refacciones', t: 'Agujas, platinas y componentes para Steiger, Shima Seiki y Protti.' },
       { k: 'Importación a México', t: 'Coordinamos el envío desde Italia y el trámite aduanal.' },
     ],
     marquee: 'Distribuidores oficiales',
@@ -149,7 +149,7 @@ export const es = {
   meta: {
     home: { title: 'Larsen Italiana — Máquinas industriales de coser y tejer', desc: 'Reacondicionamos máquinas industriales de coser y tejer de las mejores marcas europeas y japonesas con garantía total.' },
     machines: { title: 'Máquinas disponibles — Larsen Italiana', desc: 'Máquinas industriales reacondicionadas y listas para producción. Consulta especificaciones y disponibilidad.' },
-    brands: { title: 'Nuestras marcas — Larsen Italiana', desc: 'Trabajamos con los referentes mundiales: Steiger, Shima Seiki, Stoll, Protti y más.' },
+    brands: { title: 'Nuestras marcas — Larsen Italiana', desc: 'Trabajamos con los referentes mundiales: Steiger, Shima Seiki, Protti y más.' },
     quote: { title: 'Solicitar cotización — Larsen Italiana', desc: 'Cuéntanos qué necesitas y nuestro equipo te responderá en menos de 24 horas.' },
     about: { title: 'Nuestra historia — Larsen Italiana', desc: 'Desde 1964 reacondicionando máquinas industriales de coser y tejer de segunda mano.' },
     notFound: { title: 'Página no encontrada — Larsen Italiana', desc: 'La página que buscas no existe o fue movida.' },
@@ -177,7 +177,7 @@ export const en: Dictionary = {
     caps: [
       { k: 'Refurbishment', t: 'Every machine renewed part by part before dispatch.' },
       { k: '365 Warranty', t: 'A full year of coverage and original spare parts.' },
-      { k: 'Spare Parts', t: 'Needles, sinkers and components for Steiger, Stoll, Shima Seiki and Protti.' },
+      { k: 'Spare Parts', t: 'Needles, sinkers and components for Steiger, Shima Seiki and Protti.' },
       { k: 'Import to Mexico', t: 'We coordinate shipping from Italy and customs clearance.' },
     ],
     marquee: 'Official distributors',
@@ -304,7 +304,7 @@ export const en: Dictionary = {
   meta: {
     home: { title: 'Larsen Italiana — Industrial sewing & knitting machines', desc: 'We refurbish industrial sewing and knitting machines from the finest European and Japanese brands with a full warranty.' },
     machines: { title: 'Available machines — Larsen Italiana', desc: 'Refurbished, production-ready industrial machines. Check specifications and availability.' },
-    brands: { title: 'Our brands — Larsen Italiana', desc: 'We work with the world leaders: Steiger, Shima Seiki, Stoll, Protti and more.' },
+    brands: { title: 'Our brands — Larsen Italiana', desc: 'We work with the world leaders: Steiger, Shima Seiki, Protti and more.' },
     quote: { title: 'Request a quote — Larsen Italiana', desc: 'Tell us what you need and our team will get back to you within 24 hours.' },
     about: { title: 'Our story — Larsen Italiana', desc: 'Refurbishing second-hand industrial sewing and knitting machines since 1964.' },
     notFound: { title: 'Page not found — Larsen Italiana', desc: 'The page you are looking for does not exist or has moved.' },
