@@ -1,6 +1,7 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '../app';
+import prismaClient from '../config/database';
 
 jest.mock('../config/env', () => ({
   __esModule: true,
@@ -31,7 +32,7 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const prisma = require('../config/database').default;
+const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
 
 const tokenFor = (userId: string) =>
   jwt.sign({ userId, email: `${userId}@example.com` }, 'test-secret');

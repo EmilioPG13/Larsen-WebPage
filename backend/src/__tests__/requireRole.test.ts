@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import prismaClient from '../config/database';
 import { requireRole, AuthRequest } from '../middleware/auth.middleware';
 
 jest.mock('../config/env', () => ({
@@ -15,7 +16,7 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const prisma = require('../config/database').default;
+const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
 const mockFindUnique = prisma.user.findUnique;
 
 describe('requireRole middleware', () => {

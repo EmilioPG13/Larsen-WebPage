@@ -17,6 +17,8 @@ const publicUserSelect = {
   updatedAt: true,
 } as const;
 
+const errorCode = (error: unknown): string | undefined => (error as { code?: string }).code;
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const isRole = (value: unknown): value is Role =>
@@ -85,7 +87,7 @@ export const createUser = async (req: AuthRequest, res: Response, next: NextFunc
 
     res.status(201).json(user);
   } catch (error) {
-    if ((error as any).code === 'P2002') {
+    if (errorCode(error) === 'P2002') {
       return next(new AppError('A user with this email already exists', 409));
     }
     next(error);
@@ -146,7 +148,7 @@ export const updateUser = async (req: AuthRequest, res: Response, next: NextFunc
 
     res.json(user);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (errorCode(error) === 'P2025') {
       return next(new AppError('User not found', 404));
     }
     next(error);
@@ -166,7 +168,7 @@ export const resetUserPassword = async (req: AuthRequest, res: Response, next: N
 
     res.json({ message: 'Password reset successfully' });
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (errorCode(error) === 'P2025') {
       return next(new AppError('User not found', 404));
     }
     next(error);

@@ -6,6 +6,7 @@ import {
   resetUserPassword,
 } from '../controllers/users.controller';
 import { AuthRequest } from '../middleware/auth.middleware';
+import prismaClient from '../config/database';
 
 jest.mock('../config/env', () => ({
   __esModule: true,
@@ -25,7 +26,7 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const prisma = require('../config/database').default;
+const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
 
 const publicUser = {
   id: 'u2',

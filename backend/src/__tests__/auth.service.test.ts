@@ -1,3 +1,4 @@
+import prismaClient from '../config/database';
 import { login, getCurrentUser, changePassword } from '../services/auth.service';
 import { hashPassword } from '../services/password';
 
@@ -16,7 +17,7 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const prisma = require('../config/database').default;
+const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
 const mockFindUnique = prisma.user.findUnique;
 const mockUpdate = prisma.user.update;
 
