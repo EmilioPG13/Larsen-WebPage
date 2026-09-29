@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
 import { AuthRequest } from '../middleware/auth.middleware';
@@ -34,9 +34,10 @@ const assertValidPassword = (password: unknown): string => {
 /**
  * Throws 400 when the change would leave the system without an active ADMIN,
  * i.e. the target is an active ADMIN today and no other active ADMIN exists.
+ * Takes the transaction client so the count and the update see one snapshot.
  */
-const assertNotLastAdmin = async (targetId: string) => {
-  const otherActiveAdmins = await prisma.user.count({
+const assertNotLastAdmin = async (tx: Prisma.TransactionClient, targetId: string) => {
+  const otherActiveAdmins = await tx.user.count({
     where: { role: 'ADMIN', active: true, id: { not: targetId } },
   });
 
@@ -45,6 +46,30 @@ const assertNotLastAdmin = async (targetId: string) => {
       'Cannot deactivate or demote the last active administrator',
       400
     );
+  }
+};
+
+/** Total attempts (first try included) when a serializable transaction conflicts. */
+const MAX_SERIALIZATION_ATTEMPTS = 3;
+
+/**
+ * Runs `work` in a serializable transaction and retries on serialization
+ * failures (P2034), which is what two concurrent "last admin" changes produce.
+ */
+const runSerializable = async <T>(
+  work: (tx: Prisma.TransactionClient) => Promise<T>
+): Promise<T> => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await prisma.$transaction(work, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      });
+    } catch (error) {
+      if (errorCode(error) !== 'P2034') throw error;
+      if (attempt >= MAX_SERIALIZATION_ATTEMPTS) {
+        throw new AppError('Concurrent changes conflicted, please try again', 409);
+      }
+    }
   }
 };
 
@@ -123,27 +148,29 @@ export const updateUser = async (req: AuthRequest, res: Response, next: NextFunc
       throw new AppError('Nothing to update', 400);
     }
 
-    const target = await prisma.user.findUnique({
-      where: { id },
-      select: { id: true, role: true, active: true },
-    });
+    const user = await runSerializable(async (tx) => {
+      const target = await tx.user.findUnique({
+        where: { id },
+        select: { id: true, role: true, active: true },
+      });
 
-    if (!target) {
-      throw new AppError('User not found', 404);
-    }
+      if (!target) {
+        throw new AppError('User not found', 404);
+      }
 
-    // Applies to the caller too: an admin may deactivate or demote themselves
-    // as long as another active ADMIN remains.
-    const staysActiveAdmin =
-      (data.role ?? target.role) === 'ADMIN' && (data.active ?? target.active) === true;
-    if (target.role === 'ADMIN' && target.active && !staysActiveAdmin) {
-      await assertNotLastAdmin(target.id);
-    }
+      // Applies to the caller too: an admin may deactivate or demote themselves
+      // as long as another active ADMIN remains.
+      const staysActiveAdmin =
+        (data.role ?? target.role) === 'ADMIN' && (data.active ?? target.active) === true;
+      if (target.role === 'ADMIN' && target.active && !staysActiveAdmin) {
+        await assertNotLastAdmin(tx, target.id);
+      }
 
-    const user = await prisma.user.update({
-      where: { id },
-      data,
-      select: publicUserSelect,
+      return tx.user.update({
+        where: { id },
+        data,
+        select: publicUserSelect,
+      });
     });
 
     res.json(user);

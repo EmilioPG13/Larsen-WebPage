@@ -23,10 +23,23 @@ jest.mock('../config/database', () => ({
       update: jest.fn(),
       count: jest.fn(),
     },
+    $transaction: jest.fn(),
   },
 }));
 
-const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
+const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>> & {
+  $transaction: jest.Mock;
+};
+
+// A transaction client distinct from the global one, so tests can tell which
+// of the two a query went through.
+const tx = {
+  user: {
+    findUnique: jest.fn(),
+    update: jest.fn(),
+    count: jest.fn(),
+  },
+};
 
 const publicUser = {
   id: 'u2',
@@ -45,6 +58,7 @@ describe('Users Controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.$transaction.mockImplementation((work: (client: typeof tx) => unknown) => work(tx));
     req = { body: {}, params: {}, userId: 'u1' };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -121,18 +135,18 @@ describe('Users Controller', () => {
     it('updates name, role and active for a non-admin user', async () => {
       req.params = { id: 'u2' };
       req.body = { name: 'New', role: 'ADMIN', active: false };
-      prisma.user.findUnique.mockResolvedValue({ id: 'u2', role: 'INVENTARIO', active: true });
-      prisma.user.update.mockResolvedValue({ ...publicUser, name: 'New' });
+      tx.user.findUnique.mockResolvedValue({ id: 'u2', role: 'INVENTARIO', active: true });
+      tx.user.update.mockResolvedValue({ ...publicUser, name: 'New' });
 
       await call(updateUser);
 
-      expect(prisma.user.update).toHaveBeenCalledWith(
+      expect(tx.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'u2' },
           data: { name: 'New', role: 'ADMIN', active: false },
         })
       );
-      const args = prisma.user.update.mock.calls[0][0];
+      const args = tx.user.update.mock.calls[0][0];
       expect(args.select).not.toHaveProperty('passwordHash');
       expect(res.json).toHaveBeenCalled();
     });
@@ -140,7 +154,7 @@ describe('Users Controller', () => {
     it('responds 404 when the user does not exist', async () => {
       req.params = { id: 'missing' };
       req.body = { name: 'X' };
-      prisma.user.findUnique.mockResolvedValue(null);
+      tx.user.findUnique.mockResolvedValue(null);
 
       await call(updateUser);
 
@@ -154,18 +168,18 @@ describe('Users Controller', () => {
       await call(updateUser);
 
       expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
-      expect(prisma.user.update).not.toHaveBeenCalled();
+      expect(tx.user.update).not.toHaveBeenCalled();
     });
 
     describe('last active ADMIN protection', () => {
       beforeEach(() => {
         req.params = { id: 'u1' };
-        prisma.user.findUnique.mockResolvedValue({ id: 'u1', role: 'ADMIN', active: true });
+        tx.user.findUnique.mockResolvedValue({ id: 'u1', role: 'ADMIN', active: true });
       });
 
       it('refuses to demote the last active ADMIN', async () => {
         req.body = { role: 'INVENTARIO' };
-        prisma.user.count.mockResolvedValue(0);
+        tx.user.count.mockResolvedValue(0);
 
         await call(updateUser);
 
@@ -175,60 +189,118 @@ describe('Users Controller', () => {
             message: expect.stringContaining('last active administrator'),
           })
         );
-        expect(prisma.user.update).not.toHaveBeenCalled();
+        expect(tx.user.update).not.toHaveBeenCalled();
       });
 
       it('refuses to deactivate the last active ADMIN', async () => {
         req.body = { active: false };
-        prisma.user.count.mockResolvedValue(0);
+        tx.user.count.mockResolvedValue(0);
 
         await call(updateUser);
 
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
-        expect(prisma.user.update).not.toHaveBeenCalled();
+        expect(tx.user.update).not.toHaveBeenCalled();
       });
 
       it('counts only other active admins when deciding', async () => {
         req.body = { active: false };
-        prisma.user.count.mockResolvedValue(0);
+        tx.user.count.mockResolvedValue(0);
 
         await call(updateUser);
 
-        expect(prisma.user.count).toHaveBeenCalledWith({
+        expect(tx.user.count).toHaveBeenCalledWith({
           where: { role: 'ADMIN', active: true, id: { not: 'u1' } },
         });
       });
 
       it('lets an admin demote themselves when another active ADMIN remains', async () => {
         req.body = { role: 'INVENTARIO' };
-        prisma.user.count.mockResolvedValue(1);
-        prisma.user.update.mockResolvedValue({ ...publicUser, id: 'u1', role: 'INVENTARIO' });
+        tx.user.count.mockResolvedValue(1);
+        tx.user.update.mockResolvedValue({ ...publicUser, id: 'u1', role: 'INVENTARIO' });
 
         await call(updateUser);
 
-        expect(prisma.user.update).toHaveBeenCalled();
+        expect(tx.user.update).toHaveBeenCalled();
         expect(next).not.toHaveBeenCalled();
       });
 
       it('does not run the check for a change that keeps the ADMIN active (rename)', async () => {
         req.body = { name: 'Renamed' };
-        prisma.user.update.mockResolvedValue({ ...publicUser, id: 'u1', name: 'Renamed' });
+        tx.user.update.mockResolvedValue({ ...publicUser, id: 'u1', name: 'Renamed' });
 
         await call(updateUser);
 
-        expect(prisma.user.count).not.toHaveBeenCalled();
-        expect(prisma.user.update).toHaveBeenCalled();
+        expect(tx.user.count).not.toHaveBeenCalled();
+        expect(tx.user.update).toHaveBeenCalled();
       });
 
       it('does not block changing an ADMIN that is already inactive', async () => {
-        prisma.user.findUnique.mockResolvedValue({ id: 'u1', role: 'ADMIN', active: false });
+        tx.user.findUnique.mockResolvedValue({ id: 'u1', role: 'ADMIN', active: false });
         req.body = { role: 'INVENTARIO' };
-        prisma.user.update.mockResolvedValue({ ...publicUser, id: 'u1' });
+        tx.user.update.mockResolvedValue({ ...publicUser, id: 'u1' });
 
         await call(updateUser);
 
+        expect(tx.user.count).not.toHaveBeenCalled();
+        expect(tx.user.update).toHaveBeenCalled();
+      });
+    });
+    describe('transaction handling', () => {
+      const serializationError = { code: 'P2034' };
+
+      beforeEach(() => {
+        req.params = { id: 'u1' };
+        req.body = { active: false };
+        tx.user.findUnique.mockResolvedValue({ id: 'u1', role: 'ADMIN', active: true });
+        tx.user.count.mockResolvedValue(1);
+        tx.user.update.mockResolvedValue({ ...publicUser, id: 'u1', active: false });
+      });
+
+      it('runs the read, the admin count and the update in one serializable transaction', async () => {
+        await call(updateUser);
+
+        expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+        expect(prisma.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+          isolationLevel: 'Serializable',
+        });
+        expect(tx.user.findUnique).toHaveBeenCalled();
+        expect(tx.user.count).toHaveBeenCalled();
+        expect(tx.user.update).toHaveBeenCalled();
+        // Nothing went through the global client.
+        expect(prisma.user.findUnique).not.toHaveBeenCalled();
         expect(prisma.user.count).not.toHaveBeenCalled();
-        expect(prisma.user.update).toHaveBeenCalled();
+        expect(prisma.user.update).not.toHaveBeenCalled();
+      });
+
+      it('retries when the transaction fails with P2034 and then succeeds', async () => {
+        prisma.$transaction
+          .mockRejectedValueOnce(serializationError)
+          .mockImplementation((work: (client: typeof tx) => unknown) => work(tx));
+
+        await call(updateUser);
+
+        expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalled();
+      });
+
+      it('gives up with 409 after repeated P2034 failures', async () => {
+        prisma.$transaction.mockRejectedValue(serializationError);
+
+        await call(updateUser);
+
+        expect(prisma.$transaction).toHaveBeenCalledTimes(3);
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 409 }));
+        expect(res.json).not.toHaveBeenCalled();
+      });
+
+      it('does not retry other errors', async () => {
+        prisma.$transaction.mockRejectedValue(new Error('db down'));
+
+        await call(updateUser);
+
+        expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+        expect(next).toHaveBeenCalledWith(expect.any(Error));
       });
     });
   });
