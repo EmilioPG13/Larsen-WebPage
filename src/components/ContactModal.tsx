@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { submitContact } from '../services/api';
+import { sendQuoteLead } from '../services/leads';
 import { X } from './ui/icons';
 import type { Product, ContactFormData } from '../types';
 
@@ -79,14 +79,19 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
     setSubmitStatus('idle');
 
     try {
-      await submitContact({
+      // Goes through the same channel as the quote form so it lands in `leads`.
+      const lines = [
+        formData.productName && `Máquina de interés: ${formData.productName}`,
+        formData.message,
+      ].filter(Boolean);
+      await sendQuoteLead({
         name: formData.name,
+        company: formData.company,
         email: formData.email,
         phone: formData.phone,
-        company: formData.company,
-        message: formData.message,
-        productId: formData.productId,
-        productName: formData.productName,
+        machine: formData.productName || '',
+        message: lines.join('\n'),
+        source: 'catalog-interest',
       });
 
       setSubmitStatus('success');
@@ -188,12 +193,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
 
           <div>
             <label htmlFor="cm-phone" className={labelCls}>
-              Teléfono
+              Teléfono *
             </label>
             <input
               type="tel"
               id="cm-phone"
               name="phone"
+              required
               value={formData.phone}
               onChange={handleInputChange}
               className={fieldCls}
