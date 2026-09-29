@@ -4,7 +4,7 @@ import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { hashPassword } from '../services/password';
-import { MIN_PASSWORD_LENGTH } from '../services/auth.service';
+import { MIN_PASSWORD_LENGTH, normalizeEmail } from '../services/auth.service';
 
 // Explicit select so passwordHash can never leak into a response.
 const publicUserSelect = {
@@ -89,7 +89,7 @@ export const createUser = async (req: AuthRequest, res: Response, next: NextFunc
   try {
     const { email, name, role, password } = req.body;
 
-    if (typeof email !== 'string' || !EMAIL_PATTERN.test(email.trim())) {
+    if (typeof email !== 'string' || !EMAIL_PATTERN.test(normalizeEmail(email))) {
       throw new AppError('A valid email is required', 400);
     }
     if (!isRole(role)) {
@@ -102,7 +102,7 @@ export const createUser = async (req: AuthRequest, res: Response, next: NextFunc
 
     const user = await prisma.user.create({
       data: {
-        email: email.trim(),
+        email: normalizeEmail(email),
         name: typeof name === 'string' && name.trim() ? name.trim() : null,
         role,
         passwordHash: await hashPassword(validPassword),

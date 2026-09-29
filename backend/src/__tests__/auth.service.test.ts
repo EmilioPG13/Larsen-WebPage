@@ -75,6 +75,15 @@ describe('auth service', () => {
       });
     });
 
+    it('finds the user regardless of the capitalization or spacing of the email', async () => {
+      mockFindUnique.mockResolvedValue(makeUser());
+
+      const result = await login('  Admin@Example.COM ', PASSWORD);
+
+      expect(mockFindUnique).toHaveBeenCalledWith({ where: { email: 'admin@example.com' } });
+      expect(result.user.email).toBe('admin@example.com');
+    });
+
     it('still runs a bcrypt comparison when the user does not exist', async () => {
       mockFindUnique.mockResolvedValue(null);
 

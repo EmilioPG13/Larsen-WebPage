@@ -67,7 +67,8 @@ const brandsData = [
  * a new ADMIN_PASSWORD doubles as a password reset.
  */
 async function seedAdminUser() {
-  const email = process.env.ADMIN_EMAIL;
+  // Same normalization as the API (trim + lower-case) so login finds the account.
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
 
   if (!email || !password) {

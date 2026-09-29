@@ -4,6 +4,9 @@ import prisma from '../config/database';
 import { comparePassword, hashPassword } from './password';
 import { AppError } from '../middleware/error.middleware';
 
+/** Emails are stored and looked up lower-cased and trimmed. */
+export const normalizeEmail = (email: string): string => email.trim().toLowerCase();
+
 /** Same minimum as ADMIN_PASSWORD in prisma/seed.ts. */
 export const MIN_PASSWORD_LENGTH = 12;
 
@@ -24,7 +27,7 @@ export const generateToken = (userId: string, email: string): string => {
 
 export const login = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: normalizeEmail(email) },
   });
 
   // A missing or inactive account gets the same answer, and takes the same

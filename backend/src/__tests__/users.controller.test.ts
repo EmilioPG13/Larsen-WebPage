@@ -107,6 +107,15 @@ describe('Users Controller', () => {
       expect(body).not.toHaveProperty('passwordHash');
     });
 
+    it('lower-cases and trims the email before storing it', async () => {
+      req.body = { ...validBody, email: '  Ana@X.com ' };
+      prisma.user.create.mockResolvedValue(publicUser);
+
+      await call(createUser);
+
+      expect(prisma.user.create.mock.calls[0][0].data.email).toBe('ana@x.com');
+    });
+
     it.each([
       ['an invalid role', { role: 'SUPERUSER' }],
       ['a missing role', { role: undefined }],
