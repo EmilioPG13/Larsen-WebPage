@@ -9,6 +9,7 @@ vi.mock('../services/adminApi', () => ({
   adminApi: {
     getLeads: vi.fn(),
     updateLeadStatus: vi.fn(),
+    deleteLead: vi.fn(),
   },
 }));
 
@@ -45,6 +46,7 @@ describe('Leads Page', () => {
     vi.clearAllMocks();
     mockAdminApi.getLeads.mockResolvedValue({ leads: mockLeads });
     mockAdminApi.updateLeadStatus.mockResolvedValue({ ...mockLeads[0], status: 'contacted' });
+    mockAdminApi.deleteLead.mockResolvedValue({ message: 'Lead deleted successfully' });
   });
 
   it('should display loading state initially', () => {
@@ -120,6 +122,43 @@ describe('Leads Page', () => {
     await waitFor(() => {
       expect(mockAdminApi.updateLeadStatus).toHaveBeenCalledWith('1', 'contacted');
     });
+  });
+
+  it('should delete a lead after confirmation', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<Leads />);
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getAllByText('Ver detalles')[0]);
+    await user.click(screen.getByText('Eliminar lead'));
+
+    await waitFor(() => {
+      expect(mockAdminApi.deleteLead).toHaveBeenCalledWith('1');
+    });
+    expect(confirmSpy).toHaveBeenCalled();
+    // The list is refreshed after the delete
+    expect(mockAdminApi.getLeads).toHaveBeenCalledTimes(2);
+    confirmSpy.mockRestore();
+  });
+
+  it('should not delete a lead when the confirmation is declined', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    render(<Leads />);
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getAllByText('Ver detalles')[0]);
+    await user.click(screen.getByText('Eliminar lead'));
+
+    expect(mockAdminApi.deleteLead).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
   });
 
   it('should display error message on fetch failure', async () => {
