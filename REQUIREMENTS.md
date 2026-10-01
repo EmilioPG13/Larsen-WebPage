@@ -64,7 +64,7 @@ Sitio corporativo y catálogo que comunique la oferta de máquinas de coser indu
 ## 5. Técnico
 - [ ] Optimización de imágenes (formato webp, lazy loading, peso reducido)
 - [ ] Meta tags ya configurados — confirmar que apunten al dominio final
-- [ ] og-image.jpg real (actualmente referenciada en /images/og-image.jpg)
+- [ ] Real og-image (currently referenced at /images/og-image-v2.jpg)
 - [ ] Conectar dominio propio (larsenitaliana.com) en Vercel
 - [ ] Revisión de performance (Lighthouse)
 - [ ] Formulario: validación de campos + protección anti-spam básica

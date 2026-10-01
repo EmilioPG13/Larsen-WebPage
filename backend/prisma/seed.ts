@@ -39,16 +39,6 @@ const brandsData = [
     ],
   },
   {
-    name: 'STOLL',
-    image: '/images/brands/STOLL.png',
-    description: 'Máquinas de punto alemanas de última generación',
-    specialties: [
-      'Máquinas de punto',
-      'Tecnología alemana',
-      'Sistemas CAD/CAM',
-    ],
-  },
-  {
     name: 'Scheller',
     image: '/images/brands/Scheller.png',
     description: 'Maquinaria textil europea para tejido de punto y confección',

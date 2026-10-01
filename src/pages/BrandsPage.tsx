@@ -26,7 +26,7 @@ const BrandsPage = () => {
 
       {/* separate plates — cards lift on hover, so 24px gaps rather than a 1px ruled grid */}
       <div className={`${PLATE} py-14 md:py-[88px]`}>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {brands.map((b) => (
             <Link
               key={b.name}
