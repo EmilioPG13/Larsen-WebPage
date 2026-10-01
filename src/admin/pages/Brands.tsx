@@ -34,7 +34,7 @@ const Brands: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="text-gray-600">Cargando marcas...</div>
       </div>
     );
@@ -42,19 +42,19 @@ const Brands: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="text-red-600">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Marcas</h1>
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Marcas</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {brands.map((brand) => (
           <div key={brand.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6">

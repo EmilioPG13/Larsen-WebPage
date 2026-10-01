@@ -37,7 +37,7 @@ const Machines: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="text-gray-600">Cargando máquinas...</div>
       </div>
     );
@@ -45,21 +45,21 @@ const Machines: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="text-red-600">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Máquinas</h1>
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Máquinas</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Machines List */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -117,7 +117,7 @@ const Machines: React.FC = () => {
         </div>
 
         {/* Inventory Manager Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           {selectedMachine ? (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4">
