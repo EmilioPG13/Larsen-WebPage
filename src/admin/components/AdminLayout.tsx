@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { adminApi } from '../services/adminApi';
 import { getStoredUser, type AdminRole } from '../services/session';
@@ -35,7 +35,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [newLeads, setNewLeads] = useState(0);
   const user = getStoredUser();
+  const isAdmin = user?.role === 'ADMIN';
+
+  // Only admins see Leads, so only they need the new-leads counter. A failed
+  // request just hides the badge; it is not worth interrupting the panel.
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    adminApi
+      .getStats()
+      .then((stats) => {
+        if (!cancelled) setNewLeads(stats?.leads?.new ?? 0);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin]);
 
   const handleLogout = () => {
     adminApi.logout();
@@ -101,6 +119,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 >
                   <span>{item.icon}</span>
                   <span>{item.label}</span>
+                  {item.path === '/admin/leads' && newLeads > 0 && (
+                    <span
+                      aria-label={`${newLeads} leads nuevos`}
+                      className="ml-auto rounded-full bg-larsen-red px-2 py-0.5 text-xs font-semibold text-white"
+                    >
+                      {newLeads}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}

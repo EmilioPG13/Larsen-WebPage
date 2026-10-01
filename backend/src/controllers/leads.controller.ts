@@ -183,6 +183,7 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       productsOutOfStock,
       machinesInStock,
       machinesOutOfStock,
+      newLeads,
     ] = await Promise.all([
       prisma.lead.count(),
       prisma.lead.count({
@@ -198,12 +199,14 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       prisma.product.count({ where: { inStock: false } }),
       prisma.machine.count({ where: { inStock: true } }),
       prisma.machine.count({ where: { inStock: false } }),
+      prisma.lead.count({ where: { status: 'new' } }),
     ]);
 
     res.json({
       leads: {
         total: totalLeads,
         newToday: newLeadsToday,
+        new: newLeads,
       },
       products: {
         total: totalProducts,

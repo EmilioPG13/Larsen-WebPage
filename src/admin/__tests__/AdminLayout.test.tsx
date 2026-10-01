@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
@@ -9,6 +9,7 @@ vi.mock('../services/adminApi', () => ({
   adminApi: {
     logout: vi.fn(),
     changePassword: vi.fn(),
+    getStats: vi.fn(),
   },
 }));
 
@@ -35,6 +36,7 @@ describe('AdminLayout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    mockAdminApi.getStats.mockResolvedValue({ leads: { total: 5, newToday: 1, new: 3 } });
   });
 
   it('shows the full menu plus Usuarios to an ADMIN', () => {
@@ -142,5 +144,38 @@ describe('AdminLayout', () => {
     await user.click(screen.getByRole('button', { name: 'Abrir menú' }));
     await user.click(screen.getByRole('link', { name: /Productos/ }));
     expect(sidebar.className).toContain('-translate-x-full');
+  });
+
+  it('shows the new-leads count next to Leads for an ADMIN', async () => {
+    storeUser('ADMIN');
+    renderLayout();
+
+    expect(await screen.findByLabelText('3 leads nuevos')).toHaveTextContent('3');
+  });
+
+  it('hides the badge when there are no new leads', async () => {
+    mockAdminApi.getStats.mockResolvedValue({ leads: { total: 5, newToday: 0, new: 0 } });
+    storeUser('ADMIN');
+    renderLayout();
+
+    await waitFor(() => expect(mockAdminApi.getStats).toHaveBeenCalled());
+    expect(screen.queryByLabelText(/leads nuevos/)).not.toBeInTheDocument();
+  });
+
+  it('keeps the menu working when the stats request fails', async () => {
+    mockAdminApi.getStats.mockRejectedValue(new Error('offline'));
+    storeUser('ADMIN');
+    renderLayout();
+
+    await waitFor(() => expect(mockAdminApi.getStats).toHaveBeenCalled());
+    expect(screen.getByRole('link', { name: /Leads/ })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/leads nuevos/)).not.toBeInTheDocument();
+  });
+
+  it('does not request stats for an INVENTARIO user', () => {
+    storeUser('INVENTARIO');
+    renderLayout();
+
+    expect(mockAdminApi.getStats).not.toHaveBeenCalled();
   });
 });
