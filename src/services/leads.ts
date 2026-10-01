@@ -54,18 +54,21 @@ async function sendViaBackend(p: QuoteLeadPayload): Promise<void> {
 }
 
 /**
- * Delivers a quote lead through every configured channel (backend store +
- * EmailJS notification). Resolves if at least one channel succeeds, so the
- * form keeps working when the backend is offline (e.g. static deploy) as long
- * as EmailJS is configured, and vice-versa. Rejects only if all channels fail.
+ * Delivers a quote lead. The backend is the primary channel: it stores the lead
+ * and emails the sales team. EmailJS is only a fallback for when the backend
+ * call fails, so a successful submission never sends two notifications.
+ * Rejects with the backend error when both channels fail (or when the backend
+ * fails and EmailJS is not configured), so the failure is not hidden.
  */
 export async function sendQuoteLead(p: QuoteLeadPayload): Promise<void> {
-  const results = await Promise.allSettled([sendViaBackend(p), sendViaEmailjs(p)]);
-
-  if (results.some((r) => r.status === 'fulfilled')) return;
-
-  const firstError = results.find((r) => r.status === 'rejected') as
-    | PromiseRejectedResult
-    | undefined;
-  throw firstError?.reason ?? new Error('No lead delivery channel is available');
+  try {
+    await sendViaBackend(p);
+    return;
+  } catch (backendError) {
+    try {
+      await sendViaEmailjs(p);
+    } catch {
+      throw backendError;
+    }
+  }
 }
