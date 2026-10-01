@@ -92,7 +92,7 @@ const Users: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="text-gray-600">Cargando usuarios...</div>
       </div>
     );
@@ -100,15 +100,15 @@ const Users: React.FC = () => {
 
   if (loadError) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="text-red-600">{loadError}</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Gestión de Usuarios</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Gestión de Usuarios</h1>
 
       {actionError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
@@ -225,7 +225,7 @@ const Users: React.FC = () => {
         </form>
       )}
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

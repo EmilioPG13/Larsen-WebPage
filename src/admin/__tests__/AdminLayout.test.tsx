@@ -116,4 +116,31 @@ describe('AdminLayout', () => {
     expect(mockAdminApi.changePassword).not.toHaveBeenCalled();
     expect(screen.getByRole('alert')).toHaveTextContent('al menos 12 caracteres');
   });
+
+  it('opens and closes the mobile menu', async () => {
+    storeUser('ADMIN');
+    const user = userEvent.setup();
+    const { container } = renderLayout();
+    const sidebar = container.querySelector('div.fixed.w-64') as HTMLElement;
+
+    // Hidden off-canvas until the hamburger is pressed
+    expect(sidebar.className).toContain('-translate-x-full');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    expect(sidebar.className).not.toContain('-translate-x-full');
+
+    await user.click(screen.getByRole('button', { name: 'Cerrar menú' }));
+    expect(sidebar.className).toContain('-translate-x-full');
+  });
+
+  it('closes the mobile menu after choosing a section', async () => {
+    storeUser('ADMIN');
+    const user = userEvent.setup();
+    const { container } = renderLayout();
+    const sidebar = container.querySelector('div.fixed.w-64') as HTMLElement;
+
+    await user.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    await user.click(screen.getByRole('link', { name: /Productos/ }));
+    expect(sidebar.className).toContain('-translate-x-full');
+  });
 });
