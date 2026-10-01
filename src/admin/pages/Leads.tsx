@@ -53,6 +53,19 @@ const Leads: React.FC = () => {
     }
   };
 
+  const handleDelete = async (lead: Lead) => {
+    if (!window.confirm(`¿Eliminar el lead de ${lead.name}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    try {
+      await adminApi.deleteLead(lead.id);
+      setSelectedLead(null);
+      await fetchLeads();
+    } catch (err: any) {
+      alert('Error al eliminar lead: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   const statusOptions = ['new', 'contacted', 'converted', 'archived'];
   const statusLabels: Record<string, string> = {
     new: 'Nuevo',
@@ -228,6 +241,12 @@ const Leads: React.FC = () => {
                 </select>
               </div>
 
+              <button
+                onClick={() => handleDelete(selectedLead)}
+                className="w-full mb-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100"
+              >
+                Eliminar lead
+              </button>
               <button
                 onClick={() => setSelectedLead(null)}
                 className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"

@@ -28,6 +28,11 @@ export const adminApi = {
     return response.data;
   },
 
+  deleteLead: async (id: string) => {
+    const response = await api.delete(`/leads/${id}`);
+    return response.data;
+  },
+
   getProducts: async () => {
     const response = await api.get('/products');
     return response.data;

@@ -130,6 +130,23 @@ export const updateLeadStatus = async (req: Request, res: Response, next: NextFu
   }
 };
 
+export const deleteLead = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.lead.delete({
+      where: { id },
+    });
+
+    res.json({ message: 'Lead deleted successfully' });
+  } catch (error) {
+    if ((error as any).code === 'P2025') {
+      return next(new AppError('Lead not found', 404));
+    }
+    next(error);
+  }
+};
+
 export const createContactSubmission = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, phone, company, message, productId } = req.body;

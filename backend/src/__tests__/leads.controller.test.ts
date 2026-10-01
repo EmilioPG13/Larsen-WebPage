@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createLead, getLeads, getLeadById, updateLeadStatus } from '../controllers/leads.controller';
+import { createLead, getLeads, getLeadById, updateLeadStatus, deleteLead } from '../controllers/leads.controller';
 import { AppError } from '../middleware/error.middleware';
 
 // Mock the notification service (no SMTP in tests)
@@ -16,6 +16,7 @@ jest.mock('../config/database', () => ({
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
       count: jest.fn(),
     },
   },
@@ -27,6 +28,7 @@ const mockCreate = prisma.lead.create;
 const mockFindMany = prisma.lead.findMany;
 const mockFindUnique = prisma.lead.findUnique;
 const mockUpdate = prisma.lead.update;
+const mockDelete = prisma.lead.delete;
 const mockCount = prisma.lead.count;
 
 describe('Leads Controller', () => {
@@ -419,5 +421,40 @@ describe('Leads Controller', () => {
       );
     });
   });
-});
 
+  describe('deleteLead', () => {
+    it('should delete the lead', async () => {
+      mockRequest.params = { id: '1' };
+      mockDelete.mockResolvedValue({ id: '1' });
+
+      await deleteLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockDelete).toHaveBeenCalledWith({ where: { id: '1' } });
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Lead deleted successfully' });
+    });
+
+    it('should return 404 when lead not found', async () => {
+      mockRequest.params = { id: '999' };
+      mockDelete.mockRejectedValue({ code: 'P2025' });
+
+      await deleteLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Lead not found',
+          status: 404,
+        })
+      );
+    });
+
+    it('should forward unexpected errors', async () => {
+      mockRequest.params = { id: '1' };
+      const failure = new Error('db down');
+      mockDelete.mockRejectedValue(failure);
+
+      await deleteLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(failure);
+    });
+  });
+});

@@ -4,6 +4,7 @@ import {
   getLeads,
   getLeadById,
   updateLeadStatus,
+  deleteLead,
   createContactSubmission,
   getStats,
 } from '../controllers/leads.controller';
@@ -20,6 +21,7 @@ router.get('/', authenticateToken, getLeads);
 router.get('/stats', authenticateToken, getStats);
 router.get('/:id', authenticateToken, getLeadById);
 router.put('/:id/status', authenticateToken, updateLeadStatus);
+router.delete('/:id', authenticateToken, deleteLead);
 
 router.use(errorHandler);
 
