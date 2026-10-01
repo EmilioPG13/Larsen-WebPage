@@ -32,6 +32,22 @@ const Brands: React.FC = () => {
     }
   };
 
+  const handleDelete = async (brand: Brand) => {
+    if (
+      !window.confirm(
+        `¿Eliminar la marca ${brand.name}? Sus productos y máquinas no se borran, pero quedarán sin marca. Esta acción no se puede deshacer.`
+      )
+    ) {
+      return;
+    }
+    try {
+      await adminApi.deleteBrand(brand.id);
+      await fetchBrands();
+    } catch (err: any) {
+      alert('Error al eliminar marca: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-4 sm:p-8">
@@ -77,6 +93,12 @@ const Brands: React.FC = () => {
                   </span>
                 ))}
               </div>
+              <button
+                onClick={() => handleDelete(brand)}
+                className="mt-4 px-3 py-1.5 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
+              >
+                Eliminar marca
+              </button>
             </div>
           </div>
         ))}
