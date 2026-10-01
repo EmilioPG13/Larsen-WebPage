@@ -184,6 +184,7 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       machinesInStock,
       machinesOutOfStock,
       newLeads,
+      unitsByStatus,
     ] = await Promise.all([
       prisma.lead.count(),
       prisma.lead.count({
@@ -200,7 +201,11 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       prisma.machine.count({ where: { inStock: true } }),
       prisma.machine.count({ where: { inStock: false } }),
       prisma.lead.count({ where: { status: 'new' } }),
+      prisma.inventoryUnit.groupBy({ by: ['status'], _count: { _all: true } }),
     ]);
+
+    const unitCount = (status: string) =>
+      unitsByStatus.find((row) => row.status === status)?._count._all ?? 0;
 
     res.json({
       leads: {
@@ -217,6 +222,11 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
         total: totalMachines,
         inStock: machinesInStock,
         outOfStock: machinesOutOfStock,
+      },
+      inventory: {
+        available: unitCount('DISPONIBLE'),
+        reserved: unitCount('APARTADA'),
+        sold: unitCount('VENDIDA'),
       },
     });
   } catch (error) {
