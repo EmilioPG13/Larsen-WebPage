@@ -2,6 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { createLead, getLeads, getLeadById, updateLeadStatus } from '../controllers/leads.controller';
 import { AppError } from '../middleware/error.middleware';
 
+// Mock the notification service (no SMTP in tests)
+jest.mock('../services/notify', () => ({
+  notifyNewLead: jest.fn(),
+}));
+
 // Mock Prisma
 jest.mock('../config/database', () => ({
   __esModule: true,
@@ -16,6 +21,7 @@ jest.mock('../config/database', () => ({
   },
 }));
 
+const { notifyNewLead: mockNotifyNewLead } = require('../services/notify');
 const prisma = require('../config/database').default;
 const mockCreate = prisma.lead.create;
 const mockFindMany = prisma.lead.findMany;
@@ -40,6 +46,8 @@ describe('Leads Controller', () => {
     };
     mockNext = jest.fn();
     jest.clearAllMocks();
+    mockNotifyNewLead.mockReset();
+    mockNotifyNewLead.mockResolvedValue(undefined);
   });
 
   describe('createLead', () => {
@@ -117,11 +125,13 @@ describe('Leads Controller', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(201);
     });
 
-    it('should return error when required fields are missing', async () => {
-      mockRequest.body = {
-        name: 'John Doe',
-        // Missing email, phone, company, budget, purchaseDate
-      };
+    it.each([
+      ['email and phone', { name: 'John Doe' }],
+      ['email', { name: 'John Doe', phone: '+1 555 123 4567' }],
+      ['phone', { name: 'John Doe', email: 'john@example.com' }],
+      ['name', { email: 'john@example.com', phone: '+1 555 123 4567' }],
+    ])('should return error when %s is missing', async (_label, body) => {
+      mockRequest.body = body;
 
       await createLead(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -132,6 +142,107 @@ describe('Leads Controller', () => {
           status: 400,
         })
       );
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('should create a lead without company, budget or purchaseDate using defaults', async () => {
+      const body = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1 (555) 123-4567',
+      };
+      const createdLead = { id: '1', ...body, status: 'new' };
+
+      mockRequest.body = body;
+      mockCreate.mockResolvedValue(createdLead);
+
+      await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+      expect(mockCreate).toHaveBeenCalledWith({
+        data: {
+          ...body,
+          company: '',
+          industry: null,
+          productionVolume: null,
+          budget: 'No especificado',
+          purchaseDate: 'No especificado',
+          message: null,
+          status: 'new',
+        },
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+      expect(mockResponse.json).toHaveBeenCalledWith(createdLead);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    describe('lead notification', () => {
+      const body = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1 (555) 123-4567',
+      };
+      const createdLead = { id: '1', ...body, status: 'new' };
+
+      beforeEach(() => {
+        mockRequest.body = body;
+        mockCreate.mockResolvedValue(createdLead);
+      });
+
+      it('notifies once with the created lead, after create and before the 201', async () => {
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockNotifyNewLead).toHaveBeenCalledTimes(1);
+        expect(mockNotifyNewLead).toHaveBeenCalledWith(createdLead);
+
+        const createOrder = mockCreate.mock.invocationCallOrder[0];
+        const notifyOrder = mockNotifyNewLead.mock.invocationCallOrder[0];
+        const statusOrder = (mockResponse.status as jest.Mock).mock.invocationCallOrder[0];
+        expect(createOrder).toBeLessThan(notifyOrder);
+        expect(notifyOrder).toBeLessThan(statusOrder);
+      });
+
+      it('waits for the notification before responding', async () => {
+        let resolveNotify!: () => void;
+        mockNotifyNewLead.mockReturnValue(new Promise<void>((resolve) => (resolveNotify = resolve)));
+
+        const pending = createLead(mockRequest as Request, mockResponse as Response, mockNext);
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(mockResponse.status).not.toHaveBeenCalled();
+
+        resolveNotify();
+        await pending;
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+      });
+
+      it('still responds 201 and does not call next when the notification fails', async () => {
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockNotifyNewLead.mockRejectedValue(new Error('SMTP down'));
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+        expect(mockResponse.json).toHaveBeenCalledWith(createdLead);
+        expect(mockNext).not.toHaveBeenCalled();
+        expect(errorSpy).toHaveBeenCalled();
+        errorSpy.mockRestore();
+      });
+
+      it('does not notify when validation fails', async () => {
+        mockRequest.body = { name: 'John Doe' };
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockNotifyNewLead).not.toHaveBeenCalled();
+      });
+
+      it('does not notify when the database write fails', async () => {
+        mockCreate.mockRejectedValue(new Error('Database error'));
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockNotifyNewLead).not.toHaveBeenCalled();
+        expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      });
     });
 
     it('should handle database errors', async () => {

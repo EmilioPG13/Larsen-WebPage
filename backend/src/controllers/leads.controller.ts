@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
+import { notifyNewLead } from '../services/notify';
 
 export const createLead = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -16,7 +17,7 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
       message,
     } = req.body;
 
-    if (!name || !email || !phone || !company || !budget || !purchaseDate) {
+    if (!name || !email || !phone) {
       throw new AppError('Missing required fields', 400);
     }
 
@@ -25,15 +26,24 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
         name,
         email,
         phone,
-        company,
+        company: company || '',
         industry: industry || null,
         productionVolume: productionVolume || null,
-        budget,
-        purchaseDate,
+        budget: budget || 'No especificado',
+        purchaseDate: purchaseDate || 'No especificado',
         message: message || null,
         status: 'new',
       },
     });
+
+    // Awaited on purpose: a serverless function can be frozen right after the
+    // response is sent, which would drop an unawaited email. A failure here is
+    // logged and never turns the saved lead into an error response.
+    try {
+      await notifyNewLead(lead);
+    } catch (notifyError) {
+      console.error('Failed to send lead notification:', notifyError);
+    }
 
     res.status(201).json(lead);
   } catch (error) {
