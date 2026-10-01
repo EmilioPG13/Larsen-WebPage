@@ -5,6 +5,7 @@ interface Stats {
   leads: {
     total: number;
     newToday: number;
+    new: number;
   };
   products: {
     total: number;
