@@ -57,7 +57,8 @@ const brandsData = [
  * a new ADMIN_PASSWORD doubles as a password reset.
  */
 async function seedAdminUser() {
-  const email = process.env.ADMIN_EMAIL;
+  // Same normalization as the API (trim + lower-case) so login finds the account.
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
 
   if (!email || !password) {
@@ -73,8 +74,8 @@ async function seedAdminUser() {
 
   await prisma.user.upsert({
     where: { email },
-    update: { passwordHash },
-    create: { email, passwordHash, role: 'admin' },
+    update: { passwordHash, role: 'ADMIN', active: true },
+    create: { email, passwordHash, role: 'ADMIN', active: true },
   });
 
   console.log(`  ✓ Admin user ready: ${email}`);

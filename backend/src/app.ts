@@ -9,6 +9,7 @@ import machinesRoutes from './routes/machines.routes';
 import brandsRoutes from './routes/brands.routes';
 import leadsRoutes from './routes/leads.routes';
 import contactRoutes from './routes/contact.routes';
+import usersRoutes from './routes/users.routes';
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use('/api/machines', machinesRoutes);
 app.use('/api/brands', brandsRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/users', usersRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
