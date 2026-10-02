@@ -15,7 +15,7 @@ jest.mock('../config/env', () => ({
 
 jest.mock('../config/database', () => {
   const model = () =>
-    Object.fromEntries(['findMany', 'findUnique', 'findFirst', 'create', 'update', 'delete'].map((m) => [m, jest.fn()]));
+    Object.fromEntries(['findMany', 'findUnique', 'findFirst', 'create', 'update', 'delete', 'groupBy'].map((m) => [m, jest.fn()]));
   // `tx` is a separate set of mocks: whatever the controller writes through the
   // transaction callback lands here, and anything written outside it lands on `db`.
   const tx = { brand: model(), machine: model(), inventoryUnit: model(), inventoryMovement: model() };
@@ -457,5 +457,99 @@ describe('GET /api/inventory/:id/movements', () => {
     db.inventoryUnit.findUnique.mockResolvedValue(null);
 
     await request(app).get('/api/inventory/ghost/movements').set(auth).expect(404);
+  });
+});
+
+describe('GET /api/inventory: reservedSince', () => {
+  beforeEach(() => asUser('INVENTARIO'));
+
+  it('says since when each reserved unit is reserved, and nothing for the others', async () => {
+    db.inventoryUnit.findMany.mockResolvedValue([
+      unit({ id: 'a', status: 'APARTADA', updatedAt: new Date('2026-10-12T12:00:00Z') }),
+      unit({ id: 'b', status: 'DISPONIBLE' }),
+      unit({ id: 'c', status: 'APARTADA', updatedAt: new Date('2026-10-14T12:00:00Z') }),
+    ]);
+    db.inventoryMovement.groupBy.mockResolvedValue([{ unitId: 'a', _max: { createdAt: new Date('2026-10-03T16:00:00Z') } }]);
+
+    const res = await request(app).get('/api/inventory').set(auth).expect(200);
+
+    expect(res.body.map((row: { id: string; reservedSince: string | null }) => [row.id, row.reservedSince])).toEqual([
+      ['a', '2026-10-03T16:00:00.000Z'],
+      ['b', null],
+      // No reservation in the history: falls back to the last update.
+      ['c', '2026-10-14T12:00:00.000Z'],
+    ]);
+    expect(db.inventoryMovement.groupBy.mock.calls[0][0]).toMatchObject({
+      by: ['unitId'],
+      where: { unitId: { in: ['a', 'c'] }, toStatus: 'APARTADA' },
+    });
+  });
+
+  it('skips the extra query when nothing is reserved', async () => {
+    db.inventoryUnit.findMany.mockResolvedValue([unit({ status: 'DISPONIBLE' })]);
+
+    await request(app).get('/api/inventory').set(auth).expect(200);
+
+    expect(db.inventoryMovement.groupBy).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /api/inventory/report', () => {
+  it('requires a token', async () => {
+    await request(app).get('/api/inventory/report').expect(401);
+  });
+
+  it('is closed to INVENTARIO users and reads no data for them', async () => {
+    asUser('INVENTARIO');
+
+    await request(app).get('/api/inventory/report').set(auth).expect(403);
+
+    expect(db.inventoryUnit.findMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects a month that is not YYYY-MM with 400', async () => {
+    asUser('ADMIN');
+
+    for (const month of ['2026-13', '2026-1', 'octubre', '2026-10-01']) {
+      await request(app).get('/api/inventory/report').query({ month }).set(auth).expect(400);
+    }
+    expect(db.inventoryUnit.findMany).not.toHaveBeenCalled();
+  });
+
+  it('builds the report of the month from the units and their movements', async () => {
+    asUser('ADMIN');
+    db.inventoryUnit.findMany.mockResolvedValue([
+      {
+        ...unit({ id: 'sold', status: 'VENDIDA' }),
+        receivedAt: new Date('2026-09-10T00:00:00Z'),
+        soldAt: new Date('2026-10-05T00:00:00Z'),
+        createdAt: new Date('2026-09-10T12:00:00Z'),
+        updatedAt: new Date('2026-10-05T20:00:00Z'),
+        movements: [
+          { action: 'CREATE', fromStatus: null, toStatus: 'DISPONIBLE', createdAt: new Date('2026-09-10T12:00:00Z') },
+          { action: 'STATUS', fromStatus: 'DISPONIBLE', toStatus: 'VENDIDA', createdAt: new Date('2026-10-05T20:00:00Z') },
+        ],
+      },
+    ]);
+
+    const res = await request(app).get('/api/inventory/report').query({ month: '2026-10' }).set(auth).expect(200);
+
+    expect(res.body.month).toBe('2026-10');
+    expect(res.body.summary).toMatchObject({ sales: 1, arrivals: 0 });
+    expect(res.body.sales[0]).toMatchObject({ id: 'sold', soldAt: '2026-10-05', daysInStock: 25 });
+    expect(res.body.responseTime).toMatchObject({ measured: 1, sameDay: 1 });
+    // It asks only for what the report needs: no notes, nothing that could leak.
+    const select = db.inventoryUnit.findMany.mock.calls[0][0].select;
+    expect(select).not.toHaveProperty('notes');
+    expect(Object.keys(select.movements.select).sort()).toEqual(['action', 'createdAt', 'fromStatus', 'toStatus']);
+  });
+
+  it('defaults to the current month', async () => {
+    asUser('ADMIN');
+    db.inventoryUnit.findMany.mockResolvedValue([]);
+
+    const res = await request(app).get('/api/inventory/report').set(auth).expect(200);
+
+    expect(res.body.month).toMatch(/^\d{4}-(0[1-9]|1[0-2])$/);
   });
 });
