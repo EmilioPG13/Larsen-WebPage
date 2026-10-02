@@ -104,6 +104,11 @@ export const adminApi = {
     return response.data;
   },
 
+  deleteUser: async (id: string) => {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+
   getInventory: async (params?: { status?: UnitStatus; brand?: string; q?: string }): Promise<InventoryUnit[]> => {
     const response = await api.get('/inventory', { params });
     return response.data;

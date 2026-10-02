@@ -3,6 +3,7 @@ import { adminApi, type ManagedUser } from '../services/adminApi';
 import { apiErrorMessage } from '../services/apiError';
 import { getStoredUser, type AdminRole } from '../services/session';
 import Select from '../components/ui/Select';
+import DeleteUserModal from '../components/DeleteUserModal';
 
 const roleLabels: Record<AdminRole, string> = {
   ADMIN: 'Administrador',
@@ -26,6 +27,9 @@ const Users: React.FC = () => {
   const [creating, setCreating] = useState(false);
   const [resetTarget, setResetTarget] = useState<ManagedUser | null>(null);
   const [resetPassword, setResetPassword] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<ManagedUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const currentUserId = getStoredUser()?.id;
 
   useEffect(() => {
@@ -90,6 +94,23 @@ const Users: React.FC = () => {
       setResetPassword('');
     } catch (err) {
       setActionError(apiErrorMessage(err, 'Error al restablecer la contraseña'));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteError('');
+    try {
+      setDeleting(true);
+      await adminApi.deleteUser(deleteTarget.id);
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      if (resetTarget?.id === deleteTarget.id) setResetTarget(null);
+      setNotice(`Usuario ${deleteTarget.email} eliminado.`);
+      setDeleteTarget(null);
+    } catch (err) {
+      setDeleteError(apiErrorMessage(err, 'Error al eliminar el usuario'));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -283,6 +304,18 @@ const Users: React.FC = () => {
                     >
                       Restablecer contraseña
                     </button>
+                    <button
+                      onClick={() => {
+                        clearMessages();
+                        setDeleteError('');
+                        setDeleteTarget(user);
+                      }}
+                      disabled={isSelf}
+                      title={isSelf ? 'No puedes eliminar tu propia cuenta' : undefined}
+                      className="text-red-600 hover:underline disabled:opacity-40 disabled:no-underline"
+                    >
+                      Eliminar
+                    </button>
                   </td>
                 </tr>
               );
@@ -290,6 +323,16 @@ const Users: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {deleteTarget && (
+        <DeleteUserModal
+          user={deleteTarget}
+          deleting={deleting}
+          error={deleteError}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 };
