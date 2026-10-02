@@ -119,12 +119,14 @@ const Footer = () => {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="max-w-[1280px] mx-auto px-7 py-[22px] flex flex-wrap justify-between items-center gap-3.5 font-mono text-[11px] tracking-[0.08em] uppercase text-white/40">
+        <div className="max-w-[1280px] mx-auto px-7 pr-24 py-[22px] pb-24 md:pb-[22px] flex flex-wrap justify-between items-center gap-3.5 font-mono text-[11px] tracking-[0.08em] uppercase text-white/40">
           <p className="m-0">© {new Date().getFullYear()} Larsen Italiana · {t.foot.rights}</p>
           <div className="flex gap-[26px]">
             <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.privacy}</a>
             <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.terms}</a>
             <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.cookies}</a>
+            {/* Discreet way in for the team; the panel itself asks for a login. */}
+            <Link to="/admin/login" className="transition-colors duration-200 hover:text-white">{t.foot.team}</Link>
           </div>
         </div>
       </div>
