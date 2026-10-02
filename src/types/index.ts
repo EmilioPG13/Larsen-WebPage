@@ -42,6 +42,8 @@ export interface Machine {
   category: string;
   image: string;
   inStock?: boolean;
+  /** Sold to order from Italy: listed in the catalog without physical units. */
+  onOrder?: boolean;
   en?: MachineI18n;
 }
 

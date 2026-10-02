@@ -11,6 +11,48 @@ export interface ManagedUser {
   updatedAt: string;
 }
 
+export type UnitStatus = 'DISPONIBLE' | 'APARTADA' | 'VENDIDA';
+export type UnitModality = 'EN_BODEGA' | 'BAJO_PEDIDO';
+
+export interface InventoryMovement {
+  id: string;
+  unitId: string;
+  action: 'CREATE' | 'UPDATE' | 'STATUS' | 'IMPORT';
+  fromStatus: UnitStatus | null;
+  toStatus: UnitStatus | null;
+  changes: Record<string, [unknown, unknown]> | null;
+  createdAt: string;
+  user: { id: string; name: string | null; email: string } | null;
+}
+
+export interface InventoryUnit {
+  id: string;
+  brand: string;
+  model: string;
+  gauge: string;
+  serialNumber: string;
+  status: UnitStatus;
+  modality: UnitModality;
+  receivedAt: string | null;
+  soldAt: string | null;
+  notes: string | null;
+  machineId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Latest movement only (the list endpoint sends at most one). */
+  movements?: InventoryMovement[];
+}
+
+export interface InventoryUnitInput {
+  brand: string;
+  model: string;
+  gauge: string;
+  serialNumber: string;
+  modality?: UnitModality;
+  receivedAt?: string | null;
+  notes?: string | null;
+}
+
 export const adminApi = {
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
@@ -59,6 +101,36 @@ export const adminApi = {
 
   resetUserPassword: async (id: string, password: string) => {
     const response = await api.put(`/users/${id}/password`, { password });
+    return response.data;
+  },
+
+  getInventory: async (params?: { status?: UnitStatus; brand?: string; q?: string }): Promise<InventoryUnit[]> => {
+    const response = await api.get('/inventory', { params });
+    return response.data;
+  },
+
+  createInventoryUnit: async (data: InventoryUnitInput & { status?: UnitStatus; soldAt?: string }): Promise<InventoryUnit> => {
+    const response = await api.post('/inventory', data);
+    return response.data;
+  },
+
+  updateInventoryUnit: async (id: string, data: Partial<InventoryUnitInput> & { soldAt?: string | null }): Promise<InventoryUnit> => {
+    const response = await api.put(`/inventory/${id}`, data);
+    return response.data;
+  },
+
+  setInventoryStatus: async (id: string, status: UnitStatus, soldAt?: string): Promise<InventoryUnit> => {
+    const response = await api.patch(`/inventory/${id}/status`, { status, ...(soldAt ? { soldAt } : {}) });
+    return response.data;
+  },
+
+  getInventoryMovements: async (id: string): Promise<InventoryMovement[]> => {
+    const response = await api.get(`/inventory/${id}/movements`);
+    return response.data;
+  },
+
+  deleteInventoryUnit: async (id: string) => {
+    const response = await api.delete(`/inventory/${id}`);
     return response.data;
   },
 

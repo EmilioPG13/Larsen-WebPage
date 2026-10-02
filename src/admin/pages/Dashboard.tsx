@@ -17,6 +17,11 @@ interface Stats {
     inStock: number;
     outOfStock: number;
   };
+  inventory: {
+    available: number;
+    reserved: number;
+    sold: number;
+  };
 }
 
 const Dashboard: React.FC = () => {
@@ -100,15 +105,18 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Inventory Summary */}
+        {/* Physical units in the inventory */}
         <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Inventario Total</h3>
-          <p className="text-3xl font-bold text-gray-900">
-            {stats.products.inStock + stats.machines.inStock}
-          </p>
-          <p className="text-sm text-gray-600 mt-2">
-            Artículos disponibles
-          </p>
+          <h3 className="text-sm font-medium text-gray-500 mb-2">Unidades disponibles</h3>
+          <p className="text-3xl font-bold text-gray-900">{stats.inventory?.available ?? 0}</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-600">
+            <span className="whitespace-nowrap">
+              Apartadas: <span className="font-semibold">{stats.inventory?.reserved ?? 0}</span>
+            </span>
+            <span className="whitespace-nowrap">
+              Vendidas: <span className="font-semibold">{stats.inventory?.sold ?? 0}</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
