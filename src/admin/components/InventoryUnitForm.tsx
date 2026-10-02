@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
 import type { InventoryUnit, UnitModality, UnitStatus } from '../services/adminApi';
 import { statusLabels } from '../utils/inventoryLabels';
+import Combobox from './ui/Combobox';
+import DatePicker from './ui/DatePicker';
+import Select from './ui/Select';
 
 const modalityLabels: Record<UnitModality, string> = {
   EN_BODEGA: 'En bodega',
   BAJO_PEDIDO: 'Bajo pedido (en camino)',
 };
+
+const modalityOptions = (Object.keys(modalityLabels) as UnitModality[]).map((value) => ({
+  value,
+  label: modalityLabels[value],
+}));
+
+const statusOptions = (Object.keys(statusLabels) as UnitStatus[]).map((value) => ({
+  value,
+  label: statusLabels[value],
+}));
 
 /** Fields the form submits. Dates are plain `YYYY-MM-DD` strings. */
 export interface UnitFormValues {
@@ -82,19 +95,13 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             <label htmlFor="unit-brand" className="block text-sm font-medium text-gray-700 mb-1">
               Marca
             </label>
-            <input
+            <Combobox
               id="unit-brand"
-              list="unit-brand-options"
               required
               value={values.brand}
-              onChange={(e) => set('brand', e.target.value)}
-              className={inputClass}
+              options={brands}
+              onChange={(brand) => set('brand', brand)}
             />
-            <datalist id="unit-brand-options">
-              {brands.map((brand) => (
-                <option key={brand} value={brand} />
-              ))}
-            </datalist>
           </div>
           <div>
             <label htmlFor="unit-model" className="block text-sm font-medium text-gray-700 mb-1">
@@ -137,29 +144,22 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             <label htmlFor="unit-modality" className="block text-sm font-medium text-gray-700 mb-1">
               Modalidad
             </label>
-            <select
+            <Select
               id="unit-modality"
               value={values.modality}
-              onChange={(e) => set('modality', e.target.value as UnitModality)}
-              className={inputClass}
-            >
-              {(Object.keys(modalityLabels) as UnitModality[]).map((modality) => (
-                <option key={modality} value={modality}>
-                  {modalityLabels[modality]}
-                </option>
-              ))}
-            </select>
+              options={modalityOptions}
+              onChange={(modality) => set('modality', modality as UnitModality)}
+            />
           </div>
           <div>
             <label htmlFor="unit-received" className="block text-sm font-medium text-gray-700 mb-1">
               Fecha de llegada (opcional)
             </label>
-            <input
+            <DatePicker
               id="unit-received"
-              type="date"
               value={values.receivedAt}
-              onChange={(e) => set('receivedAt', e.target.value)}
-              className={inputClass}
+              onChange={(date) => set('receivedAt', date)}
+              allowClear
             />
           </div>
           {!unit && (
@@ -167,18 +167,12 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
               <label htmlFor="unit-status" className="block text-sm font-medium text-gray-700 mb-1">
                 Estado inicial
               </label>
-              <select
+              <Select
                 id="unit-status"
                 value={values.status}
-                onChange={(e) => set('status', e.target.value as UnitStatus)}
-                className={inputClass}
-              >
-                {(Object.keys(statusLabels) as UnitStatus[]).map((status) => (
-                  <option key={status} value={status}>
-                    {statusLabels[status]}
-                  </option>
-                ))}
-              </select>
+                options={statusOptions}
+                onChange={(status) => set('status', status as UnitStatus)}
+              />
             </div>
           )}
           {showSoldAt && (
@@ -186,13 +180,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
               <label htmlFor="unit-sold" className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de venta
               </label>
-              <input
-                id="unit-sold"
-                type="date"
-                value={values.soldAt}
-                onChange={(e) => set('soldAt', e.target.value)}
-                className={inputClass}
-              />
+              <DatePicker id="unit-sold" value={values.soldAt} onChange={(date) => set('soldAt', date)} allowClear />
             </div>
           )}
         </div>

@@ -45,7 +45,7 @@ describe('Users Page', () => {
     expect(screen.getByText('Ivo Inventario')).toBeInTheDocument();
     expect(screen.getByText('admin@example.com')).toBeInTheDocument();
     expect(screen.getAllByText('Activo')).toHaveLength(2);
-    expect(screen.getByLabelText('Rol de inv@example.com')).toHaveValue('INVENTARIO');
+    expect(screen.getByLabelText('Rol de inv@example.com')).toHaveTextContent('Inventario');
   });
 
   it('shows an error when the list cannot be loaded', async () => {
@@ -66,7 +66,8 @@ describe('Users Page', () => {
 
     await user.type(screen.getByLabelText('Correo electrónico'), 'nuevo@example.com');
     await user.type(screen.getByLabelText('Nombre'), 'Nuevo');
-    await user.selectOptions(screen.getByLabelText('Rol'), 'INVENTARIO');
+    await user.click(screen.getByLabelText('Rol'));
+    await user.click(screen.getByRole('option', { name: 'Inventario' }));
     await user.type(screen.getByLabelText(/Contraseña temporal/), 'temporary-pass-12');
     await user.click(screen.getByRole('button', { name: 'Crear usuario' }));
 
@@ -100,10 +101,11 @@ describe('Users Page', () => {
     render(<Users />);
     await screen.findByText('inv@example.com');
 
-    await user.selectOptions(screen.getByLabelText('Rol de inv@example.com'), 'ADMIN');
+    await user.click(screen.getByLabelText('Rol de inv@example.com'));
+    await user.click(screen.getByRole('option', { name: 'Administrador' }));
 
     expect(mockAdminApi.updateUser).toHaveBeenCalledWith('u2', { role: 'ADMIN' });
-    await waitFor(() => expect(screen.getByLabelText('Rol de inv@example.com')).toHaveValue('ADMIN'));
+    await waitFor(() => expect(screen.getByLabelText('Rol de inv@example.com')).toHaveTextContent('Administrador'));
   });
 
   it('deactivates a user and shows the new status', async () => {

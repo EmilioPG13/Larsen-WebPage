@@ -68,6 +68,14 @@ const loginAs = (role: 'ADMIN' | 'INVENTARIO') =>
 
 const rows = () => screen.getAllByTestId('unit-row');
 
+/** The text the date picker shows for a `YYYY-MM-DD` value. */
+const shortDate = (iso: string) => {
+  const [year, month, day] = iso.split('-').map(Number);
+  return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    new Date(Date.UTC(year, month - 1, day)),
+  );
+};
+
 describe('Inventory page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -117,10 +125,12 @@ describe('Inventory page', () => {
     render(<Inventory />);
     await screen.findByText('Vesta 130E', { exact: false });
 
-    await user.selectOptions(screen.getByLabelText('Filtrar por marca'), 'Shima Seiki');
+    await user.click(screen.getByLabelText('Filtrar por marca'));
+    await user.click(screen.getByRole('option', { name: 'Shima Seiki' }));
     expect(rows()).toHaveLength(1);
 
-    await user.selectOptions(screen.getByLabelText('Filtrar por marca'), '');
+    await user.click(screen.getByLabelText('Filtrar por marca'));
+    await user.click(screen.getByRole('option', { name: 'Todas las marcas' }));
     await user.type(screen.getByLabelText('Buscar por número de serie o modelo'), '4738');
     expect(rows()).toHaveLength(1);
     expect(screen.getByText('4738/96')).toBeInTheDocument();
@@ -171,7 +181,7 @@ describe('Inventory page', () => {
     const dialog = screen.getByRole('dialog', { name: 'Marcar como vendida' });
     const today = new Date();
     const expected = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    expect(within(dialog).getByLabelText('Fecha de venta')).toHaveValue(expected);
+    expect(within(dialog).getByLabelText('Fecha de venta')).toHaveTextContent(shortDate(expected));
 
     await user.click(within(dialog).getByRole('button', { name: 'Confirmar venta' }));
 
@@ -281,7 +291,7 @@ describe('Inventory page', () => {
 
     await user.click(screen.getByRole('button', { name: 'Editar Gemini serie 7429' }));
     const dialog = screen.getByRole('dialog', { name: 'Editar unidad' });
-    expect(within(dialog).getByLabelText('Fecha de venta')).toHaveValue('2026-09-20');
+    expect(within(dialog).getByLabelText('Fecha de venta')).toHaveTextContent(shortDate('2026-09-20'));
     await user.click(within(dialog).getByRole('button', { name: 'Guardar' }));
 
     expect(api.updateInventoryUnit.mock.calls[0][1]).toMatchObject({ soldAt: '2026-09-20' });

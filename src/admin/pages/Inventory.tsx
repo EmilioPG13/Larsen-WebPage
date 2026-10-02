@@ -4,6 +4,8 @@ import { apiErrorMessage } from '../services/apiError';
 import { getStoredUser } from '../services/session';
 import InventoryUnitForm, { type UnitFormValues } from '../components/InventoryUnitForm';
 import UnitHistory from '../components/UnitHistory';
+import DatePicker from '../components/ui/DatePicker';
+import Select from '../components/ui/Select';
 import { formatDateTime, movementAuthor, statusLabels } from '../utils/inventoryLabels';
 import { exportInventoryXlsx } from '../utils/inventoryExport';
 
@@ -89,6 +91,10 @@ const Inventory: React.FC = () => {
     [units]
   );
   const brands = useMemo(() => Array.from(new Set(units.map((u) => u.brand))).sort(), [units]);
+  const brandOptions = useMemo(
+    () => [{ value: '', label: 'Todas las marcas' }, ...brands.map((brand) => ({ value: brand, label: brand }))],
+    [brands],
+  );
 
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -284,19 +290,12 @@ const Inventory: React.FC = () => {
           <label htmlFor="inventory-brand" className="sr-only">
             Filtrar por marca
           </label>
-          <select
+          <Select
             id="inventory-brand"
             value={brandFilter}
-            onChange={(e) => setBrandFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red"
-          >
-            <option value="">Todas las marcas</option>
-            {brands.map((brand) => (
-              <option key={brand} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
+            options={brandOptions}
+            onChange={setBrandFilter}
+          />
         </div>
       </div>
 
@@ -436,13 +435,7 @@ const Inventory: React.FC = () => {
             <label htmlFor="sale-date" className="block text-sm font-medium text-gray-700 mb-1">
               Fecha de venta
             </label>
-            <input
-              id="sale-date"
-              type="date"
-              value={saleDate}
-              onChange={(e) => setSaleDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red"
-            />
+            <DatePicker id="sale-date" value={saleDate} onChange={setSaleDate} />
             <div className="flex gap-3 mt-6">
               <button
                 onClick={confirmSale}
