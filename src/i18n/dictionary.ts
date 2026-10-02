@@ -132,6 +132,7 @@ export const es = {
     blurb: 'Especialistas en máquinas de tejer industriales reacondicionadas. Más de 60 años de experiencia en el sector textil.',
     prod: 'Navegación', contact: 'Contacto', rights: 'Todos los derechos reservados.',
     privacy: 'Política de privacidad', terms: 'Términos de uso', cookies: 'Cookies',
+    team: 'Acceso equipo',
   },
   notFound: {
     tag: 'Error 404',
@@ -287,6 +288,7 @@ export const en: Dictionary = {
     blurb: 'Specialists in refurbished industrial knitting machines. Over 60 years of experience in the textile sector.',
     prod: 'Navigation', contact: 'Contact', rights: 'All rights reserved.',
     privacy: 'Privacy policy', terms: 'Terms of use', cookies: 'Cookies',
+    team: 'Team login',
   },
   notFound: {
     tag: 'Error 404',
