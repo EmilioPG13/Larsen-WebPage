@@ -4,6 +4,7 @@ import { apiErrorMessage } from '../services/apiError';
 import { getStoredUser } from '../services/session';
 import InventoryUnitForm, { type UnitFormValues } from '../components/InventoryUnitForm';
 import UnitHistory from '../components/UnitHistory';
+import ReservedNote from '../components/ReservedNote';
 import DatePicker from '../components/ui/DatePicker';
 import Select from '../components/ui/Select';
 import { formatDateTime, movementAuthor, statusLabels } from '../utils/inventoryLabels';
@@ -355,6 +356,7 @@ const Inventory: React.FC = () => {
                     {unit.status === 'VENDIDA' && unit.soldAt && (
                       <div className="text-xs text-gray-500 mt-1">Vendida el {formatDate(unit.soldAt)}</div>
                     )}
+                    {unit.status === 'APARTADA' && unit.reservedSince && <ReservedNote since={unit.reservedSince} />}
                   </div>
                   <div className="text-xs text-gray-500">
                     {last ? (

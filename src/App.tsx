@@ -17,6 +17,7 @@ import AdminMachines from './admin/pages/Machines';
 import AdminBrands from './admin/pages/Brands';
 import AdminLeads from './admin/pages/Leads';
 import AdminUsers from './admin/pages/Users';
+import AdminReports from './admin/pages/Reports';
 import AdminInventory from './admin/pages/Inventory';
 import AdminLayout from './admin/components/AdminLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
@@ -152,6 +153,16 @@ function AppContent() {
               <ProtectedRoute roles={['ADMIN', 'INVENTARIO']}>
                 <AdminLayout>
                   <AdminInventory />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reportes"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <AdminLayout>
+                  <AdminReports />
                 </AdminLayout>
               </ProtectedRoute>
             }

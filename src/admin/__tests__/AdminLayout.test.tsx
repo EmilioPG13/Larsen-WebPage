@@ -43,10 +43,11 @@ describe('AdminLayout', () => {
     storeUser('ADMIN');
     renderLayout();
 
-    for (const label of ['Dashboard', 'Inventario', 'Productos', 'Máquinas', 'Marcas', 'Leads', 'Usuarios']) {
+    for (const label of ['Dashboard', 'Inventario', 'Reportes', 'Productos', 'Máquinas', 'Marcas', 'Leads', 'Usuarios']) {
       expect(screen.getByRole('link', { name: new RegExp(label) })).toBeInTheDocument();
     }
     expect(screen.getByRole('link', { name: /Usuarios/ })).toHaveAttribute('href', '/admin/usuarios');
+    expect(screen.getByRole('link', { name: /Reportes/ })).toHaveAttribute('href', '/admin/reportes');
   });
 
   it('shows only Inventario to an INVENTARIO user', () => {
@@ -59,6 +60,7 @@ describe('AdminLayout', () => {
     expect(links[0]).toHaveAttribute('href', '/admin/inventario');
     expect(screen.queryByText('Leads')).not.toBeInTheDocument();
     expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
+    expect(screen.queryByText('Reportes')).not.toBeInTheDocument();
   });
 
   it('shows the signed-in user name, email and role', () => {

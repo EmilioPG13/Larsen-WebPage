@@ -407,6 +407,33 @@ describe('Inventory page', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Error al exportar el inventario');
   });
 
+  describe('reserved units', () => {
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+    const reserved = (id: string, serialNumber: string, reservedSince: string | null) =>
+      makeUnit({ id, serialNumber, status: 'APARTADA', reservedSince });
+
+    it('says how long a unit has been reserved, and flags the ones held too long', async () => {
+      api.getInventory.mockResolvedValue([reserved('a', 'AAA', daysAgo(3)), reserved('b', 'BBB', daysAgo(20))]);
+      render(<Inventory />);
+
+      const recent = (await screen.findByText('AAA')).closest('[data-testid="unit-row"]') as HTMLElement;
+      const stale = screen.getByText('BBB').closest('[data-testid="unit-row"]') as HTMLElement;
+
+      expect(within(recent).getByText('Apartada hace 3 días')).toBeInTheDocument();
+      expect(within(recent).queryByText(/⚠/)).not.toBeInTheDocument();
+      expect(within(stale).getByText(/Apartada hace 20 días/)).toHaveTextContent('⚠');
+      expect(within(stale).getByTitle(/conviene confirmar la venta o liberarla/)).toBeInTheDocument();
+    });
+
+    it('shows nothing for a unit that is not reserved', async () => {
+      api.getInventory.mockResolvedValue([makeUnit({ serialNumber: 'CCC', status: 'DISPONIBLE', reservedSince: null })]);
+      render(<Inventory />);
+
+      const row = (await screen.findByText('CCC')).closest('[data-testid="unit-row"]') as HTMLElement;
+      expect(within(row).queryByText(/Apartada hace/)).not.toBeInTheDocument();
+    });
+  });
+
   it('shows an empty state when there are no units yet, and disables the export', async () => {
     api.getInventory.mockResolvedValue([]);
     render(<Inventory />);
