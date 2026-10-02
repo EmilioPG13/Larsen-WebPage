@@ -11,6 +11,7 @@ import {
   soldAtFor,
 } from '../services/inventory';
 import { buildMonthlyReport, currentMonth, isValidMonth } from '../services/inventory-report';
+import { loadReportUnits } from '../services/inventory-report-data';
 
 // Who made the latest change, shown next to each unit in the panel.
 const LAST_MOVEMENT = {
@@ -151,21 +152,7 @@ export const getMonthlyReport = async (req: AuthRequest, res: Response, next: Ne
       throw new AppError('month must look like 2026-10', 400);
     }
 
-    const units = await prisma.inventoryUnit.findMany({
-      select: {
-        id: true,
-        brand: true,
-        model: true,
-        gauge: true,
-        serialNumber: true,
-        status: true,
-        receivedAt: true,
-        soldAt: true,
-        createdAt: true,
-        updatedAt: true,
-        movements: { select: { action: true, fromStatus: true, toStatus: true, createdAt: true } },
-      },
-    });
+    const units = await loadReportUnits();
 
     res.json(buildMonthlyReport(units, target));
   } catch (error) {

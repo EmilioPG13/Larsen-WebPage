@@ -12,6 +12,7 @@ import contactRoutes from './routes/contact.routes';
 import usersRoutes from './routes/users.routes';
 import inventoryRoutes from './routes/inventory.routes';
 import catalogRoutes from './routes/catalog.routes';
+import cronRoutes from './routes/cron.routes';
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/catalog', catalogRoutes);
+app.use('/api/cron', cronRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

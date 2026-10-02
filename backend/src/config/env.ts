@@ -27,6 +27,15 @@ export const envSchema = z.object({
     emptyToUndefined,
     z.string().default('https://larsenitaliana.com/admin/leads')
   ),
+  // Monthly inventory report: the cron job that sends it proves who it is with
+  // CRON_SECRET (without it the endpoint stays closed), and the email goes to
+  // REPORT_NOTIFY_EMAIL, or to LEAD_NOTIFY_EMAIL when that is not set.
+  CRON_SECRET: optionalString(),
+  REPORT_NOTIFY_EMAIL: optionalString(),
+  ADMIN_REPORTS_URL: z.preprocess(
+    emptyToUndefined,
+    z.string().default('https://larsenitaliana.com/admin/reportes')
+  ),
 });
 
 export type Env = z.infer<typeof envSchema>;

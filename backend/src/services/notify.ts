@@ -1,5 +1,7 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import env from '../config/env';
+import { MonthlyReport } from './inventory-report';
+import { buildMonthlyReportEmail } from './report-email';
 
 /** The subset of a `Lead` row the notification needs. */
 export interface NotifiableLead {
@@ -123,4 +125,27 @@ export async function notifyNewLead(lead: NotifiableLead): Promise<void> {
     subject,
     text: body,
   });
+}
+
+/**
+ * Emails the monthly inventory closing. Skips with a warning (and returns false) when SMTP is
+ * not configured; throws on SMTP failure so the cron run is reported as failed.
+ */
+export async function notifyMonthlyReport(report: MonthlyReport): Promise<boolean> {
+  const { SMTP_USER, SMTP_PASS } = env;
+  const recipient = env.REPORT_NOTIFY_EMAIL ?? env.LEAD_NOTIFY_EMAIL;
+
+  if (!SMTP_USER || !SMTP_PASS || !recipient) {
+    console.warn('monthly report skipped: SMTP not configured');
+    return false;
+  }
+
+  const { subject, text } = buildMonthlyReportEmail(report, env.ADMIN_REPORTS_URL);
+  await getTransport(SMTP_USER, SMTP_PASS).sendMail({
+    from: `Larsen Italiana <${SMTP_USER}>`,
+    to: recipient,
+    subject,
+    text,
+  });
+  return true;
 }
