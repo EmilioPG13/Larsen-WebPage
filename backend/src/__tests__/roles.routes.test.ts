@@ -173,6 +173,7 @@ const ADMIN_ROUTES: [method: 'get' | 'post' | 'put' | 'delete', path: string][] 
   ['post', '/api/users'],
   ['put', '/api/users/u2'],
   ['put', '/api/users/u2/password'],
+  ['delete', '/api/users/u2'],
 ];
 
 /** Fails if any model method was called, except the user lookup requireRole makes. */
