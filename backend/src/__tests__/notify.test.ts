@@ -81,7 +81,7 @@ describe('notifyNewLead', () => {
     expect(mail.html).toContain('<!doctype html>');
     expect(mail.html).toContain('Ana Pérez');
     expect(mail.html).toContain('Vesta 130E');
-    expect(mail.html).toContain('https://larsenitaliana.com/images/logo/larsen-logo-1.png');
+    expect(mail.html).toContain('https://larsenitaliana.com/images/logo/larsen-logo-email.png');
     expect(mail.text).toContain('Nombre: Ana Pérez');
     expect(mail.text).toContain('Correo: ana@example.com');
     expect(mail.text).toContain('Teléfono: +52 55 1234 5678');

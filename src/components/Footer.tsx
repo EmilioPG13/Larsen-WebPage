@@ -23,15 +23,15 @@ const Footer = () => {
       <div className="max-w-[1280px] mx-auto px-7 pt-[60px] pb-[30px] grid grid-cols-1 md:grid-cols-[1.7fr_1fr_1fr_1fr] gap-x-10 gap-y-12">
         {/* Identity */}
         <div>
-          <span className="inline-flex bg-white px-3 py-2 mb-5">
-            <img
-              src="/images/logo/larsen-logo-2.png"
-              alt="Larsen Italiana"
-              loading="lazy"
-              decoding="async"
-              className="h-9 w-auto object-contain"
-            />
-          </span>
+          <img
+            src="/images/logo/larsen-logo-outline.svg"
+            alt="Larsen Italiana"
+            width={100}
+            height={46}
+            loading="lazy"
+            decoding="async"
+            className="h-[46px] w-auto object-contain mb-5"
+          />
           <p className="text-[14px] leading-[1.62] text-white/70 mb-[22px] max-w-[320px]">{t.foot.blurb}</p>
           <div className="flex items-center gap-2.5">
             <a

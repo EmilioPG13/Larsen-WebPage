@@ -327,28 +327,23 @@ export const Empty: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   <p className="m-0 py-6 text-center text-a-muted">{children}</p>
 );
 
+/** The outlined variant is this much taller than the logo itself (its outline is margin). */
+const OUTLINE_SCALE = 928 / 880;
+
 /**
- * The company wordmark in its official colors. On a dark surface (`onDark`) it sits
- * on a white plate, the same treatment the public header uses, so the blue half of
- * the logo never disappears into the navy rail and the colors are never altered.
+ * The company wordmark, traced to a vector, in its official colors. On a dark surface
+ * (`onDark`) it uses the variant with a white die-cut outline, the same one the public
+ * header uses, so the blue half never disappears into the navy rail.
  */
 export const AdminLogo: React.FC<{ height?: number; onDark?: boolean }> = ({ height = 28, onDark = false }) => {
-  const logo = (
+  const shown = onDark ? Math.round(height * OUTLINE_SCALE) : height;
+  return (
     <img
-      src="/images/logo/larsen-logo-1.png"
+      src={onDark ? '/images/logo/larsen-logo-outline.svg' : '/images/logo/larsen-logo.svg'}
       alt="Larsen Italiana"
-      height={height}
-      style={{ height, width: 'auto', alignSelf: 'flex-start' }}
+      height={shown}
+      style={{ height: shown, width: 'auto', alignSelf: 'flex-start' }}
       className="block shrink-0 object-contain"
     />
-  );
-  if (!onDark) return logo;
-  return (
-    <span
-      className="inline-flex shrink-0 self-start bg-white"
-      style={{ padding: `${Math.round(height * 0.28)}px ${Math.round(height * 0.4)}px` }}
-    >
-      {logo}
-    </span>
   );
 };

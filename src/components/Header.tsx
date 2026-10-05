@@ -47,8 +47,15 @@ const Header = () => {
     >
       <div className="max-w-[1280px] mx-auto px-7 h-16 flex items-center justify-between gap-6">
         {/* Logo */}
-        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center shrink-0 bg-white px-3 py-2">
-          <img src="/images/logo/larsen-logo-1.png" alt="Larsen Italiana" className="h-[26px] w-auto object-contain" />
+        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center shrink-0">
+          {/* Traced logo in its official colors, with a white die-cut outline so the blue reads on navy. */}
+          <img
+            src="/images/logo/larsen-logo-outline.svg"
+            alt="Larsen Italiana"
+            width={83}
+            height={38}
+            className="h-[38px] w-auto object-contain"
+          />
         </Link>
 
         {/* Desktop nav */}

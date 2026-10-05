@@ -4,7 +4,7 @@
  * value that reaches the markup goes through `escapeHtml`; nothing here executes or loads
  * anything except the logo.
  *
- * The look follows the public site: Larsen navy header with the logo in its official colors on a white plate, square
+ * The look follows the public site: Larsen navy header with the logo in its official colors and a white die-cut outline, square
  * corners, 1px hairlines and red reserved for the one action that matters.
  */
 
@@ -61,7 +61,7 @@ export const FONT_DATA = "'Red Hat Mono',ui-monospace,SFMono-Regular,Menlo,Conso
 /** Wider than any real client viewport would crop it, narrow enough to read on a phone. */
 const CARD_WIDTH = 600;
 
-export const logoUrl = (siteUrl: string): string => `${siteUrl.replace(/\/+$/, '')}/images/logo/larsen-logo-1.png`;
+export const logoUrl = (siteUrl: string): string => `${siteUrl.replace(/\/+$/, '')}/images/logo/larsen-logo-email.png`;
 
 interface ButtonOptions {
   href: string;
@@ -180,7 +180,7 @@ export const emailShell = ({ lang, title, preheader, siteUrl, headerNote, body, 
   <table role="presentation" width="${CARD_WIDTH}" cellpadding="0" cellspacing="0" border="0" class="em-card" style="width:100%;max-width:${CARD_WIDTH}px;background-color:${COLOR.surface};border:1px solid ${COLOR.line};">
     <tr><td bgcolor="${COLOR.nav}" class="em-head" style="background-color:${COLOR.nav};padding:20px 28px;border-bottom:3px solid ${COLOR.red};">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-        <td valign="middle"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${COLOR.surface}" style="background-color:${COLOR.surface};padding:8px 12px;"><a href="${escapeHtml(siteUrl)}" style="text-decoration:none;"><img src="${escapeHtml(logoUrl(siteUrl))}" width="104" height="46" alt="Larsen Italiana" style="display:block;border:0;width:104px;height:auto;font-family:${FONT};font-size:16px;line-height:22px;font-weight:700;color:${COLOR.blue};"></a></td></tr></table></td>
+        <td valign="middle"><a href="${escapeHtml(siteUrl)}" style="text-decoration:none;"><img src="${escapeHtml(logoUrl(siteUrl))}" width="120" height="55" alt="Larsen Italiana" style="display:block;border:0;width:120px;height:auto;font-family:${FONT};font-size:16px;line-height:22px;font-weight:700;color:${COLOR.onNavy};"></a></td>
         ${headerNote ? `<td valign="middle" align="right" style="font-family:${FONT};font-size:13px;line-height:18px;color:${COLOR.onNavyMuted};">${escapeHtml(headerNote)}</td>` : ''}
       </tr></table>
     </td></tr>
