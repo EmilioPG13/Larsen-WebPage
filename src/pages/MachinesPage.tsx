@@ -173,7 +173,7 @@ const MachinesPage = () => {
                       alt={m.image ? `${m.brand} ${m.model}` : m.brand}
                       loading="lazy"
                       decoding="async"
-                      className={`w-full object-contain ${m.image ? 'max-h-[200px]' : 'max-h-[72px]'}`}
+                      className={`object-contain ${m.image ? 'w-full max-h-[200px]' : 'w-auto max-w-[62%] max-h-[56px]'}`}
                     />
                   )}
                   <span
