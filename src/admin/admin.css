@@ -861,6 +861,18 @@ select.adm-input {
 }
 
 /* ------------------------------------------------------------
+   Page change: opacity only, so no transform turns the page into the
+   containing block of position: fixed modals.
+   ------------------------------------------------------------ */
+@keyframes adm-page-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.adm-page-enter {
+  animation: adm-page-enter 160ms ease-out;
+}
+
+/* ------------------------------------------------------------
    Skeleton and modal
    ------------------------------------------------------------ */
 @keyframes adm-sweep {
@@ -988,7 +1000,8 @@ select.adm-input {
   .adm-table tbody tr {
     transition: none;
   }
-  .adm-skel {
+  .adm-skel,
+  .adm-page-enter {
     animation: none;
   }
 }

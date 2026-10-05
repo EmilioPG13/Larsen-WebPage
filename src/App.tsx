@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -10,17 +10,7 @@ import AboutPage from './pages/AboutPage';
 import MachinesPage from './pages/MachinesPage';
 import MachineDetailPage from './pages/MachineDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
-import AdminLogin from './admin/pages/Login';
-import AdminDashboard from './admin/pages/Dashboard';
-import AdminProducts from './admin/pages/Products';
-import AdminMachines from './admin/pages/Machines';
-import AdminBrands from './admin/pages/Brands';
-import AdminLeads from './admin/pages/Leads';
-import AdminUsers from './admin/pages/Users';
-import AdminReports from './admin/pages/Reports';
-import AdminInventory from './admin/pages/Inventory';
-import AdminLayout from './admin/components/AdminLayout';
-import ProtectedRoute from './admin/components/ProtectedRoute';
+import { adminRoutes } from './admin/adminRoutes';
 import { useT } from './i18n/useT';
 import { initAnalytics, trackPageView } from './services/analytics';
 
@@ -31,6 +21,11 @@ function AppContent() {
 
   useEffect(() => {
     if (location.pathname !== displayLocation.pathname) {
+      // Inside the panel there is no fade (the layout fades the page itself), so switch pages at once.
+      if (location.pathname.startsWith('/admin') && displayLocation.pathname.startsWith('/admin')) {
+        setDisplayLocation(location);
+        return;
+      }
       setTransitionStage('fadeOut');
       const timer = setTimeout(() => {
         setDisplayLocation(location);
@@ -69,7 +64,8 @@ function AppContent() {
 
       <main
         id="main-content"
-        key={displayLocation.pathname}
+        // One key for the whole panel, so moving between its pages does not remount the layout.
+        key={displayLocation.pathname.startsWith('/admin') ? 'admin' : displayLocation.pathname}
         // The admin shell uses position: fixed; a transform on this ancestor would turn it into its containing block.
         className={
           isAdminRoute
@@ -89,91 +85,7 @@ function AppContent() {
           <Route path="/cotizacion" element={<QuotePage />} />
           <Route path="/nosotros" element={<AboutPage />} />
 
-          {/* Admin Routes */}
-          {/* The bare /admin is what people type: send it to the panel, which asks for a login when there is no session. */}
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminDashboard />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/products"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminProducts />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/machines"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminMachines />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/brands"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminBrands />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/leads"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminLeads />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin/usuarios"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminUsers />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/inventario"
-            element={
-              <ProtectedRoute roles={['ADMIN', 'INVENTARIO']}>
-                <AdminLayout>
-                  <AdminInventory />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/reportes"
-            element={
-              <ProtectedRoute roles={['ADMIN']}>
-                <AdminLayout>
-                  <AdminReports />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
+          {adminRoutes}
 
           {/* 404 catch-all */}
           <Route path="*" element={<NotFoundPage />} />

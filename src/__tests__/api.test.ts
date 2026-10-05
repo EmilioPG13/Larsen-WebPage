@@ -143,3 +143,44 @@ describe('API Service', () => {
   });
 });
 
+// The response error handler registered when the module loaded, captured before any test clears the mocks.
+const onResponseError = mockInterceptors.response.use.mock.calls[0][1] as (error: unknown) => Promise<never>;
+
+describe('expired panel session', () => {
+  const assign = vi.fn();
+  const fail = (url: string) => ({ message: 'x', config: { url }, response: { status: 401, data: {} } });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.setItem('admin_token', 'token');
+    localStorage.setItem('admin_user', '{}');
+  });
+
+  const at = (pathname: string) => vi.stubGlobal('location', { pathname, assign });
+
+  it('clears the session and goes to the login on a 401 inside the panel', async () => {
+    at('/admin/leads');
+
+    await expect(onResponseError(fail('/leads'))).rejects.toBeTruthy();
+
+    expect(localStorage.getItem('admin_token')).toBeNull();
+    expect(assign).toHaveBeenCalledWith('/admin/login');
+  });
+
+  it('leaves a wrong-password 401 on the login form alone', async () => {
+    at('/admin/login');
+
+    await expect(onResponseError(fail('/auth/login'))).rejects.toBeTruthy();
+
+    expect(localStorage.getItem('admin_token')).toBe('token');
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('ignores a 401 outside the panel', async () => {
+    at('/maquinas');
+
+    await expect(onResponseError(fail('/leads'))).rejects.toBeTruthy();
+
+    expect(assign).not.toHaveBeenCalled();
+  });
+});
