@@ -41,6 +41,44 @@ export interface InventoryUnit {
   updatedAt: string;
   /** Latest movement only (the list endpoint sends at most one). */
   movements?: InventoryMovement[];
+  /** When a reserved unit was reserved (null for any other status). */
+  reservedSince?: string | null;
+}
+
+export interface ReportUnitRef {
+  id: string;
+  brand: string;
+  model: string;
+  gauge: string;
+  serialNumber: string;
+}
+
+export interface MonthlyReport {
+  month: string;
+  summary: {
+    arrivals: number;
+    sales: number;
+    reservations: number;
+    stockAtClose: { available: number; reserved: number; total: number };
+  };
+  sales: (ReportUnitRef & { soldAt: string; daysInStock: number | null })[];
+  responseTime: {
+    measured: number;
+    sameDay: number;
+    averageDays: number | null;
+    worstDays: number | null;
+    notMeasurable: number;
+  };
+  aging: {
+    onHand: number;
+    withReceivedDate: number;
+    withoutReceivedDate: number;
+    averageDays: number | null;
+    oldest: (ReportUnitRef & { receivedAt: string; days: number })[];
+    averageDaysToSell: number | null;
+  };
+  staleAfterDays: number;
+  staleReservations: (ReportUnitRef & { since: string; days: number })[];
 }
 
 export interface InventoryUnitInput {
@@ -106,6 +144,11 @@ export const adminApi = {
 
   deleteUser: async (id: string) => {
     const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+
+  getMonthlyReport: async (month?: string): Promise<MonthlyReport> => {
+    const response = await api.get('/inventory/report', { params: month ? { month } : undefined });
     return response.data;
   },
 

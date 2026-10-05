@@ -5,6 +5,7 @@ import {
   updateUnit,
   updateUnitStatus,
   getUnitMovements,
+  getMonthlyReport,
   deleteUnit,
 } from '../controllers/inventory.controller';
 import { authenticateToken, requireRole } from '../middleware/auth.middleware';
@@ -14,6 +15,8 @@ const router = express.Router();
 
 // The whole panel API is for staff: ADMIN and INVENTARIO can operate the stock.
 router.get('/', authenticateToken, requireRole('ADMIN', 'INVENTARIO'), listUnits);
+// Declared before the /:id routes so "report" is never read as an id.
+router.get('/report', authenticateToken, requireRole('ADMIN'), getMonthlyReport);
 router.post('/', authenticateToken, requireRole('ADMIN', 'INVENTARIO'), createUnit);
 router.put('/:id', authenticateToken, requireRole('ADMIN', 'INVENTARIO'), updateUnit);
 router.patch('/:id/status', authenticateToken, requireRole('ADMIN', 'INVENTARIO'), updateUnitStatus);

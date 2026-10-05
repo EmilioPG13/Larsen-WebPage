@@ -18,6 +18,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: '📊', roles: ['ADMIN'] },
   { path: '/admin/inventario', label: 'Inventario', icon: '🗃️', roles: ['ADMIN', 'INVENTARIO'] },
+  { path: '/admin/reportes', label: 'Reportes', icon: '📈', roles: ['ADMIN'] },
   { path: '/admin/products', label: 'Productos', icon: '📦', roles: ['ADMIN'] },
   { path: '/admin/machines', label: 'Máquinas', icon: '🤖', roles: ['ADMIN'] },
   { path: '/admin/brands', label: 'Marcas', icon: '🏷️', roles: ['ADMIN'] },

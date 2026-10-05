@@ -10,6 +10,8 @@ import {
   resolveBrandId,
   soldAtFor,
 } from '../services/inventory';
+import { buildMonthlyReport, currentMonth, isValidMonth } from '../services/inventory-report';
+import { loadReportUnits } from '../services/inventory-report-data';
 
 // Who made the latest change, shown next to each unit in the panel.
 const LAST_MOVEMENT = {
@@ -118,7 +120,41 @@ export const listUnits = async (req: AuthRequest, res: Response, next: NextFunct
       orderBy: [{ brand: 'asc' }, { model: 'asc' }, { serialNumber: 'asc' }],
     });
 
-    res.json(units);
+    // When each reserved unit was reserved, so the panel can flag the ones that have been held too long.
+    const reservedIds = units.filter((unit) => unit.status === UnitStatus.APARTADA).map((unit) => unit.id);
+    const reservations = reservedIds.length
+      ? await prisma.inventoryMovement.groupBy({
+          by: ['unitId'],
+          where: { unitId: { in: reservedIds }, toStatus: UnitStatus.APARTADA },
+          _max: { createdAt: true },
+        })
+      : [];
+    const reservedAt = new Map(reservations.map((row) => [row.unitId, row._max.createdAt]));
+
+    res.json(
+      units.map((unit) => ({
+        ...unit,
+        reservedSince:
+          unit.status === UnitStatus.APARTADA ? (reservedAt.get(unit.id) ?? unit.updatedAt) : null,
+      }))
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Monthly report (default: the current month). ADMIN only: it is management information. */
+export const getMonthlyReport = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { month } = req.query;
+    const target = month === undefined || month === '' ? currentMonth() : month;
+    if (!isValidMonth(target)) {
+      throw new AppError('month must look like 2026-10', 400);
+    }
+
+    const units = await loadReportUnits();
+
+    res.json(buildMonthlyReport(units, target));
   } catch (error) {
     next(error);
   }

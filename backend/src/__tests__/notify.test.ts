@@ -186,3 +186,71 @@ describe('notifyNewLead', () => {
     await expect(notifyNewLead(lead)).rejects.toThrow('connect ETIMEDOUT');
   });
 });
+
+describe('notifyMonthlyReport', () => {
+  const monthly = {
+    month: '2026-09',
+    summary: { arrivals: 1, sales: 0, reservations: 0, stockAtClose: { available: 3, reserved: 0, total: 3 } },
+    sales: [],
+    responseTime: { measured: 0, sameDay: 0, averageDays: null, worstDays: null, notMeasurable: 0 },
+    aging: { onHand: 3, withReceivedDate: 0, withoutReceivedDate: 3, averageDays: null, oldest: [], averageDaysToSell: null },
+    staleAfterDays: 15,
+    staleReservations: [],
+  };
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Object.assign(mockEnv, baseEnv, { ADMIN_REPORTS_URL: 'https://larsenitaliana.com/admin/reportes' });
+    delete mockEnv.REPORT_NOTIFY_EMAIL;
+    mockSendMail.mockResolvedValue({ messageId: 'x' });
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it.each(['SMTP_USER', 'SMTP_PASS', 'LEAD_NOTIFY_EMAIL'])(
+    'skips with a warning and returns false when %s is missing and there is no other recipient',
+    async (key) => {
+      mockEnv[key] = undefined;
+      const { notifyMonthlyReport } = loadNotify();
+
+      await expect(notifyMonthlyReport(monthly)).resolves.toBe(false);
+
+      expect(mockCreateTransport).not.toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('monthly report skipped'));
+    }
+  );
+
+  it('sends the closing to the lead inbox when no report recipient is set', async () => {
+    const { notifyMonthlyReport } = loadNotify();
+
+    await expect(notifyMonthlyReport(monthly)).resolves.toBe(true);
+
+    const mail = mockSendMail.mock.calls[0][0];
+    expect(mail.to).toBe('admin@larsenitaliana.com');
+    expect(mail.from).toBe('Larsen Italiana <ventas@larsenitaliana.com>');
+    expect(mail.subject).toBe('Cierre de inventario: Septiembre 2026');
+    expect(mail.text).toContain('Llegadas: 1');
+    expect(mail.text).toContain('Ver en el panel: https://larsenitaliana.com/admin/reportes');
+  });
+
+  it('prefers REPORT_NOTIFY_EMAIL when it is set, and works without a lead inbox then', async () => {
+    mockEnv.REPORT_NOTIFY_EMAIL = 'direccion@larsenitaliana.com';
+    mockEnv.LEAD_NOTIFY_EMAIL = undefined;
+    const { notifyMonthlyReport } = loadNotify();
+
+    await expect(notifyMonthlyReport(monthly)).resolves.toBe(true);
+
+    expect(mockSendMail.mock.calls[0][0].to).toBe('direccion@larsenitaliana.com');
+  });
+
+  it('lets an SMTP failure through so the cron run fails visibly', async () => {
+    mockSendMail.mockRejectedValue(new Error('connection refused'));
+    const { notifyMonthlyReport } = loadNotify();
+
+    await expect(notifyMonthlyReport(monthly)).rejects.toThrow('connection refused');
+  });
+});

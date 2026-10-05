@@ -3,10 +3,21 @@
   "framework": null,
   "buildCommand": "npx prisma generate",
   "outputDirectory": "public",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ],
   "functions": {
     "api/index.ts": {
       "includeFiles": "node_modules/.prisma/client/**"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 14 1 * *"
+    }
+  ]
 }
