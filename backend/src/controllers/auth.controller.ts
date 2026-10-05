@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { login, getCurrentUser, changePassword } from '../services/auth.service';
+import { assertLoginAllowed, recordLoginFailure } from '../services/login-throttle';
 import { AppError } from '../middleware/error.middleware';
 import { AuthRequest } from '../middleware/auth.middleware';
 
@@ -11,8 +12,18 @@ export const loginController = async (req: Request, res: Response, next: NextFun
       throw new AppError('Email and password are required', 400);
     }
 
-    const result = await login(email, password);
-    res.json(result);
+    const ip = req.ip || 'unknown';
+    await assertLoginAllowed(ip);
+
+    try {
+      res.json(await login(email, password));
+    } catch (error) {
+      // Only wrong credentials count; a database error is not the client's fault.
+      if (error instanceof AppError && error.status === 401) {
+        await recordLoginFailure(ip);
+      }
+      throw error;
+    }
   } catch (error) {
     next(error);
   }

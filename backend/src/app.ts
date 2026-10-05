@@ -16,6 +16,11 @@ import cronRoutes from './routes/cron.routes';
 
 const app = express();
 
+// Behind Vercel's proxy the client address is the last hop of X-Forwarded-For.
+// Trusting exactly one hop keeps a spoofed header from picking the IP that the
+// login throttle sees.
+app.set('trust proxy', 1);
+
 // Middleware
 const allowedOrigins = env.CORS_ORIGIN.split(',').map(origin => origin.trim());
 app.use(cors({

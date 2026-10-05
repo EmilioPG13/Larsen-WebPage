@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../services/adminApi';
-import { apiErrorMessage } from '../services/apiError';
+import { loginErrorMessage } from '../services/apiError';
 import { roleHome } from '../services/session';
 import { useOptionalTheme } from '../../context/ThemeContext';
 import { Alert, CellMark, Icon, Mark, type MarkName } from '../components/ui/kit';
@@ -33,7 +33,7 @@ const Login: React.FC = () => {
       const { user } = await adminApi.login(email, password);
       navigate(roleHome(user?.role ?? 'ADMIN'));
     } catch (err) {
-      setError(apiErrorMessage(err, 'Error al iniciar sesión'));
+      setError(loginErrorMessage(err, 'Error al iniciar sesión'));
     } finally {
       setLoading(false);
     }
