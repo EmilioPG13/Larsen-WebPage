@@ -4,6 +4,7 @@ import {
   createUser,
   updateUser,
   resetUserPassword,
+  deleteUser,
 } from '../controllers/users.controller';
 import { AuthRequest } from '../middleware/auth.middleware';
 import prismaClient from '../config/database';
@@ -21,6 +22,7 @@ jest.mock('../config/database', () => ({
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
       count: jest.fn(),
     },
     $transaction: jest.fn(),
@@ -37,6 +39,7 @@ const tx = {
   user: {
     findUnique: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
     count: jest.fn(),
   },
 };
@@ -348,6 +351,100 @@ describe('Users Controller', () => {
       await call(resetUserPassword);
 
       expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 404 }));
+    });
+  });
+
+  describe('deleteUser', () => {
+    beforeEach(() => {
+      req.params = { id: 'u2' };
+      tx.user.findUnique.mockResolvedValue({ id: 'u2', role: 'INVENTARIO', active: true });
+      tx.user.delete.mockResolvedValue({ id: 'u2' });
+    });
+
+    it('deletes the user inside a serializable transaction and confirms', async () => {
+      await call(deleteUser);
+
+      expect(prisma.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+        isolationLevel: 'Serializable',
+      });
+      expect(tx.user.delete).toHaveBeenCalledWith({ where: { id: 'u2' } });
+      expect(res.json).toHaveBeenCalledWith({ message: 'User deleted successfully' });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('refuses to delete the caller, without touching the database', async () => {
+      req.params = { id: 'u1' };
+
+      await call(deleteUser);
+
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 400, message: 'You cannot delete your own account' })
+      );
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+      expect(tx.user.delete).not.toHaveBeenCalled();
+    });
+
+    it('responds 404 when the user does not exist', async () => {
+      tx.user.findUnique.mockResolvedValue(null);
+
+      await call(deleteUser);
+
+      expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 404 }));
+      expect(tx.user.delete).not.toHaveBeenCalled();
+    });
+
+    it('responds 404 when the row disappears before the delete (P2025)', async () => {
+      tx.user.delete.mockRejectedValue({ code: 'P2025' });
+
+      await call(deleteUser);
+
+      expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 404 }));
+    });
+
+    it('does not run the last-admin check for a non-admin user', async () => {
+      await call(deleteUser);
+
+      expect(tx.user.count).not.toHaveBeenCalled();
+    });
+
+    describe('last active ADMIN protection', () => {
+      beforeEach(() => {
+        tx.user.findUnique.mockResolvedValue({ id: 'u2', role: 'ADMIN', active: true });
+      });
+
+      it('refuses to delete the last active ADMIN', async () => {
+        tx.user.count.mockResolvedValue(0);
+
+        await call(deleteUser);
+
+        expect(next).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: 400,
+            message: 'Cannot delete the last active administrator',
+          })
+        );
+        expect(tx.user.delete).not.toHaveBeenCalled();
+      });
+
+      it('counts only the other active admins', async () => {
+        tx.user.count.mockResolvedValue(1);
+
+        await call(deleteUser);
+
+        expect(tx.user.count).toHaveBeenCalledWith({
+          where: { role: 'ADMIN', active: true, id: { not: 'u2' } },
+        });
+        expect(tx.user.delete).toHaveBeenCalledWith({ where: { id: 'u2' } });
+      });
+
+      it('lets an inactive ADMIN be deleted without the check', async () => {
+        tx.user.findUnique.mockResolvedValue({ id: 'u2', role: 'ADMIN', active: false });
+
+        await call(deleteUser);
+
+        expect(tx.user.count).not.toHaveBeenCalled();
+        expect(tx.user.delete).toHaveBeenCalled();
+      });
     });
   });
 });

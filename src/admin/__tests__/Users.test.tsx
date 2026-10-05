@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Users from '../pages/Users';
 import * as adminApi from '../services/adminApi';
@@ -10,6 +10,7 @@ vi.mock('../services/adminApi', () => ({
     createUser: vi.fn(),
     updateUser: vi.fn(),
     resetUserPassword: vi.fn(),
+    deleteUser: vi.fn(),
   },
 }));
 
@@ -157,5 +158,95 @@ describe('Users Page', () => {
 
     expect(mockAdminApi.resetUserPassword).toHaveBeenCalledWith('u2', 'reset-password-12');
     expect(await screen.findByText(/restablecida/)).toBeInTheDocument();
+  });
+
+  describe('deleting a user', () => {
+    const openDeleteDialog = async (user: ReturnType<typeof userEvent.setup>) => {
+      await screen.findByText('inv@example.com');
+      await user.click(screen.getAllByRole('button', { name: 'Eliminar' })[1]);
+      return screen.getByRole('dialog', { name: 'Eliminar usuario' });
+    };
+
+    it('does not let the signed-in admin delete their own account', async () => {
+      render(<Users />);
+      await screen.findByText('inv@example.com');
+
+      expect(screen.getAllByRole('button', { name: 'Eliminar' })[0]).toBeDisabled();
+    });
+
+    it('keeps the delete button locked until the phrase is typed', async () => {
+      const user = userEvent.setup();
+      render(<Users />);
+      const dialog = await openDeleteDialog(user);
+      const confirm = within(dialog).getByRole('button', { name: 'Eliminar' });
+
+      expect(within(dialog).getByText('inv@example.com')).toBeInTheDocument();
+      expect(confirm).toBeDisabled();
+
+      await user.type(within(dialog).getByLabelText(/Escribe/), 'eliminar');
+      expect(confirm).toBeDisabled();
+
+      await user.type(within(dialog).getByLabelText(/Escribe/), ' usuario');
+      expect(confirm).toBeEnabled();
+      expect(mockAdminApi.deleteUser).not.toHaveBeenCalled();
+    });
+
+    it('deletes the user once the phrase is typed, ignoring case and outer spaces', async () => {
+      mockAdminApi.deleteUser.mockResolvedValue({ message: 'User deleted successfully' });
+      const user = userEvent.setup();
+      render(<Users />);
+      const dialog = await openDeleteDialog(user);
+
+      await user.type(within(dialog).getByLabelText(/Escribe/), '  Eliminar Usuario ');
+      await user.click(within(dialog).getByRole('button', { name: 'Eliminar' }));
+
+      expect(mockAdminApi.deleteUser).toHaveBeenCalledWith('u2');
+      expect(await screen.findByText('Usuario inv@example.com eliminado.')).toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'Eliminar usuario' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Ivo Inventario')).not.toBeInTheDocument();
+    });
+
+    it('submits with Enter when the phrase matches', async () => {
+      mockAdminApi.deleteUser.mockResolvedValue({ message: 'ok' });
+      const user = userEvent.setup();
+      render(<Users />);
+      const dialog = await openDeleteDialog(user);
+
+      await user.type(within(dialog).getByLabelText(/Escribe/), 'eliminar usuario{Enter}');
+
+      expect(mockAdminApi.deleteUser).toHaveBeenCalledWith('u2');
+    });
+
+    it('does nothing when cancelled or closed with Escape', async () => {
+      const user = userEvent.setup();
+      render(<Users />);
+      let dialog = await openDeleteDialog(user);
+
+      await user.click(within(dialog).getByRole('button', { name: 'Cancelar' }));
+      expect(screen.queryByRole('dialog', { name: 'Eliminar usuario' })).not.toBeInTheDocument();
+
+      dialog = await openDeleteDialog(user);
+      await user.keyboard('{Escape}');
+      expect(screen.queryByRole('dialog', { name: 'Eliminar usuario' })).not.toBeInTheDocument();
+
+      expect(mockAdminApi.deleteUser).not.toHaveBeenCalled();
+      expect(screen.getByText('Ivo Inventario')).toBeInTheDocument();
+    });
+
+    it('shows the backend error inside the dialog and keeps the user', async () => {
+      mockAdminApi.deleteUser.mockRejectedValue({
+        response: { data: { error: 'Cannot delete the last active administrator' } },
+      });
+      const user = userEvent.setup();
+      render(<Users />);
+      const dialog = await openDeleteDialog(user);
+
+      await user.type(within(dialog).getByLabelText(/Escribe/), 'eliminar usuario');
+      await user.click(within(dialog).getByRole('button', { name: 'Eliminar' }));
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent('last active administrator');
+      expect(screen.getByRole('dialog', { name: 'Eliminar usuario' })).toBeInTheDocument();
+      expect(screen.getByText('Ivo Inventario')).toBeInTheDocument();
+    });
   });
 });

@@ -36,16 +36,17 @@ const assertValidPassword = (password: unknown): string => {
  * i.e. the target is an active ADMIN today and no other active ADMIN exists.
  * Takes the transaction client so the count and the update see one snapshot.
  */
-const assertNotLastAdmin = async (tx: Prisma.TransactionClient, targetId: string) => {
+const assertNotLastAdmin = async (
+  tx: Prisma.TransactionClient,
+  targetId: string,
+  action = 'deactivate or demote'
+) => {
   const otherActiveAdmins = await tx.user.count({
     where: { role: 'ADMIN', active: true, id: { not: targetId } },
   });
 
   if (otherActiveAdmins === 0) {
-    throw new AppError(
-      'Cannot deactivate or demote the last active administrator',
-      400
-    );
+    throw new AppError(`Cannot ${action} the last active administrator`, 400);
   }
 };
 
@@ -194,6 +195,43 @@ export const resetUserPassword = async (req: AuthRequest, res: Response, next: N
     });
 
     res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    if (errorCode(error) === 'P2025') {
+      return next(new AppError('User not found', 404));
+    }
+    next(error);
+  }
+};
+
+export const deleteUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    if (id === req.userId) {
+      throw new AppError('You cannot delete your own account', 400);
+    }
+
+    // The caller is always an active ADMIN, so blocking self-deletion already keeps one around.
+    // The check still runs in the transaction to cover two admins deleting each other at once.
+    await runSerializable(async (tx) => {
+      const target = await tx.user.findUnique({
+        where: { id },
+        select: { id: true, role: true, active: true },
+      });
+
+      if (!target) {
+        throw new AppError('User not found', 404);
+      }
+
+      if (target.role === 'ADMIN' && target.active) {
+        await assertNotLastAdmin(tx, target.id, 'delete');
+      }
+
+      // Inventory movements keep their rows: the relation is ON DELETE SET NULL.
+      await tx.user.delete({ where: { id } });
+    });
+
+    res.json({ message: 'User deleted successfully' });
   } catch (error) {
     if (errorCode(error) === 'P2025') {
       return next(new AppError('User not found', 404));

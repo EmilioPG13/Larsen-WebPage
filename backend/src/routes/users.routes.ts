@@ -4,6 +4,7 @@ import {
   createUser,
   updateUser,
   resetUserPassword,
+  deleteUser,
 } from '../controllers/users.controller';
 import { authenticateToken, requireRole } from '../middleware/auth.middleware';
 import { errorHandler } from '../middleware/error.middleware';
@@ -18,6 +19,7 @@ router.get('/', getUsers);
 router.post('/', createUser);
 router.put('/:id', updateUser);
 router.put('/:id/password', resetUserPassword);
+router.delete('/:id', deleteUser);
 
 router.use(errorHandler);
 
