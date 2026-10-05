@@ -59,12 +59,14 @@ const MARGIN = 8;
  * Places a portaled panel next to its anchor with fixed positioning, so no scrolling or clipping
  * ancestor (a table wrapper, a modal) can cut it off. Opens upwards when there is no room below.
  * `width` is the panel's own width; without it the panel is at least as wide as the anchor.
+ * `align: 'end'` lines the panel's right edge up with the anchor's, for triggers at the right of the page.
  */
 export function usePanelPosition(
   anchorRef: RefObject<HTMLElement | null>,
   open: boolean,
   needed: number,
   width?: number,
+  align: 'start' | 'end' = 'start',
 ) {
   const [position, setPosition] = useState<{
     side: 'bottom' | 'top';
@@ -83,7 +85,8 @@ export function usePanelPosition(
       const below = window.innerHeight - rect.bottom;
       const side = below < needed && rect.top > below ? 'top' : 'bottom';
       const panelWidth = width ?? rect.width;
-      const left = Math.max(MARGIN, Math.min(rect.left, window.innerWidth - panelWidth - MARGIN));
+      const preferred = align === 'end' ? rect.right - panelWidth : rect.left;
+      const left = Math.max(MARGIN, Math.min(preferred, window.innerWidth - panelWidth - MARGIN));
       setPosition({
         side,
         style: {
@@ -103,7 +106,7 @@ export function usePanelPosition(
       window.removeEventListener('scroll', update, true);
       window.removeEventListener('resize', update);
     };
-  }, [anchorRef, open, needed, width]);
+  }, [anchorRef, open, needed, width, align]);
 
   return position;
 }

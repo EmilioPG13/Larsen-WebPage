@@ -7,7 +7,9 @@ import UnitHistory from '../components/UnitHistory';
 import DatePicker from '../components/ui/DatePicker';
 import Select from '../components/ui/Select';
 import { formatDateTime, movementAuthor, statusLabels } from '../utils/inventoryLabels';
+import ExportMenu, { type ExportFormat } from '../components/ExportMenu';
 import { exportInventoryXlsx } from '../utils/inventoryExport';
+import { exportInventoryPdf } from '../utils/inventoryPdf';
 
 const STATUSES: UnitStatus[] = ['DISPONIBLE', 'APARTADA', 'VENDIDA'];
 
@@ -190,11 +192,11 @@ const Inventory: React.FC = () => {
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async (format: ExportFormat) => {
     setActionError('');
     setExporting(true);
     try {
-      await exportInventoryXlsx(units);
+      await (format === 'pdf' ? exportInventoryPdf(units) : exportInventoryXlsx(units));
     } catch (err) {
       setActionError(apiErrorMessage(err, 'Error al exportar el inventario'));
     } finally {
@@ -232,13 +234,7 @@ const Inventory: React.FC = () => {
           >
             Nueva unidad
           </button>
-          <button
-            onClick={handleExport}
-            disabled={exporting || units.length === 0}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-          >
-            {exporting ? 'Exportando...' : 'Exportar Excel'}
-          </button>
+          <ExportMenu busy={exporting} disabled={units.length === 0} onExport={handleExport} />
         </div>
       </div>
 

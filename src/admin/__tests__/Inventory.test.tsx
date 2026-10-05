@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import Inventory from '../pages/Inventory';
 import * as adminApi from '../services/adminApi';
 import * as exporter from '../utils/inventoryExport';
+import * as pdfExporter from '../utils/inventoryPdf';
 
 vi.mock('../services/adminApi', () => ({
   adminApi: {
@@ -20,8 +21,13 @@ vi.mock('../utils/inventoryExport', () => ({
   exportInventoryXlsx: vi.fn(),
 }));
 
+vi.mock('../utils/inventoryPdf', () => ({
+  exportInventoryPdf: vi.fn(),
+}));
+
 const api = adminApi.adminApi as unknown as Record<string, Mock>;
 const exportXlsx = exporter.exportInventoryXlsx as unknown as Mock;
+const exportPdf = pdfExporter.exportInventoryPdf as unknown as Mock;
 
 const now = '2026-10-01T15:00:00.000Z';
 const makeUnit = (overrides: Record<string, unknown> = {}) => ({
@@ -373,6 +379,32 @@ describe('Inventory page', () => {
 
     expect(exportXlsx).toHaveBeenCalledTimes(1);
     expect(exportXlsx.mock.calls[0][0]).toHaveLength(4);
+  });
+
+  it('exports a PDF from the export menu with every unit, whatever the filters', async () => {
+    const user = userEvent.setup();
+    render(<Inventory />);
+    await screen.findByText('Vesta 130E', { exact: false });
+
+    await user.click(screen.getByRole('button', { name: 'Vendidas (1)' }));
+    await user.click(screen.getByRole('button', { name: 'Más formatos de exportación' }));
+    await user.click(screen.getByRole('menuitem', { name: /PDF/ }));
+
+    expect(exportPdf).toHaveBeenCalledTimes(1);
+    expect(exportPdf.mock.calls[0][0]).toHaveLength(4);
+    expect(exportXlsx).not.toHaveBeenCalled();
+  });
+
+  it('shows the error when the PDF cannot be generated', async () => {
+    exportPdf.mockRejectedValueOnce(new Error('boom'));
+    const user = userEvent.setup();
+    render(<Inventory />);
+    await screen.findByText('Vesta 130E', { exact: false });
+
+    await user.click(screen.getByRole('button', { name: 'Más formatos de exportación' }));
+    await user.click(screen.getByRole('menuitem', { name: /PDF/ }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Error al exportar el inventario');
   });
 
   it('shows an empty state when there are no units yet, and disables the export', async () => {
