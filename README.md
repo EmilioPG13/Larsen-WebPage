@@ -1,471 +1,112 @@
-# Larsen Italiana - Lead Generation Website
+# Larsen Italiana
 
-A professional website for Larsen Italiana industrial sewing machines, built with React, TypeScript, Express, and PostgreSQL. Includes a complete admin panel, lead management system, and dynamic catalog of products and machines.
+A bilingual (ES/EN) lead-generation site and inventory back office for Larsen Italiana, a distributor of rebuilt industrial knitting machines. Visitors browse the catalog and request a quote; the sales team gets an email, and staff manage leads and physical stock from a private panel.
 
-## 🚀 Main Features
+[![A visitor fills in the quote form and gets a confirmation](assets/readme/quote-flow.gif)](assets/readme/quote-flow.gif)
 
-### Public Frontend
-- **Responsive Design**: Optimized for all devices (mobile, tablets, desktop)
-- **Multiple Pages**: Home, Brands, Machines, Quote, About
-- **Dynamic Catalog**: Products and machines with detailed information from database
-- **Interactive Quote Form**: Multi-step form with validation
-- **Contact Form**: Modal integrated with EmailJS
-- **Stock Management**: Real-time availability badges
-- **Carousels**: Hero carousel and Product carousel
-- **Page Transitions**: Smooth animations between pages
-- **Top Banner**: Featured promotions and announcements
+**React 19** · TypeScript · Vite · Tailwind 4 · Express · Prisma + PostgreSQL (Neon) · Zod · JWT · Nodemailer · Vitest + Jest · Vercel
 
-### Admin Panel
-- **Secure Authentication**: Login with JWT and bcrypt
-- **Dashboard**: System statistics and summary
-- **Lead Management**: View, filter by status, and update leads
-- **Inventory Management**: Stock updates for products and machines
-- **Product Management**: Full CRUD for products
-- **Machine Management**: Full CRUD for machines
-- **Brand Management**: Brand administration and relationships
-- **Protected Routes**: Authentication middleware for all admin routes
+## Try it
 
-### Backend API
-- **RESTful API**: Complete endpoints for all operations
-- **PostgreSQL Database**: With Prisma ORM
-- **JWT Authentication**: Secure tokens for admin sessions
-- **Data Validation**: With Zod
-- **Error Handling**: Centralized middleware
-- **CORS Configured**: Support for development and production
+Live at **[larsenitaliana.com](https://larsenitaliana.com)**. The admin panel is private: there is no public registration, and the first account comes from the seed script.
 
-## 🛠️ Technology Stack
+<table>
+  <tr>
+    <td width="40%"><img src="assets/readme/catalog.png" alt="Machine catalog with availability badges"></td>
+    <td width="40%"><img src="assets/readme/machine-detail.png" alt="Machine detail page with a specifications table"></td>
+    <td width="20%"><img src="assets/readme/mobile-detail.png" alt="The same detail page on a phone"></td>
+  </tr>
+  <tr>
+    <td width="40%"><img src="assets/readme/admin-inventory.png" alt="Admin inventory list with one-click status changes"></td>
+    <td width="40%"><img src="assets/readme/admin-leads.png" alt="Admin lead list filtered by status"></td>
+    <td width="20%"></td>
+  </tr>
+</table>
 
-### Frontend
-- **Framework**: Vite + React 19 + TypeScript
-- **Routing**: React Router DOM v7
-- **Styles**: Tailwind CSS v4
-- **Forms**: EmailJS for contacts
-- **HTTP Client**: Axios
-- **Testing**: Vitest + Testing Library
+Admin screenshots use fictitious data.
 
-### Backend
-- **Runtime**: Node.js + Express
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Authentication**: JWT + bcrypt
-- **Validation**: Zod
-- **Testing**: Jest + Supertest
+## How it works
 
-### DevOps
-- **Frontend Deployment**: Vercel (configured)
-- **Backend Deployment**: Railway/Render compatible
-- **Version Control**: Git
-
-## 📦 Installation and Setup
-
-### Prerequisites
-- Node.js v18 or higher
-- PostgreSQL (local or remote)
-- npm or yarn
-
-### Initial Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Larsen-WebPage
-   ```
-
-2. **Install frontend dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Setup the backend**
-   ```bash
-   cd backend
-   npm install
-   ```
-
-4. **Configure backend environment variables**
-   
-   Create `backend/.env`:
-   ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/larsen_db"
-   JWT_SECRET="your-super-secure-secret-key"
-   PORT=3001
-   CORS_ORIGIN="http://localhost:5173"
-   ```
-
-5. **Setup database**
-   ```bash
-   cd backend
-   npm run prisma:generate
-   npm run prisma:migrate
-   npm run seed
-   ```
-   
-   **Alternative: Use Prisma Studio for database management**
-   ```bash
-   npm run prisma:studio
-   ```
-   This opens a GUI at `http://localhost:5555` to view and edit your database.
-
-6. **Configure frontend environment variables**
-   
-   Create `.env` in the root:
-   ```env
-   VITE_API_URL=http://localhost:3001/api
-   ```
-
-7. **Create admin user**
-   ```bash
-   # From the backend directory
-   curl -X POST http://localhost:3001/api/auth/register \
-     -H "Content-Type: application/json" \
-     -d '{"email":"admin@larsenitaliana.com","password":"your-secure-password"}'
-   ```
-
-### Development
-
-**Start backend:**
-```bash
-cd backend
-npm run dev
+```mermaid
+flowchart LR
+  subgraph Vercel
+    W["React SPA<br/>larsenitaliana.com"] -->|REST + JWT| A["Express API<br/>api.larsenitaliana.com"]
+    C["Cron<br/>monthly report"] --> A
+  end
+  A --> DB[("PostgreSQL<br/>Neon")]
+  A -->|SMTP| T["Sales team<br/>HTML notification"]
+  A -->|SMTP| K["Customer<br/>confirmation, ES or EN"]
 ```
 
-**Start frontend (in another terminal):**
-```bash
-npm run dev
-```
+- A quote request is stored first, then two emails go out in parallel: an HTML notification for the sales team (Reply, Call and "View in panel" buttons) and an automatic confirmation to the customer in the language they browsed in.
+- An email failure never fails the saved lead. If the API itself is unreachable, the form falls back to EmailJS.
+- Machine pages generate a one-page spec-sheet PDF in the browser, and the download is recorded as a lead.
+- Two roles: `ADMIN` does everything; `INVENTARIO` can only work on stock. Every inventory change is written to an audit trail.
+- GA4 events track machine views, WhatsApp and phone clicks, quote submissions and spec downloads.
 
-**Using development script (Windows):**
-```bash
-dev.bat
-```
+## Decisions, and why
 
-Frontend will be available at `http://localhost:5173`  
-Backend will be available at `http://localhost:3001`
+- **Typed i18n, no library.** [`dictionary.ts`](src/i18n/dictionary.ts) defines `es` as the canonical shape and the type forces `en` to match, so a missing translation fails the build instead of showing up in production.
+- **PDFs stay out of the main bundle.** [`specSheet.ts`](src/services/specSheet.ts) imports jsPDF dynamically, so only people who click "download" pay for it.
+- **Login throttling lives in the database.** Serverless instances share no memory, so failed attempts are counted per IP in a `login_attempts` table (5 per 15 minutes).
+- **One Express app, two Vercel projects.** The same `app` runs locally with `tsx` and in production as the serverless handler in [`backend/api/index.ts`](backend/api/index.ts); the SPA and the API deploy independently.
+- **Serial numbers are the identity of a unit.** Stock is one row per physical machine, unique per brand and serial. Internal notes never leave the admin API.
+- **Ready for an ERP, without building one.** `InventoryUnit.externalId` is the hook for a future Odoo sync, so the schema won't need to change when that stage starts.
 
-## 🗂️ Project Structure
+## Run it locally
 
-```
-Larsen-WebPage/
-├── backend/                    # Backend API
-│   ├── prisma/
-│   │   ├── schema.prisma      # Database schema
-│   │   ├── seed.ts            # Initial data
-│   │   └── migrations/        # Database migrations
-│   ├── src/
-│   │   ├── config/            # Configuration (DB, env)
-│   │   ├── controllers/       # Route controllers
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── products.controller.ts
-│   │   │   ├── machines.controller.ts
-│   │   │   ├── brands.controller.ts
-│   │   │   └── leads.controller.ts
-│   │   ├── middleware/        # Middleware (auth, errors)
-│   │   ├── routes/            # Route definitions
-│   │   ├── services/          # Business logic
-│   │   ├── types/             # TypeScript types
-│   │   ├── utils/             # Utilities
-│   │   └── server.ts          # Entry point
-│   ├── __tests__/             # Backend tests
-│   └── package.json
-│
-├── src/                        # Frontend
-│   ├── admin/                  # Admin panel
-│   │   ├── components/
-│   │   │   ├── AdminLayout.tsx
-│   │   │   ├── InventoryManager.tsx
-│   │   │   └── ProtectedRoute.tsx
-│   │   ├── pages/
-│   │   │   ├── Login.tsx
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── Products.tsx
-│   │   │   ├── Machines.tsx
-│   │   │   ├── Brands.tsx
-│   │   │   └── Leads.tsx
-│   │   └── services/
-│   │       └── adminApi.ts
-│   │
-│   ├── components/             # Public components
-│   │   ├── Header.tsx
-│   │   ├── Footer.tsx
-│   │   ├── Hero.tsx
-│   │   ├── HeroCarousel.tsx
-│   │   ├── TopBanner.tsx
-│   │   ├── ProductGrid.tsx
-│   │   ├── ProductCard.tsx
-│   │   ├── ProductCarousel.tsx
-│   │   ├── ContactModal.tsx
-│   │   ├── ContactAlternatives.tsx
-│   │   ├── InteractiveQuoteForm.tsx
-│   │   ├── QuoteSteps.tsx
-│   │   └── ImagePlaceholder.tsx
-│   │
-│   ├── pages/                  # Application pages
-│   │   ├── HomePage.tsx
-│   │   ├── BrandsPage.tsx
-│   │   ├── MachinesPage.tsx
-│   │   ├── QuotePage.tsx
-│   │   └── AboutPage.tsx
-│   │
-│   ├── services/               # API services
-│   │   └── api.ts
-│   │
-│   ├── types/                  # TypeScript types
-│   │   └── index.ts
-│   │
-│   ├── data/                   # Static data (fallback)
-│   │   ├── products.json
-│   │   └── machines.json
-│   │
-│   ├── __tests__/              # Frontend tests
-│   ├── App.tsx
-│   └── main.tsx
-│
-├── public/
-│   └── images/
-│       ├── logo/
-│       ├── brands/
-│       └── machines/
-│
-├── BACKEND_SETUP.md            # Backend setup guide
-├── DEPLOYMENT.md               # Deployment guide
-├── TESTING.md                  # Testing guide
-└── README.md                   # This file
-```
-
-## 📡 API Endpoints
-
-### Public Endpoints
-- `GET /api/products` - List all products
-- `GET /api/products/:id` - Get product by ID
-- `GET /api/machines` - List all machines
-- `GET /api/machines/:id` - Get machine by ID
-- `GET /api/brands` - List all brands
-- `GET /api/brands/:id` - Get brand by ID
-- `POST /api/leads` - Create new lead (quote request)
-- `POST /api/contact` - Submit contact form
-
-### Authentication Endpoints
-- `POST /api/auth/register` - Register admin (development only)
-- `POST /api/auth/login` - Admin login
-
-### Admin Endpoints (Require Authentication)
-
-**Products:**
-- `GET /api/admin/products` - List products (with pagination)
-- `POST /api/admin/products` - Create product
-- `PUT /api/admin/products/:id` - Update product
-- `DELETE /api/admin/products/:id` - Delete product
-- `PUT /api/admin/products/:id/stock` - Update product stock status
-
-**Machines:**
-- `GET /api/admin/machines` - List machines (with pagination)
-- `POST /api/admin/machines` - Create machine
-- `PUT /api/admin/machines/:id` - Update machine
-- `DELETE /api/admin/machines/:id` - Delete machine
-- `PUT /api/admin/machines/:id/stock` - Update machine stock status
-
-**Brands:**
-- `GET /api/admin/brands` - List brands
-- `POST /api/admin/brands` - Create brand
-- `PUT /api/admin/brands/:id` - Update brand
-- `DELETE /api/admin/brands/:id` - Delete brand
-
-**Leads:**
-- `GET /api/admin/leads` - List leads
-- `GET /api/admin/leads/:id` - Get lead by ID
-- `PUT /api/admin/leads/:id/status` - Update lead status
-- `GET /api/admin/leads/stats` - Dashboard statistics
-
-**Statistics:**
-- `GET /api/admin/stats` - Dashboard statistics
-
-## 🎨 Color Palette
-
-```css
-/* Main colors */
---larsen-blue: #28327B
---larsen-red: #D81E2A
---larsen-pink: #D3AFC4
---larsen-dark-red: #B7444C
---larsen-white: #FFFFFF
-```
-
-## 🗄️ Data Model
-
-### Prisma Schema
-- **User**: Admin users
-- **Brand**: Product/machine brands
-- **Product**: Products with stock (`inStock` boolean field)
-- **Machine**: Industrial machines with stock (`inStock` boolean field)
-- **Lead**: Quote requests with status tracking
-- **ContactSubmission**: Contact form submissions
-
-All models include timestamps (`createdAt`, `updatedAt`) and appropriate relationships.
-
-### Inventory Management
-
-Products and machines have an `inStock` boolean field for stock status tracking. Update stock status using:
+Needs Node 20.19+ and a PostgreSQL database.
 
 ```bash
-PUT /api/admin/products/:id/stock
-PUT /api/admin/machines/:id/stock
+git clone https://github.com/EmilioPG13/Larsen-WebPage.git
+cd Larsen-WebPage
+npm install
+cd backend && npm install
 
-Body: { "inStock": true } OR { "quantity": 5 }
+# Copy backend/.env.example to backend/.env and set DATABASE_URL, JWT_SECRET,
+# ADMIN_EMAIL and ADMIN_PASSWORD (12+ characters).
+npm run prisma:migrate
+npm run seed
+npm run dev          # API on http://localhost:3001
 ```
 
-**Note:** If `quantity` is provided, it converts to boolean (quantity > 0 = inStock = true, quantity = 0 = inStock = false).
+In a second terminal, from the repo root, create `.env` with `VITE_API_URL=http://localhost:3001/api`, then:
 
-## 🧪 Testing
-
-### Frontend Testing
 ```bash
-# Run tests
-npm test
-
-# Tests with UI
-npm run test:ui
-
-# Coverage
-npm run test:coverage
+npm run dev          # site on http://localhost:3000, admin at /admin/login
 ```
 
-### Backend Testing
+SMTP is optional. Without it, leads are still saved and the emails are skipped with a warning. Every variable is documented in [`.env.example`](.env.example) and [`backend/.env.example`](backend/.env.example).
+
+## Tests
+
 ```bash
-cd backend
-npm test
-npm run test:watch
-npm run test:coverage
+npm test             # 249 tests, Vitest + Testing Library
+cd backend && npm test   # 385 tests, Jest + Supertest
 ```
 
-See `TESTING.md` for complete manual and automated testing guide.
+Manual QA steps are in [TESTING.md](TESTING.md).
 
-## 🚀 Deployment
+## API at a glance
 
-### Frontend (Vercel)
-1. Connect repository to Vercel
-2. Configure environment variables:
-   - `VITE_API_URL`: Your backend API URL
-3. Deploy automatically
+| Access | Routes |
+| --- | --- |
+| Public | `GET /api/products`, `/machines`, `/brands`, `/catalog` · `POST /api/leads` · `POST /api/auth/login` · `GET /health` |
+| Signed in | `GET /api/auth/me` · `PUT /api/auth/password` |
+| `ADMIN` + `INVENTARIO` | `/api/inventory`: list, create, edit, change status, unit history |
+| `ADMIN` | Catalog writes (products, machines, brands) · leads · `/api/users` · inventory report and delete |
+| Cron | `GET /api/cron/monthly-report`, protected by `CRON_SECRET` |
 
-### Backend (Railway/Render)
-1. Connect repository
-2. Configure environment variables:
-   - `DATABASE_URL`: PostgreSQL URL
-   - `JWT_SECRET`: Secret key for JWT
-   - `CORS_ORIGIN`: Frontend URL
-   - `PORT`: Server port
-3. Run migrations: `npm run prisma:migrate`
-4. Run seed: `npm run seed`
+Data model: [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma).
 
-See `DEPLOYMENT.md` for complete details.
+## Honest limitations
 
-## ⚙️ EmailJS Configuration (Optional)
+- The admin panel is Spanish only; the public site is ES/EN.
+- Migrations are applied by hand with `prisma migrate deploy`, not on deploy.
+- The monthly inventory report is still a plain-text email.
+- `POST /api/contact` is legacy and no longer used by the UI.
+- The ERP sync is a schema hook only; nothing talks to Odoo yet.
 
-For the traditional contact form:
+## About
 
-1. Create account at [EmailJS](https://www.emailjs.com/)
-2. Configure email service
-3. Create template with variables:
-   - `{{from_name}}`, `{{from_email}}`, `{{phone}}`, `{{company}}`, `{{message}}`, `{{product_name}}`
-4. Update `src/components/ContactModal.tsx` with your IDs
-
-## 🎯 Lead Generation Flow
-
-1. User browses catalog (products/machines)
-2. Clicks "I'm interested" or navigates to `/cotizacion`
-3. Completes interactive multi-step form
-4. Data saved to database as Lead
-5. Lead appears in admin panel with "New" status
-6. Admin can update status (Contacted, Converted, Archived)
-7. Optional email via EmailJS for notifications
-
-## 📱 Responsive Features
-
-The site is optimized for:
-- 📱 Mobile (320px+)
-- 📱 Tablets (768px+)
-- 💻 Desktop (1024px+)
-- 🖥️ Large screens (1280px+)
-
-## 🔒 Security
-
-- JWT authentication with secure tokens
-- Passwords hashed with bcrypt
-- Authentication middleware on protected routes
-- Data validation with Zod
-- CORS configured appropriately
-- Environment variables for secrets
-
-## 🖼️ Images
-
-Images should be placed in `public/images/`:
-- `logo/` - Larsen logos
-- `brands/` - Brand images
-- `machines/` - Machine images
-
-The system includes automatic placeholders if images are not available.
-
-## 📚 Additional Documentation
-
-- `TESTING.md` - Manual and automated testing guide with detailed test procedures
-
-## 🔧 Available Scripts
-
-### Frontend
-- `npm run dev` - Development server
-- `npm run build` - Production build
-- `npm run preview` - Preview build
-- `npm test` - Run tests
-- `npm run lint` - Linter
-
-### Backend
-- `npm run dev` - Development server with hot reload
-- `npm run build` - Compile TypeScript
-- `npm start` - Run production server
-- `npm run prisma:generate` - Generate Prisma Client
-- `npm run prisma:migrate` - Run database migrations
-- `npm run prisma:studio` - Open Prisma Studio (GUI for database management)
-- `npm run seed` - Seed database with initial data
-- `npm test` - Run tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage report
-
-## 🆘 Troubleshooting
-
-### Database connection error
-- Verify PostgreSQL is running
-- Verify `DATABASE_URL` in `.env`
-- Ensure database exists
-
-### CORS errors
-- Verify `CORS_ORIGIN` in backend `.env`
-- Must match frontend URL
-
-### Authentication error
-- Verify `JWT_SECRET` is configured
-- Verify token hasn't expired
-- Verify admin user exists
-
-### Products/Machines not appearing
-- Verify backend is running
-- Verify `VITE_API_URL` in frontend `.env`
-- Check browser console for errors
-
-## 🔄 Potential Future Improvements
-
-- [ ] Email notification system for new leads
-- [ ] Export leads to CSV/Excel
-- [ ] Advanced search and filters
-- [ ] Image upload for products/machines
-- [ ] Multi-language (i18n)
-- [ ] Integrated analytics
-- [ ] Live chat
-- [ ] Blog/News
-
-## 📄 License
-
-This project is private and property of Larsen Italiana.
-
----
-
-**Larsen Italiana** - Industrial sewing machine specialists since 2004.
+Built by [Emilio Parra](https://github.com/EmilioPG13) for Larsen Italiana, with their permission. The source is shared as a portfolio piece. Larsen's name, logo and product photos belong to the company, and no license is granted to reuse them.
