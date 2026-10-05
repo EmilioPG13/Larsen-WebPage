@@ -4,7 +4,7 @@ import { adminApi } from '../services/adminApi';
 import { getStoredUser, type AdminRole } from '../services/session';
 import { useOptionalTheme } from '../../context/ThemeContext';
 import ChangePasswordModal from './ChangePasswordModal';
-import { CellMark, Icon, Tag, type IconName } from './ui/kit';
+import { AdminLogo, Icon, Tag, type IconName } from './ui/kit';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -125,10 +125,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         >
           <Icon name="menu" size={22} />
         </button>
-        <span className="flex items-center gap-2 text-[18px] font-bold tracking-tight">
-          <CellMark size={22} />
-          Larsen
-        </span>
+        <AdminLogo height={24} onDark />
         {theme && (
           <button
             onClick={theme.toggleTheme}
@@ -155,12 +152,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         }`}
       >
         <div className="flex items-center justify-between gap-3 border-b border-(--a-rail-line) px-4 py-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <CellMark size={30} />
-            <div className="min-w-0 leading-tight">
-              <div className="text-[18px] font-bold tracking-tight">Larsen</div>
-              <div className="text-[13px] text-(--a-rail-muted)">Italiana · Panel interno</div>
-            </div>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <AdminLogo height={32} onDark />
+            <div className="text-[13px] text-(--a-rail-muted)">Panel interno</div>
           </div>
           <button
             onClick={() => setMenuOpen(false)}

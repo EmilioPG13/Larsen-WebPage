@@ -242,7 +242,7 @@ Radius is 0 everywhere. Forms are squares, hairline rectangles and drawn geometr
 The state vocabulary, drawn in a 16px box (rendered 14-18px) in `currentColor`: **ring** (circle outline), **slash** (ring crossed by a diagonal), **dot** (filled circle), **cross** (an X), **sq** (filled square), **sqslash**, **sqcheck**, **sqdash** (square outlines with a diagonal, check or dash), **alert** (square outline with an exclamation), and **check**. Each state of a unit or record gets one fixed mark; tags and table rows carry the mark beside the text.
 
 ### Rail
-Navy-ink column with a wordmark lockup (3x3 L-shaped cell mark plus "Larsen"), grouped nav under 11px uppercase group labels, 40px links with 20px drawn icons, the active link an inverted paper cell, then a user cell and the theme switch (two equal cells, the live one filled paper) at the bottom.
+Navy-ink column with the company wordmark (`AdminLogo`, a white silhouette of the logo on the dark rail) over "Panel interno", grouped nav under 11px uppercase group labels, 40px links with 20px drawn icons, the active link an inverted paper cell, then a user cell and the theme switch (two equal cells, the live one filled paper) at the bottom.
 
 ### Plates
 White squares with a 1px hairline. Optional head band (64px, plate-header tone, label-style title, 13px note beneath) and body padding 16-20px. A ledger variant lists label-left, mono-value-right rows separated by hairlines.
