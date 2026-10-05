@@ -1,9 +1,47 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
-import { notifyNewLead } from '../services/notify';
+import { NotifiableLead, notifyNewLead, sendLeadConfirmation } from '../services/notify';
+import { EmailLang, parseEmailLang } from '../services/email-layout';
 
 const MAX_TAG_LENGTH = 60;
+
+// A spec-sheet download leaves contact details but does not ask for anything, so
+// "we will contact you" would promise something nobody requested.
+const NO_CONFIRMATION_SOURCE = 'spec-download';
+const CONFIRMATION_COOLDOWN_MS = 60 * 60 * 1000;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const MAX_EMAIL_LENGTH = 254;
+
+/**
+ * Sends the person an automatic acknowledgement of their quote request. The form is public,
+ * so it is also an open mailer: this only writes to a well-formed address, only for requests
+ * that ask for a quote, and at most once an hour per address. Never throws: the lead is
+ * already saved and the email is best-effort.
+ */
+const confirmToCustomer = async (
+  lead: NotifiableLead & { source?: string | null },
+  lang: EmailLang
+): Promise<void> => {
+  try {
+    if (lead.source === NO_CONFIRMATION_SOURCE) return;
+    if (lead.email.length > MAX_EMAIL_LENGTH || !EMAIL_RE.test(lead.email)) return;
+
+    const recent = await prisma.lead.count({
+      where: {
+        id: { not: lead.id },
+        email: { equals: lead.email, mode: 'insensitive' },
+        createdAt: { gte: new Date(Date.now() - CONFIRMATION_COOLDOWN_MS) },
+        OR: [{ source: null }, { source: { not: NO_CONFIRMATION_SOURCE } }],
+      },
+    });
+    if (recent > 0) return;
+
+    await sendLeadConfirmation(lead, lang);
+  } catch (confirmError) {
+    console.error('Failed to send lead confirmation:', confirmError);
+  }
+};
 
 /** A trimmed, length-capped string, or null when the value is not usable text. */
 const optionalText = (value: unknown): string | null =>
@@ -49,6 +87,7 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
       inventoryUnitId,
       serialNumber,
       source,
+      language,
     } = req.body;
 
     if (!name || !email || !phone) {
@@ -80,13 +119,15 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
     });
 
     // Awaited on purpose: a serverless function can be frozen right after the
-    // response is sent, which would drop an unawaited email. A failure here is
-    // logged and never turns the saved lead into an error response.
-    try {
-      await notifyNewLead(lead);
-    } catch (notifyError) {
-      console.error('Failed to send lead notification:', notifyError);
-    }
+    // response is sent, which would drop an unawaited email. Both emails go out
+    // together so the slower SMTP call is the only wait, and a failure in either
+    // is logged and never turns the saved lead into an error response.
+    await Promise.all([
+      notifyNewLead(lead).catch((notifyError) => {
+        console.error('Failed to send lead notification:', notifyError);
+      }),
+      confirmToCustomer(lead, parseEmailLang(language)),
+    ]);
 
     res.status(201).json(lead);
   } catch (error) {

@@ -107,6 +107,8 @@ export const submitLead = async (leadData: {
   inventoryUnitId?: string;
   serialNumber?: string;
   source?: string;
+  /** Language of the confirmation email sent to the visitor. */
+  language?: 'es' | 'en';
 }) => {
   const response = await api.post('/leads', leadData);
   return response.data;

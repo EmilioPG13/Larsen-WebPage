@@ -5,6 +5,7 @@ import { AppError } from '../middleware/error.middleware';
 // Mock the notification service (no SMTP in tests)
 jest.mock('../services/notify', () => ({
   notifyNewLead: jest.fn(),
+  sendLeadConfirmation: jest.fn(),
 }));
 
 // Mock Prisma
@@ -25,7 +26,10 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const { notifyNewLead: mockNotifyNewLead } = require('../services/notify');
+const {
+  notifyNewLead: mockNotifyNewLead,
+  sendLeadConfirmation: mockSendLeadConfirmation,
+} = require('../services/notify');
 const prisma = require('../config/database').default;
 const mockCreate = prisma.lead.create;
 const mockFindMany = prisma.lead.findMany;
@@ -58,6 +62,8 @@ describe('Leads Controller', () => {
     jest.clearAllMocks();
     mockNotifyNewLead.mockReset();
     mockNotifyNewLead.mockResolvedValue(undefined);
+    mockSendLeadConfirmation.mockReset();
+    mockSendLeadConfirmation.mockResolvedValue(true);
   });
 
   describe('createLead', () => {
@@ -340,6 +346,137 @@ describe('Leads Controller', () => {
 
         expect(mockNotifyNewLead).not.toHaveBeenCalled();
         expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      });
+    });
+
+    describe('confirmation to the customer', () => {
+      const body = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1 (555) 123-4567',
+        source: 'home-quote',
+      };
+      const createdLead = { id: '1', ...body, status: 'new' };
+
+      beforeEach(() => {
+        mockRequest.body = body;
+        mockCreate.mockResolvedValue(createdLead);
+        mockCount.mockResolvedValue(0);
+      });
+
+      it('confirms the quote in Spanish by default', async () => {
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockSendLeadConfirmation).toHaveBeenCalledTimes(1);
+        expect(mockSendLeadConfirmation).toHaveBeenCalledWith(createdLead, 'es');
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+      });
+
+      it('answers in the language the visitor was browsing in, and falls back to Spanish', async () => {
+        mockRequest.body = { ...body, language: 'en' };
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+        mockRequest.body = { ...body, language: 'klingon' };
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockSendLeadConfirmation.mock.calls[0][1]).toBe('en');
+        expect(mockSendLeadConfirmation.mock.calls[1][1]).toBe('es');
+      });
+
+      it('does not store the language with the lead', async () => {
+        mockRequest.body = { ...body, language: 'en' };
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockCreate.mock.calls[0][0].data).not.toHaveProperty('language');
+      });
+
+      it('does not confirm a spec-sheet download: nobody asked to be contacted', async () => {
+        mockRequest.body = { ...body, source: 'spec-download' };
+        mockCreate.mockResolvedValue({ ...createdLead, source: 'spec-download' });
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockSendLeadConfirmation).not.toHaveBeenCalled();
+        expect(mockNotifyNewLead).toHaveBeenCalledTimes(1);
+      });
+
+      it.each([
+        ['no at sign', 'not-an-email'],
+        ['no domain suffix', 'a@b'],
+        ['a space', 'a b@example.com'],
+        ['over 254 characters', `${'x'.repeat(250)}@example.com`],
+      ])(
+        'does not write to a malformed address (%s)',
+        async (_label, email) => {
+          mockCreate.mockResolvedValue({ ...createdLead, email });
+
+          await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+          expect(mockSendLeadConfirmation).not.toHaveBeenCalled();
+          expect(mockResponse.status).toHaveBeenCalledWith(201);
+        }
+      );
+
+      it('confirms at most once an hour per address, ignoring spec-sheet downloads', async () => {
+        mockCount.mockResolvedValue(1);
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        const where = mockCount.mock.calls[0][0].where;
+        expect(where.id).toEqual({ not: '1' });
+        expect(where.email).toEqual({ equals: 'john@example.com', mode: 'insensitive' });
+        expect(where.createdAt.gte).toBeInstanceOf(Date);
+        expect(Date.now() - where.createdAt.gte.getTime()).toBeLessThanOrEqual(60 * 60 * 1000 + 1000);
+        expect(where.OR).toEqual([{ source: null }, { source: { not: 'spec-download' } }]);
+        expect(mockSendLeadConfirmation).not.toHaveBeenCalled();
+        expect(mockNotifyNewLead).toHaveBeenCalledTimes(1);
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+      });
+
+      it('still responds 201, and still notifies the team, when the confirmation fails', async () => {
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockSendLeadConfirmation.mockRejectedValue(new Error('SMTP down'));
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockNotifyNewLead).toHaveBeenCalledTimes(1);
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+        expect(mockResponse.json).toHaveBeenCalledWith(createdLead);
+        expect(mockNext).not.toHaveBeenCalled();
+        expect(errorSpy).toHaveBeenCalledWith('Failed to send lead confirmation:', expect.any(Error));
+        errorSpy.mockRestore();
+      });
+
+      it('skips the confirmation, without failing the request, when the lookup fails', async () => {
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockCount.mockRejectedValue(new Error('db down'));
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockSendLeadConfirmation).not.toHaveBeenCalled();
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+        errorSpy.mockRestore();
+      });
+
+      it('still responds 201 when the team notification fails but the confirmation goes out', async () => {
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockNotifyNewLead.mockRejectedValue(new Error('SMTP down'));
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockSendLeadConfirmation).toHaveBeenCalledTimes(1);
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+        errorSpy.mockRestore();
+      });
+
+      it('sends nothing when validation or the database write fails', async () => {
+        mockRequest.body = { name: 'John Doe' };
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+        mockRequest.body = body;
+        mockCreate.mockRejectedValue(new Error('Database error'));
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockSendLeadConfirmation).not.toHaveBeenCalled();
       });
     });
 

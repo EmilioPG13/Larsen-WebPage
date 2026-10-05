@@ -23,6 +23,8 @@ export const envSchema = z.object({
   SMTP_USER: optionalString(),
   SMTP_PASS: optionalString(),
   LEAD_NOTIFY_EMAIL: optionalString(),
+  // Public site address: the emails load the logo from it and link back to it.
+  SITE_URL: z.preprocess(emptyToUndefined, z.string().default('https://larsenitaliana.com')),
   ADMIN_LEADS_URL: z.preprocess(
     emptyToUndefined,
     z.string().default('https://larsenitaliana.com/admin/leads')

@@ -13,6 +13,7 @@ const baseEnv = {
   SMTP_PASS: 'app-password',
   LEAD_NOTIFY_EMAIL: 'admin@larsenitaliana.com',
   ADMIN_LEADS_URL: 'https://larsenitaliana.com/admin/leads',
+  SITE_URL: 'https://larsenitaliana.com',
 };
 const mockEnv: Record<string, unknown> = { ...baseEnv };
 
@@ -66,7 +67,7 @@ describe('notifyNewLead', () => {
     }
   );
 
-  it('sends one plain-text email with the expected envelope and body', async () => {
+  it('sends one email, HTML with a plain-text fallback, with the expected envelope and body', async () => {
     const { notifyNewLead } = loadNotify();
 
     await notifyNewLead(lead);
@@ -77,7 +78,10 @@ describe('notifyNewLead', () => {
     expect(mail.to).toBe('admin@larsenitaliana.com');
     expect(mail.replyTo).toBe('ana@example.com');
     expect(mail.subject).toBe('Nueva cotización: Ana Pérez — Vesta 130E');
-    expect(mail.html).toBeUndefined();
+    expect(mail.html).toContain('<!doctype html>');
+    expect(mail.html).toContain('Ana Pérez');
+    expect(mail.html).toContain('Vesta 130E');
+    expect(mail.html).toContain('https://larsenitaliana.com/images/logo/larsen-logo-1.png');
     expect(mail.text).toContain('Nombre: Ana Pérez');
     expect(mail.text).toContain('Correo: ana@example.com');
     expect(mail.text).toContain('Teléfono: +52 55 1234 5678');
@@ -194,6 +198,73 @@ describe('notifyNewLead', () => {
     const { notifyNewLead } = loadNotify();
 
     await expect(notifyNewLead(lead)).rejects.toThrow('connect ETIMEDOUT');
+  });
+});
+
+describe('sendLeadConfirmation', () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Object.assign(mockEnv, baseEnv);
+    mockSendMail.mockResolvedValue({ messageId: 'x' });
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it.each(['SMTP_USER', 'SMTP_PASS'])('skips with a warning and returns false when %s is missing', async (key) => {
+    mockEnv[key] = undefined;
+    const { sendLeadConfirmation } = loadNotify();
+
+    await expect(sendLeadConfirmation(lead, 'es')).resolves.toBe(false);
+
+    expect(warnSpy).toHaveBeenCalledWith('lead confirmation skipped: SMTP not configured');
+    expect(mockCreateTransport).not.toHaveBeenCalled();
+  });
+
+  it('needs no internal inbox: it writes to the customer, from the sales mailbox', async () => {
+    mockEnv.LEAD_NOTIFY_EMAIL = undefined;
+    const { sendLeadConfirmation } = loadNotify();
+
+    await expect(sendLeadConfirmation(lead, 'es')).resolves.toBe(true);
+
+    const mail = mockSendMail.mock.calls[0][0];
+    expect(mail.from).toBe('Larsen Italiana <ventas@larsenitaliana.com>');
+    expect(mail.to).toBe('ana@example.com');
+    expect(mail.replyTo).toBeUndefined();
+    expect(mail.subject).toBe('Recibimos tu solicitud de cotización');
+    expect(mail.headers).toEqual({ 'Auto-Submitted': 'auto-generated' });
+    expect(mail.html).toContain('<html lang="es">');
+    expect(mail.text).toContain('lo más pronto posible');
+  });
+
+  it('answers in English when asked to', async () => {
+    const { sendLeadConfirmation } = loadNotify();
+
+    await sendLeadConfirmation(lead, 'en');
+
+    const mail = mockSendMail.mock.calls[0][0];
+    expect(mail.subject).toBe('We received your quote request');
+    expect(mail.html).toContain('<html lang="en">');
+    expect(mail.text).toContain('as soon as possible');
+  });
+
+  it('strips CR/LF from the recipient so an address cannot inject headers', async () => {
+    const { sendLeadConfirmation } = loadNotify();
+
+    await sendLeadConfirmation({ ...lead, email: 'eve@example.com\r\nBcc: attacker@evil.com' }, 'es');
+
+    expect(mockSendMail.mock.calls[0][0].to).not.toMatch(/[\r\n]/);
+  });
+
+  it('propagates SMTP failures so the caller can handle them', async () => {
+    mockSendMail.mockRejectedValue(new Error('connect ETIMEDOUT'));
+    const { sendLeadConfirmation } = loadNotify();
+
+    await expect(sendLeadConfirmation(lead, 'es')).rejects.toThrow('connect ETIMEDOUT');
   });
 });
 

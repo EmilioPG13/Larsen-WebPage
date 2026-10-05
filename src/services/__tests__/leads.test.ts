@@ -51,6 +51,21 @@ describe('sendQuoteLead', () => {
     expect(mockEmailjsSend).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['en', 'en'],
+    ['es', 'es'],
+    ['fr', 'es'],
+    ['', 'es'],
+  ])('sends the visitor language so the confirmation email matches it (html lang %j -> %s)', async (htmlLang, expected) => {
+    document.documentElement.lang = htmlLang;
+    const { sendQuoteLead } = await loadService(false);
+
+    await sendQuoteLead(payload);
+
+    expect(mockSubmitLead.mock.calls[0][0]).toMatchObject({ language: expected });
+    document.documentElement.lang = '';
+  });
+
   it('sends the unit and the source as their own fields, and only when present', async () => {
     const { sendQuoteLead } = await loadService(false);
 

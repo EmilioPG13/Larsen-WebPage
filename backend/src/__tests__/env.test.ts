@@ -16,6 +16,7 @@ describe('env schema (notification settings)', () => {
     expect(env.SMTP_PASS).toBeUndefined();
     expect(env.LEAD_NOTIFY_EMAIL).toBeUndefined();
     expect(env.ADMIN_LEADS_URL).toBe('https://larsenitaliana.com/admin/leads');
+    expect(env.SITE_URL).toBe('https://larsenitaliana.com');
   });
 
   it('treats empty strings as missing', () => {
@@ -27,6 +28,7 @@ describe('env schema (notification settings)', () => {
       SMTP_PASS: '',
       LEAD_NOTIFY_EMAIL: '',
       ADMIN_LEADS_URL: '',
+      SITE_URL: '',
     });
 
     expect(env.SMTP_HOST).toBe('smtp.gmail.com');
@@ -35,6 +37,7 @@ describe('env schema (notification settings)', () => {
     expect(env.SMTP_PASS).toBeUndefined();
     expect(env.LEAD_NOTIFY_EMAIL).toBeUndefined();
     expect(env.ADMIN_LEADS_URL).toBe('https://larsenitaliana.com/admin/leads');
+    expect(env.SITE_URL).toBe('https://larsenitaliana.com');
   });
 
   it('coerces SMTP_PORT and keeps provided values', () => {

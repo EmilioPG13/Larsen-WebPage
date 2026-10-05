@@ -44,6 +44,14 @@ async function sendViaEmailjs(p: QuoteLeadPayload): Promise<void> {
   );
 }
 
+/**
+ * The language the visitor is browsing in. LanguageProvider mirrors it on <html lang>, so the
+ * service reads it from there and no form has to pass it along. The backend answers the
+ * customer's confirmation email in this language.
+ */
+const currentLanguage = (): 'es' | 'en' =>
+  typeof document !== 'undefined' && document.documentElement.lang === 'en' ? 'en' : 'es';
+
 async function sendViaBackend(p: QuoteLeadPayload): Promise<void> {
   const sourceLine = p.source ? `[${p.source}] ` : '';
   await submitLead({
@@ -57,6 +65,7 @@ async function sendViaBackend(p: QuoteLeadPayload): Promise<void> {
     inventoryUnitId: p.inventoryUnitId || undefined,
     serialNumber: p.serialNumber || undefined,
     source: p.source || undefined,
+    language: currentLanguage(),
   });
 }
 
