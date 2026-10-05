@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { adminApi, type ManagedUser } from '../services/adminApi';
 import { apiErrorMessage } from '../services/apiError';
 import { getStoredUser, type AdminRole } from '../services/session';
+import Select from '../components/ui/Select';
 
 const roleLabels: Record<AdminRole, string> = {
   ADMIN: 'Administrador',
   INVENTARIO: 'Inventario',
 };
+
+const roleOptions = (['INVENTARIO', 'ADMIN'] as AdminRole[]).map((value) => ({ value, label: roleLabels[value] }));
 
 const emptyForm = { email: '', name: '', role: 'INVENTARIO' as AdminRole, password: '' };
 
@@ -153,15 +156,12 @@ const Users: React.FC = () => {
             <label htmlFor="user-role" className="block text-sm font-medium text-gray-700 mb-1">
               Rol
             </label>
-            <select
+            <Select
               id="user-role"
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as AdminRole })}
-              className={inputClass}
-            >
-              <option value="INVENTARIO">{roleLabels.INVENTARIO}</option>
-              <option value="ADMIN">{roleLabels.ADMIN}</option>
-            </select>
+              options={roleOptions}
+              onChange={(role) => setForm({ ...form, role: role as AdminRole })}
+            />
           </div>
           <div>
             <label htmlFor="user-password" className="block text-sm font-medium text-gray-700 mb-1">
@@ -247,16 +247,14 @@ const Users: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                   <td className="px-6 py-4 text-sm">
-                    <select
-                      aria-label={`Rol de ${user.email}`}
+                    <Select
+                      ariaLabel={`Rol de ${user.email}`}
                       value={user.role}
+                      options={roleOptions}
                       disabled={isSelf}
-                      onChange={(e) => handleUpdate(user, { role: e.target.value as AdminRole })}
-                      className="px-2 py-1 border border-gray-300 rounded-lg disabled:opacity-60"
-                    >
-                      <option value="ADMIN">{roleLabels.ADMIN}</option>
-                      <option value="INVENTARIO">{roleLabels.INVENTARIO}</option>
-                    </select>
+                      compact
+                      onChange={(role) => handleUpdate(user, { role: role as AdminRole })}
+                    />
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span

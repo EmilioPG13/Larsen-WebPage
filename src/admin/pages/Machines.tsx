@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../services/adminApi';
-import InventoryManager from '../components/InventoryManager';
+import { apiErrorMessage } from '../services/apiError';
 import type { Machine } from '../../types';
 
+/**
+ * Spec sheets of the machines. Stock no longer lives here: it comes from the
+ * physical units in Inventario. The only commercial flag left on a sheet is
+ * whether the model is sold to order from Italy (Aries), which the public
+ * catalog lists without units.
+ */
 const Machines: React.FC = () => {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
+  const [actionError, setActionError] = useState('');
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMachines();
@@ -18,20 +25,23 @@ const Machines: React.FC = () => {
       setLoading(true);
       const data = await adminApi.getMachines();
       setMachines(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cargar máquinas');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al cargar máquinas'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStockUpdate = async (id: string, data: { inStock?: boolean; quantity?: number }) => {
+  const handleOnOrderChange = async (machine: Machine, onOrder: boolean) => {
+    setActionError('');
+    setSavingId(machine.id);
     try {
-      await adminApi.updateMachineStock(id, data);
-      await fetchMachines(); // Refresh list
-      setSelectedMachine(null);
-    } catch (err: any) {
-      alert('Error al actualizar inventario: ' + (err.response?.data?.error || err.message));
+      const updated = await adminApi.updateMachine(machine.id, { onOrder });
+      setMachines((prev) => prev.map((m) => (m.id === machine.id ? { ...m, onOrder: updated.onOrder ?? onOrder } : m)));
+    } catch (err) {
+      setActionError(apiErrorMessage(err, 'Error al actualizar la máquina'));
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -53,93 +63,60 @@ const Machines: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+      <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Máquinas</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Las unidades disponibles se administran en Inventario. Aquí solo se marca qué modelos se venden bajo pedido.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Machines List */}
-        <div className="xl:col-span-2">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Máquina
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Marca
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {machines.map((machine) => (
-                    <tr key={machine.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{machine.name}</div>
-                        <div className="text-sm text-gray-500">{machine.description.substring(0, 50)}...</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {machine.brand}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            machine.inStock
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {machine.inStock ? 'En Stock' : 'No disponible'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => setSelectedMachine(machine)}
-                          className="text-larsen-blue hover:text-larsen-red font-medium"
-                        >
-                          Gestionar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      {actionError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
+          {actionError}
         </div>
+      )}
 
-        {/* Inventory Manager Sidebar */}
-        <div className="xl:col-span-1">
-          {selectedMachine ? (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {selectedMachine.name}
-              </h2>
-              <InventoryManager
-                currentStock={selectedMachine.inStock ?? true}
-                onUpdate={(data) => handleStockUpdate(selectedMachine.id, data)}
-                type="machine"
-              />
-              <button
-                onClick={() => setSelectedMachine(null)}
-                className="mt-4 w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-              >
-                Cerrar
-              </button>
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-              Selecciona una máquina para gestionar su inventario
-            </div>
-          )}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Máquina
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Marca
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Bajo pedido
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {machines.map((machine) => (
+                <tr key={machine.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-gray-900">{machine.name}</div>
+                    <div className="text-sm text-gray-500">{machine.description.substring(0, 50)}...</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{machine.brand}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <label className="inline-flex items-center gap-2 text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={machine.onOrder ?? false}
+                        disabled={savingId === machine.id}
+                        onChange={(e) => handleOnOrderChange(machine, e.target.checked)}
+                        aria-label={`${machine.name} se vende bajo pedido`}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      Se vende bajo pedido
+                    </label>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -147,4 +124,3 @@ const Machines: React.FC = () => {
 };
 
 export default Machines;
-
