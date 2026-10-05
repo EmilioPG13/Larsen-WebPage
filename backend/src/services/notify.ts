@@ -10,6 +10,8 @@ export interface NotifiableLead {
   email: string;
   phone: string;
   company?: string | null;
+  /** Serial of the inventory unit the quote is about, when there is one. */
+  serialNumber?: string | null;
   message?: string | null;
   createdAt: Date | string;
 }
@@ -106,6 +108,7 @@ export async function notifyNewLead(lead: NotifiableLead): Promise<void> {
     `Correo: ${singleLine(lead.email)}`,
     `Teléfono: ${singleLine(lead.phone)}`,
     `Empresa: ${singleLine(lead.company ?? '') || DASH}`,
+    ...(lead.serialNumber ? [`Unidad (serie): ${singleLine(lead.serialNumber)}`] : []),
     `Origen: ${source}`,
     '',
     'Mensaje:',
