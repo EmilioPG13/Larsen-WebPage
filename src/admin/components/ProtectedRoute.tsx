@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { adminApi } from '../services/adminApi';
+import { AdminRoleContext } from '../services/sessionContext';
 import {
   clearSession,
   getStoredUser,
@@ -73,7 +74,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
     );
   }
 
-  return <>{children}</>;
+  return <AdminRoleContext.Provider value={role}>{children}</AdminRoleContext.Provider>;
 };
 
 export default ProtectedRoute;

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { adminApi } from '../services/adminApi';
-import { getStoredUser, type AdminRole } from '../services/session';
+import { getStoredUser, roleHome, type AdminRole } from '../services/session';
 import { useOptionalTheme } from '../../context/ThemeContext';
 import ChangePasswordModal from './ChangePasswordModal';
-import { CellMark, Icon, Tag, type IconName } from './ui/kit';
+import { AdminLogo, Icon, Tag, type IconName } from './ui/kit';
 
 interface AdminLayoutProps {
-  children: React.ReactNode;
+  /** Page to render. Omitted when the layout is a route element: the matched child route renders instead. */
+  children?: React.ReactNode;
 }
 
 interface NavItem {
@@ -85,9 +86,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [newLeads, setNewLeads] = useState(0);
   const user = getStoredUser();
   const isAdmin = user?.role === 'ADMIN';
+  const homePath = user ? roleHome(user.role) : '/admin/login';
 
-  // Only admins see Leads, so only they need the new-leads counter. A failed
-  // request just hides the badge; it is not worth interrupting the panel.
+  // Only admins see Leads, so only they need the new-leads counter. It is
+  // refreshed on every page change, since the layout no longer remounts and
+  // leads can arrive or be handled meanwhile. A failed request just keeps the
+  // last number; it is not worth interrupting the panel.
   useEffect(() => {
     if (!isAdmin) return;
     let cancelled = false;
@@ -100,7 +104,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     return () => {
       cancelled = true;
     };
-  }, [isAdmin]);
+  }, [isAdmin, location.pathname]);
 
   const handleLogout = () => {
     adminApi.logout();
@@ -125,10 +129,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         >
           <Icon name="menu" size={22} />
         </button>
-        <span className="flex items-center gap-2 text-[18px] font-bold tracking-tight">
-          <CellMark size={22} />
-          Larsen
-        </span>
+        <Link to={homePath} aria-label="Ir al inicio del panel" className="flex items-center">
+          <AdminLogo height={24} onDark />
+        </Link>
         {theme && (
           <button
             onClick={theme.toggleTheme}
@@ -155,12 +158,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         }`}
       >
         <div className="flex items-center justify-between gap-3 border-b border-(--a-rail-line) px-4 py-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <CellMark size={30} />
-            <div className="min-w-0 leading-tight">
-              <div className="text-[18px] font-bold tracking-tight">Larsen</div>
-              <div className="text-[13px] text-(--a-rail-muted)">Italiana · Panel interno</div>
-            </div>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <Link
+              to={homePath}
+              onClick={() => setMenuOpen(false)}
+              aria-label="Ir al inicio del panel"
+              className="adm-brackets self-start"
+            >
+              <AdminLogo height={32} onDark />
+            </Link>
+            <div className="text-[13px] text-(--a-rail-muted)">Panel interno</div>
           </div>
           <button
             onClick={() => setMenuOpen(false)}
@@ -237,7 +244,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="lg:ml-64">{children}</div>
+      {/* Keyed by path so each page fades in; the shell around it stays mounted. */}
+      <div key={location.pathname} className="adm-page-enter lg:ml-64">
+        {children ?? <Outlet />}
+      </div>
 
       {showPasswordModal && <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />}
     </div>

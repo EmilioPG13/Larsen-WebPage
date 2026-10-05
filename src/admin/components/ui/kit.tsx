@@ -326,3 +326,18 @@ export const PageError: React.FC<{ children: React.ReactNode }> = ({ children })
 export const Empty: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="m-0 py-6 text-center text-a-muted">{children}</p>
 );
+
+/**
+ * The company wordmark. On a dark surface (`onDark`) it is drawn as a white
+ * silhouette, the same treatment the public header uses in dark mode, so the
+ * blue half of the logo never disappears into the navy rail.
+ */
+export const AdminLogo: React.FC<{ height?: number; onDark?: boolean }> = ({ height = 28, onDark = false }) => (
+  <img
+    src="/images/logo/larsen-logo-1.png"
+    alt="Larsen Italiana"
+    height={height}
+    style={{ height, width: 'auto', alignSelf: 'flex-start', ...(onDark ? { filter: 'brightness(0) invert(1)' } : null) }}
+    className="block shrink-0 object-contain"
+  />
+);

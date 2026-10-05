@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { Product, Machine, CatalogModel, ContactFormData } from '../types';
 import machinesData from '../data/machines.json';
+import { clearSession } from '../admin/services/session';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -30,6 +31,15 @@ api.interceptors.response.use(
       status: error.response?.status,
       url: error.config?.url,
     });
+
+    // The panel validates the session once and then keeps its layout mounted,
+    // so an expired or revoked token is caught here, on the next request.
+    const path = window.location.pathname;
+    const inPanel = path.startsWith('/admin') && !path.startsWith('/admin/login');
+    if (error.response?.status === 401 && error.config?.url !== '/auth/login' && inPanel) {
+      clearSession();
+      window.location.assign('/admin/login');
+    }
     return Promise.reject(error);
   }
 );

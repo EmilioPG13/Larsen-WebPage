@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
@@ -50,11 +50,26 @@ describe('AdminLayout', () => {
     expect(screen.getByRole('link', { name: /Reportes/ })).toHaveAttribute('href', '/admin/reportes');
   });
 
+  it('turns the logo into a link to the first page of the role', () => {
+    storeUser('ADMIN');
+    const { unmount } = renderLayout();
+    for (const logo of screen.getAllByRole('link', { name: 'Ir al inicio del panel' })) {
+      expect(logo).toHaveAttribute('href', '/admin/dashboard');
+    }
+    unmount();
+
+    storeUser('INVENTARIO');
+    renderLayout();
+    for (const logo of screen.getAllByRole('link', { name: 'Ir al inicio del panel' })) {
+      expect(logo).toHaveAttribute('href', '/admin/inventario');
+    }
+  });
+
   it('shows only Inventario to an INVENTARIO user', () => {
     storeUser('INVENTARIO');
     renderLayout();
 
-    const links = screen.getAllByRole('link');
+    const links = within(screen.getByRole('navigation', { name: 'Secciones del panel' })).getAllByRole('link');
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveTextContent('Inventario');
     expect(links[0]).toHaveAttribute('href', '/admin/inventario');

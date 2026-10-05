@@ -4,7 +4,7 @@ import { adminApi } from '../services/adminApi';
 import { loginErrorMessage } from '../services/apiError';
 import { roleHome } from '../services/session';
 import { useOptionalTheme } from '../../context/ThemeContext';
-import { Alert, CellMark, Icon, Mark, type MarkName } from '../components/ui/kit';
+import { AdminLogo, Alert, Icon, Mark, type MarkName } from '../components/ui/kit';
 
 // A fixed chart for the side panel: the same stitch vocabulary the panel uses for states.
 const CHART: (MarkName | null)[] = [
@@ -42,12 +42,9 @@ const Login: React.FC = () => {
   return (
     <div className="adm grid min-h-screen lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <aside className="adm-rail relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
-        <div className="flex items-center gap-3">
-          <CellMark size={36} />
-          <div className="leading-tight">
-            <div className="text-[26px] font-bold tracking-tight">Larsen</div>
-            <div className="text-[13px] text-(--a-rail-muted)">Italiana · Panel interno</div>
-          </div>
+        <div className="flex flex-col gap-2">
+          <AdminLogo height={44} onDark />
+          <div className="text-[13px] text-(--a-rail-muted)">Panel interno</div>
         </div>
 
         <ul
@@ -84,12 +81,9 @@ const Login: React.FC = () => {
 
         <div className="w-full max-w-md">
         <div className="mb-6 text-a-navy lg:hidden">
-          <div className="flex items-center gap-3">
-            <CellMark size={34} />
-            <div className="leading-tight text-a-ink">
-              <div className="text-[26px] font-bold tracking-tight">Larsen</div>
-              <div className="text-[13px] text-a-muted">Italiana · Panel interno</div>
-            </div>
+          <div className="flex flex-col gap-2">
+            <AdminLogo height={40} onDark={Boolean(theme?.isDark)} />
+            <div className="text-[13px] text-a-muted">Panel interno</div>
           </div>
           <ul aria-hidden="true" className="adm-chart mt-4">
             {CHART.slice(0, 8).map((mark, index) => (
