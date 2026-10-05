@@ -122,7 +122,7 @@ const Select: React.FC<SelectProps> = ({
         onKeyDown={handleKeyDown}
         className={`${triggerClass} ${compact ? 'px-2! py-1!' : ''}`}
       >
-        <span className={`truncate ${selected ? 'text-gray-900' : 'text-gray-400'}`}>
+        <span className={`truncate ${selected ? 'text-a-ink' : 'text-a-muted'}`}>
           {selected ? selected.label : placeholder}
         </span>
         <ChevronIcon open={open} />
@@ -152,9 +152,9 @@ const Select: React.FC<SelectProps> = ({
                   onMouseDown={(event) => event.preventDefault()}
                   onMouseEnter={() => setActive(index)}
                   onClick={() => choose(index)}
-                  className={`adm-opt flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
-                    isSelected ? 'font-semibold text-larsen-red' : 'text-gray-700'
-                  } ${index === active ? 'bg-red-50' : ''}`}
+                  data-active={index === active}
+                  data-selected={isSelected}
+                  className="adm-opt adm-option"
                 >
                   <span className="truncate">{option.label}</span>
                   {isSelected && <CheckIcon />}

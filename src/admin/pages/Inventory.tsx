@@ -11,16 +11,17 @@ import { formatDateTime, movementAuthor, statusLabels } from '../utils/inventory
 import ExportMenu, { type ExportFormat } from '../components/ExportMenu';
 import { exportInventoryXlsx } from '../utils/inventoryExport';
 import { exportInventoryPdf } from '../utils/inventoryPdf';
+import { Alert, Icon, Mark, PageError, PageHeader, PageLoading, type MarkName } from '../components/ui/kit';
 
 const STATUSES: UnitStatus[] = ['DISPONIBLE', 'APARTADA', 'VENDIDA'];
 
-const statusStyles: Record<UnitStatus, { badge: string; active: string }> = {
-  DISPONIBLE: { badge: 'bg-green-100 text-green-800', active: 'bg-green-600 text-white' },
-  APARTADA: { badge: 'bg-yellow-100 text-yellow-800', active: 'bg-yellow-500 text-white' },
-  VENDIDA: { badge: 'bg-gray-200 text-gray-700', active: 'bg-gray-600 text-white' },
+const statusMarks: Record<UnitStatus, MarkName> = {
+  DISPONIBLE: 'ring',
+  APARTADA: 'slash',
+  VENDIDA: 'dot',
 };
 
-const GRID = 'md:grid md:grid-cols-[1.3fr_0.4fr_0.8fr_2.6fr_1.1fr_1fr] md:items-center md:gap-4';
+const GRID = 'md:grid md:grid-cols-[1.3fr_0.45fr_0.9fr_2.3fr_1.2fr_1.5fr] md:items-center md:gap-4';
 
 /** Today in the browser's time zone as `YYYY-MM-DD`, for the sale date input. */
 const todayLocal = () => {
@@ -205,100 +206,76 @@ const Inventory: React.FC = () => {
     }
   };
 
-  if (loading && units.length === 0) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-gray-600">Cargando inventario...</div>
-      </div>
-    );
-  }
-
-  if (loadError && units.length === 0) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-red-600">{loadError}</div>
-      </div>
-    );
-  }
+  if (loading && units.length === 0) return <PageLoading>Cargando inventario...</PageLoading>;
+  if (loadError && units.length === 0) return <PageError>{loadError}</PageError>;
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Inventario</h1>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => {
-              setFormError('');
-              setFormUnit('new');
-            }}
-            className="px-4 py-2 bg-larsen-red text-white rounded-lg hover:opacity-90 transition-colors"
-          >
-            Nueva unidad
+    <div className="adm-page">
+      <PageHeader
+        title="Inventario"
+        actions={
+          <>
+            <button
+              onClick={() => {
+                setFormError('');
+                setFormUnit('new');
+              }}
+              className="adm-btn adm-btn-primary"
+            >
+              <Icon name="plus" size={16} />
+              Nueva unidad
+            </button>
+            <ExportMenu busy={exporting} disabled={units.length === 0} onExport={handleExport} />
+          </>
+        }
+      />
+
+      {actionError && <Alert>{actionError}</Alert>}
+
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="adm-seg" role="group" aria-label="Filtrar por estado">
+          <button onClick={() => setStatusFilter('')} aria-pressed={statusFilter === ''}>
+            Todas ({units.length})
           </button>
-          <ExportMenu busy={exporting} disabled={units.length === 0} onExport={handleExport} />
+          {STATUSES.map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              aria-pressed={statusFilter === status}
+              data-zero={counts[status] === 0}
+            >
+              <Mark name={statusMarks[status]} size={14} />
+              {statusLabels[status]}s ({counts[status]})
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:w-[30rem]">
+          <div>
+            <label htmlFor="inventory-search" className="sr-only">
+              Buscar por número de serie o modelo
+            </label>
+            <input
+              id="inventory-search"
+              type="search"
+              placeholder="Buscar por serie o modelo"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="adm-input"
+            />
+          </div>
+          <div>
+            <label htmlFor="inventory-brand" className="sr-only">
+              Filtrar por marca
+            </label>
+            <Select id="inventory-brand" value={brandFilter} options={brandOptions} onChange={setBrandFilter} />
+          </div>
         </div>
       </div>
 
-      {actionError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
-          {actionError}
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Filtrar por estado">
-        <button
-          onClick={() => setStatusFilter('')}
-          aria-pressed={statusFilter === ''}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-            statusFilter === '' ? 'bg-larsen-red text-white' : 'bg-white text-gray-700 border border-gray-300'
-          }`}
-        >
-          Todas ({units.length})
-        </button>
-        {STATUSES.map((status) => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
-            aria-pressed={statusFilter === status}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-              statusFilter === status ? 'bg-larsen-red text-white' : 'bg-white text-gray-700 border border-gray-300'
-            }`}
-          >
-            {statusLabels[status]}s ({counts[status]})
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-w-2xl">
-        <div>
-          <label htmlFor="inventory-search" className="sr-only">
-            Buscar por número de serie o modelo
-          </label>
-          <input
-            id="inventory-search"
-            type="search"
-            placeholder="Buscar por serie o modelo"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red"
-          />
-        </div>
-        <div>
-          <label htmlFor="inventory-brand" className="sr-only">
-            Filtrar por marca
-          </label>
-          <Select
-            id="inventory-brand"
-            value={brandFilter}
-            options={brandOptions}
-            onChange={setBrandFilter}
-          />
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="adm-panel">
         <div
-          className={`hidden px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider ${GRID}`}
+          className={`adm-label-sm hidden border-b border-a-line-strong bg-a-surface-2 px-5 py-2.5 ${GRID}`}
           aria-hidden="true"
         >
           <span>Marca y modelo</span>
@@ -310,79 +287,88 @@ const Inventory: React.FC = () => {
         </div>
 
         {visible.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-8 text-center text-a-muted">
             {units.length === 0 ? 'Todavía no hay unidades en el inventario.' : 'Ninguna unidad coincide con los filtros.'}
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <ul className="m-0 list-none p-0">
             {visible.map((unit) => {
               const last = unit.movements?.[0];
               const busy = busyId === unit.id;
               return (
-                <li key={unit.id} className={`p-4 md:px-6 space-y-3 md:space-y-0 ${GRID}`} data-testid="unit-row">
+                <li
+                  key={unit.id}
+                  className={`space-y-2.5 border-b border-a-line p-4 transition-colors last:border-b-0 hover:bg-a-navy-soft md:space-y-0 md:px-5 ${GRID}`}
+                  data-testid="unit-row"
+                >
                   <div>
-                    <div className="font-medium text-gray-900">
+                    <div className="font-semibold text-a-ink">
                       {unit.brand} {unit.model}
                     </div>
-                    {unit.modality === 'BAJO_PEDIDO' && <div className="text-xs text-blue-700">Bajo pedido</div>}
-                    {unit.notes && <div className="text-xs text-gray-500">{unit.notes}</div>}
+                    {unit.modality === 'BAJO_PEDIDO' && (
+                      <div className="mt-0.5 flex items-center gap-1.5 text-[13px] font-medium text-a-navy">
+                        <Mark name="sqslash" size={13} />
+                        Bajo pedido
+                      </div>
+                    )}
+                    {unit.notes && <div className="text-[13px] text-a-muted">{unit.notes}</div>}
                   </div>
-                  <div className="text-sm text-gray-700">
-                    <span className="md:hidden text-gray-500">Galga </span>
-                    {unit.gauge}
-                  </div>
-                  <div className="text-sm text-gray-700 break-all">
-                    <span className="md:hidden text-gray-500">Serie </span>
-                    {unit.serialNumber}
+                  <div className="grid grid-cols-[auto_1fr] gap-x-6 md:contents">
+                    <div className="adm-num text-a-text2">
+                      <span className="text-a-muted md:hidden">Galga </span>
+                      {unit.gauge}
+                    </div>
+                    <div className="adm-num break-all text-[13px] text-a-text2">
+                      <span className="font-sans text-a-muted md:hidden">Serie </span>
+                      {unit.serialNumber}
+                    </div>
                   </div>
                   <div>
-                    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={`Estado de la unidad ${unit.serialNumber}`}>
+                    <div className="adm-seg adm-seg-fill" role="group" aria-label={`Estado de la unidad ${unit.serialNumber}`}>
                       {STATUSES.map((status) => (
                         <button
                           key={status}
                           onClick={() => handleStatusClick(unit, status)}
                           disabled={busy}
                           aria-pressed={unit.status === status}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-60 ${
-                            unit.status === status
-                              ? statusStyles[status].active
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
                         >
+                          <Mark name={statusMarks[status]} size={14} />
                           {statusLabels[status]}
                         </button>
                       ))}
                     </div>
                     {unit.status === 'VENDIDA' && unit.soldAt && (
-                      <div className="text-xs text-gray-500 mt-1">Vendida el {formatDate(unit.soldAt)}</div>
+                      <div className="mt-1 text-[13px] text-a-muted">
+                        Vendida el <span className="adm-num">{formatDate(unit.soldAt)}</span>
+                      </div>
                     )}
                     {unit.status === 'APARTADA' && unit.reservedSince && <ReservedNote since={unit.reservedSince} />}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-[13px] text-a-muted">
                     {last ? (
                       <>
-                        <div className="text-gray-700">{movementAuthor(last)}</div>
-                        <div>{formatDateTime(last.createdAt)}</div>
+                        <div className="text-a-text2">{movementAuthor(last)}</div>
+                        <div className="adm-num">{formatDateTime(last.createdAt)}</div>
                       </>
                     ) : (
                       '—'
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
                     <button
                       onClick={() => {
                         setFormError('');
                         setFormUnit(unit);
                       }}
                       aria-label={`Editar ${unit.model} serie ${unit.serialNumber}`}
-                      className="text-larsen-blue hover:underline"
+                      className="adm-link adm-brackets"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => setHistoryUnit(unit)}
                       aria-label={`Historial de ${unit.model} serie ${unit.serialNumber}`}
-                      className="text-gray-700 hover:underline"
+                      className="adm-link adm-link-muted adm-brackets"
                     >
                       Historial
                     </button>
@@ -390,7 +376,7 @@ const Inventory: React.FC = () => {
                       <button
                         onClick={() => handleDelete(unit)}
                         aria-label={`Eliminar ${unit.model} serie ${unit.serialNumber}`}
-                        className="text-red-600 hover:underline"
+                        className="adm-link adm-link-danger adm-brackets"
                       >
                         Eliminar
                       </button>
@@ -417,34 +403,27 @@ const Inventory: React.FC = () => {
       {historyUnit && <UnitHistory unit={historyUnit} onClose={() => setHistoryUnit(null)} />}
 
       {saleTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="sale-title"
-        >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h2 id="sale-title" className="text-xl font-bold text-gray-900 mb-2">
-              Marcar como vendida
-            </h2>
-            <p className="text-sm text-gray-600 mb-4">
-              {saleTarget.brand} {saleTarget.model} · serie {saleTarget.serialNumber}. Dejará de aparecer en el catálogo del sitio.
-            </p>
-            <label htmlFor="sale-date" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de venta
-            </label>
-            <DatePicker id="sale-date" value={saleDate} onChange={setSaleDate} />
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={confirmSale}
-                className="px-6 py-2 bg-larsen-red text-white rounded-lg hover:opacity-90 transition-colors"
-              >
+        <div className="adm-scrim items-center" role="dialog" aria-modal="true" aria-labelledby="sale-title">
+          <div className="adm-dialog max-w-md">
+            <div className="adm-dialog-head">
+              <h2 id="sale-title" className="adm-dialog-title">
+                Marcar como vendida
+              </h2>
+            </div>
+            <div className="adm-dialog-body">
+              <p className="m-0 mb-4 text-a-text2">
+                {saleTarget.brand} {saleTarget.model} · serie {saleTarget.serialNumber}. Dejará de aparecer en el catálogo del sitio.
+              </p>
+              <label htmlFor="sale-date" className="adm-field-label">
+                Fecha de venta
+              </label>
+              <DatePicker id="sale-date" value={saleDate} onChange={setSaleDate} />
+            </div>
+            <div className="adm-dialog-foot">
+              <button onClick={confirmSale} className="adm-btn adm-btn-primary">
                 Confirmar venta
               </button>
-              <button
-                onClick={() => setSaleTarget(null)}
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
+              <button onClick={() => setSaleTarget(null)} className="adm-btn">
                 Cancelar
               </button>
             </div>

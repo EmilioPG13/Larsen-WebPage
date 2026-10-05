@@ -420,8 +420,9 @@ describe('Inventory page', () => {
       const stale = screen.getByText('BBB').closest('[data-testid="unit-row"]') as HTMLElement;
 
       expect(within(recent).getByText('Apartada hace 3 días')).toBeInTheDocument();
-      expect(within(recent).queryByText(/⚠/)).not.toBeInTheDocument();
-      expect(within(stale).getByText(/Apartada hace 20 días/)).toHaveTextContent('⚠');
+      expect(recent.querySelector('[data-mark="alert"]')).toBeNull();
+      expect(within(stale).getByText(/Apartada hace 20 días/)).toBeInTheDocument();
+      expect(stale.querySelector('[data-mark="alert"]')).not.toBeNull();
       expect(within(stale).getByTitle(/conviene confirmar la venta o liberarla/)).toBeInTheDocument();
     });
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { adminApi, type InventoryMovement, type InventoryUnit } from '../services/adminApi';
 import { apiErrorMessage } from '../services/apiError';
+import { Alert } from './ui/kit';
 import { formatDateTime, movementAuthor, statusLabels } from '../utils/inventoryLabels';
 
 const fieldLabels: Record<string, string> = {
@@ -68,51 +69,50 @@ const UnitHistory: React.FC<UnitHistoryProps> = ({ unit, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4"
+      className="adm-scrim items-start"
       role="dialog"
       aria-modal="true"
       aria-labelledby="unit-history-title"
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 my-8">
-        <h2 id="unit-history-title" className="text-xl font-bold text-gray-900 mb-1">
-          Historial
-        </h2>
-        <p className="text-sm text-gray-600 mb-4">
-          {unit.brand} {unit.model} · galga {unit.gauge} · serie {unit.serialNumber}
-        </p>
+      <div className="adm-dialog my-8 max-w-xl">
+        <div className="adm-dialog-head">
+          <h2 id="unit-history-title" className="adm-dialog-title">
+            Historial
+          </h2>
+          <p className="adm-note adm-num">
+            {unit.brand} {unit.model} · galga {unit.gauge} · serie {unit.serialNumber}
+          </p>
+        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
-            {error}
-          </div>
-        )}
-        {!movements && !error && <div className="text-gray-600">Cargando historial...</div>}
-        {movements && movements.length === 0 && <div className="text-gray-600">Sin movimientos.</div>}
+        <div className="adm-dialog-body">
+          {error && <Alert>{error}</Alert>}
+          {!movements && !error && <div className="text-a-muted">Cargando historial...</div>}
+          {movements && movements.length === 0 && <div className="text-a-muted">Sin movimientos.</div>}
 
-        {movements && movements.length > 0 && (
-          <ol className="space-y-3">
-            {movements.map((movement) => (
-              <li key={movement.id} className="border-l-4 border-larsen-red pl-3">
-                <div className="text-sm font-medium text-gray-900">
-                  {actionLabels[movement.action]} · {movementAuthor(movement)}
-                </div>
-                <div className="text-xs text-gray-500">{formatDateTime(movement.createdAt)}</div>
-                {describe(movement).map((line) => (
-                  <div key={line} className="text-sm text-gray-700">
-                    {line}
+          {movements && movements.length > 0 && (
+            <ol className="adm-timeline">
+              {movements.map((movement) => (
+                <li key={movement.id}>
+                  <div className="text-[14px] font-semibold text-a-ink">
+                    {actionLabels[movement.action]} · {movementAuthor(movement)}
                   </div>
-                ))}
-              </li>
-            ))}
-          </ol>
-        )}
+                  <div className="adm-num text-[13px] text-a-muted">{formatDateTime(movement.createdAt)}</div>
+                  {describe(movement).map((line) => (
+                    <div key={line} className="text-[14px] text-a-text2">
+                      {line}
+                    </div>
+                  ))}
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
 
-        <button
-          onClick={onClose}
-          className="mt-6 w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          Cerrar
-        </button>
+        <div className="adm-dialog-foot">
+          <button onClick={onClose} className="adm-btn adm-btn-block">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );

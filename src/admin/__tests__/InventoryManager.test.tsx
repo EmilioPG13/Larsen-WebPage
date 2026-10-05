@@ -19,7 +19,7 @@ describe('InventoryManager', () => {
       />
     );
 
-    expect(screen.getByText('✓ En Stock')).toBeInTheDocument();
+    expect(screen.getByText('En Stock')).toBeInTheDocument();
   });
 
   it('should display current stock status as "No disponible" when inStock is false', () => {
@@ -31,7 +31,7 @@ describe('InventoryManager', () => {
       />
     );
 
-    expect(screen.getByText('✗ No disponible')).toBeInTheDocument();
+    expect(screen.getByText('No disponible')).toBeInTheDocument();
   });
 
   it('should toggle stock status when toggle button is clicked', async () => {

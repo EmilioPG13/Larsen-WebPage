@@ -90,7 +90,7 @@ const Combobox: React.FC<ComboboxProps> = ({ id, value, options, onChange, requi
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-larsen-red"
+        className="adm-input pr-9"
       />
       <button
         type="button"
@@ -102,7 +102,7 @@ const Combobox: React.FC<ComboboxProps> = ({ id, value, options, onChange, requi
           setActive(-1);
           document.getElementById(inputId)?.focus();
         }}
-        className="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-3"
+        className="absolute inset-y-0 right-0 flex items-center border-0 bg-transparent px-3"
       >
         <ChevronIcon open={showList} />
       </button>
@@ -128,9 +128,9 @@ const Combobox: React.FC<ComboboxProps> = ({ id, value, options, onChange, requi
                 onMouseDown={(event) => event.preventDefault()}
                 onMouseEnter={() => setActive(index)}
                 onClick={() => choose(option)}
-                className={`adm-opt cursor-pointer rounded-xl px-3 py-2 text-sm transition-colors ${
-                  option === value ? 'font-semibold text-larsen-red' : 'text-gray-700'
-                } ${index === active ? 'bg-red-50' : ''}`}
+                data-active={index === active}
+                data-selected={option === value}
+                className="adm-opt adm-option"
               >
                 {option}
               </li>

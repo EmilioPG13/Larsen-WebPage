@@ -4,6 +4,7 @@ import { statusLabels } from '../utils/inventoryLabels';
 import Combobox from './ui/Combobox';
 import DatePicker from './ui/DatePicker';
 import Select from './ui/Select';
+import { Alert } from './ui/kit';
 
 const modalityLabels: Record<UnitModality, string> = {
   EN_BODEGA: 'En bodega',
@@ -46,8 +47,7 @@ interface InventoryUnitFormProps {
 
 const dateInput = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : '');
 
-const inputClass =
-  'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red';
+const inputClass = 'adm-input';
 
 const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, saving, error, onSave, onCancel }) => {
   const [values, setValues] = useState<UnitFormValues>({
@@ -74,25 +74,24 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4"
+      className="adm-scrim items-start"
       role="dialog"
       aria-modal="true"
       aria-labelledby="unit-form-title"
     >
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 my-8">
-        <h2 id="unit-form-title" className="text-xl font-bold text-gray-900 mb-4">
-          {unit ? 'Editar unidad' : 'Nueva unidad'}
-        </h2>
+      <form onSubmit={handleSubmit} className="adm-dialog my-8 max-w-2xl">
+        <div className="adm-dialog-head">
+          <h2 id="unit-form-title" className="adm-dialog-title">
+            {unit ? 'Editar unidad' : 'Nueva unidad'}
+          </h2>
+        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
-            {error}
-          </div>
-        )}
+        <div className="adm-dialog-body">
+        {error && <Alert>{error}</Alert>}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="unit-brand" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="unit-brand" className="adm-field-label">
               Marca
             </label>
             <Combobox
@@ -104,7 +103,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             />
           </div>
           <div>
-            <label htmlFor="unit-model" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="unit-model" className="adm-field-label">
               Modelo
             </label>
             <input
@@ -116,7 +115,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             />
           </div>
           <div>
-            <label htmlFor="unit-gauge" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="unit-gauge" className="adm-field-label">
               Galga
             </label>
             <input
@@ -129,7 +128,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             />
           </div>
           <div>
-            <label htmlFor="unit-serial" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="unit-serial" className="adm-field-label">
               No. de serie
             </label>
             <input
@@ -141,7 +140,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             />
           </div>
           <div>
-            <label htmlFor="unit-modality" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="unit-modality" className="adm-field-label">
               Modalidad
             </label>
             <Select
@@ -152,7 +151,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
             />
           </div>
           <div>
-            <label htmlFor="unit-received" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="unit-received" className="adm-field-label">
               Fecha de llegada (opcional)
             </label>
             <DatePicker
@@ -164,7 +163,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
           </div>
           {!unit && (
             <div>
-              <label htmlFor="unit-status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="unit-status" className="adm-field-label">
                 Estado inicial
               </label>
               <Select
@@ -177,7 +176,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
           )}
           {showSoldAt && (
             <div>
-              <label htmlFor="unit-sold" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="unit-sold" className="adm-field-label">
                 Fecha de venta
               </label>
               <DatePicker id="unit-sold" value={values.soldAt} onChange={(date) => set('soldAt', date)} allowClear />
@@ -186,7 +185,7 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
         </div>
 
         <div className="mt-4">
-          <label htmlFor="unit-notes" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="unit-notes" className="adm-field-label">
             Observaciones (internas, no se muestran en el sitio)
           </label>
           <textarea
@@ -198,19 +197,13 @@ const InventoryUnitForm: React.FC<InventoryUnitFormProps> = ({ unit, brands, sav
           />
         </div>
 
-        <div className="flex gap-3 mt-6">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-larsen-red text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
-          >
+        </div>
+
+        <div className="adm-dialog-foot">
+          <button type="submit" disabled={saving} className="adm-btn adm-btn-primary">
             {saving ? 'Guardando...' : 'Guardar'}
           </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-          >
+          <button type="button" onClick={onCancel} className="adm-btn">
             Cancelar
           </button>
         </div>

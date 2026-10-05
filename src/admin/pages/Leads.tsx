@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../services/adminApi';
+import { apiErrorMessage } from '../services/apiError';
+import { PageError, PageHeader, PageLoading, Panel, Tag, type MarkName } from '../components/ui/kit';
 
 interface Lead {
   id: string;
@@ -34,8 +36,8 @@ const Leads: React.FC = () => {
       const params = statusFilter !== 'all' ? { status: statusFilter } : {};
       const data = await adminApi.getLeads(params);
       setLeads(data.leads || data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cargar leads');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al cargar leads'));
     } finally {
       setLoading(false);
     }
@@ -48,8 +50,8 @@ const Leads: React.FC = () => {
       if (selectedLead?.id === id) {
         setSelectedLead({ ...selectedLead, status });
       }
-    } catch (err: any) {
-      alert('Error al actualizar estado: ' + (err.response?.data?.error || err.message));
+    } catch (err) {
+      alert('Error al actualizar estado: ' + apiErrorMessage(err, err instanceof Error ? err.message : ''));
     }
   };
 
@@ -61,8 +63,8 @@ const Leads: React.FC = () => {
       await adminApi.deleteLead(lead.id);
       setSelectedLead(null);
       await fetchLeads();
-    } catch (err: any) {
-      alert('Error al eliminar lead: ' + (err.response?.data?.error || err.message));
+    } catch (err) {
+      alert('Error al eliminar lead: ' + apiErrorMessage(err, err instanceof Error ? err.message : ''));
     }
   };
 
@@ -74,164 +76,122 @@ const Leads: React.FC = () => {
     archived: 'Archivado',
   };
 
-  const statusColors: Record<string, string> = {
-    new: 'bg-blue-100 text-blue-800',
-    contacted: 'bg-yellow-100 text-yellow-800',
-    converted: 'bg-green-100 text-green-800',
-    archived: 'bg-gray-100 text-gray-800',
+  const statusMarks: Record<string, MarkName> = {
+    new: 'sq',
+    contacted: 'sqslash',
+    converted: 'sqcheck',
+    archived: 'sqdash',
+  };
+  const statusTones: Record<string, 'solid' | 'navy' | 'plain'> = {
+    new: 'solid',
+    contacted: 'navy',
+    converted: 'navy',
+    archived: 'plain',
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-gray-600">Cargando leads...</div>
-      </div>
-    );
-  }
+  if (loading) return <PageLoading>Cargando leads...</PageLoading>;
+  if (error) return <PageError>{error}</PageError>;
 
-  if (error) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
-  }
+  const Detail: React.FC<{ term: string; children: React.ReactNode }> = ({ term, children }) => (
+    <>
+      <dt>{term}</dt>
+      <dd>{children}</dd>
+    </>
+  );
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Leads</h1>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red"
-        >
-          <option value="all">Todos los estados</option>
-          {statusOptions.map((status) => (
-            <option key={status} value={status}>
-              {statusLabels[status]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Leads List */}
-        <div className="xl:col-span-2">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contacto
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Empresa
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {leads.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{lead.name}</div>
-                        <div className="text-sm text-gray-500">{lead.email}</div>
-                        <div className="text-sm text-gray-500">{lead.phone}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {lead.company}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            statusColors[lead.status] || statusColors.archived
-                          }`}
-                        >
-                          {statusLabels[lead.status] || lead.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(lead.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => setSelectedLead(lead)}
-                          className="text-larsen-blue hover:text-larsen-red font-medium"
-                        >
-                          Ver detalles
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+    <div className="adm-page">
+      <PageHeader
+        title="Gestión de Leads"
+        actions={
+          <div className="w-full sm:w-56">
+            <label htmlFor="lead-status-filter" className="sr-only">
+              Filtrar por estado
+            </label>
+            <select
+              id="lead-status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="adm-input"
+            >
+              <option value="all">Todos los estados</option>
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {statusLabels[status]}
+                </option>
+              ))}
+            </select>
           </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+        {/* Leads List */}
+        <div className="adm-panel self-start overflow-x-auto">
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th scope="col">Contacto</th>
+                <th scope="col">Empresa</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leads.map((lead) => (
+                <tr key={lead.id} data-selected={selectedLead?.id === lead.id}>
+                  <td className="whitespace-nowrap">
+                    <div className="font-semibold text-a-ink">{lead.name}</div>
+                    <div className="text-[13px] text-a-text2">{lead.email}</div>
+                    <div className="adm-num text-[13px] text-a-muted">{lead.phone}</div>
+                  </td>
+                  <td className="whitespace-nowrap text-a-text2">{lead.company}</td>
+                  <td className="whitespace-nowrap">
+                    <Tag mark={statusMarks[lead.status] ?? 'sqdash'} tone={statusTones[lead.status] ?? 'plain'}>
+                      {statusLabels[lead.status] || lead.status}
+                    </Tag>
+                  </td>
+                  <td className="adm-num whitespace-nowrap text-[13px] text-a-text2">
+                    {new Date(lead.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="whitespace-nowrap">
+                    <button onClick={() => setSelectedLead(lead)} className="adm-link adm-brackets">
+                      Ver detalles
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Lead Details Sidebar */}
-        <div className="xl:col-span-1">
+        <div>
           {selectedLead ? (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Detalles del Lead</h2>
-              
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Nombre</label>
-                  <p className="text-gray-900">{selectedLead.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Email</label>
-                  <p className="text-gray-900">{selectedLead.email}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Teléfono</label>
-                  <p className="text-gray-900">{selectedLead.phone}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Empresa</label>
-                  <p className="text-gray-900">{selectedLead.company}</p>
-                </div>
-                {selectedLead.industry && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Industria</label>
-                    <p className="text-gray-900">{selectedLead.industry}</p>
-                  </div>
-                )}
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Presupuesto</label>
-                  <p className="text-gray-900">{selectedLead.budget}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Fecha de compra</label>
-                  <p className="text-gray-900">{selectedLead.purchaseDate}</p>
-                </div>
-                {selectedLead.message && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Mensaje</label>
-                    <p className="text-gray-900">{selectedLead.message}</p>
-                  </div>
-                )}
-              </div>
+            <Panel title="Detalles del Lead">
+              <dl className="adm-detail m-0">
+                <Detail term="Nombre">{selectedLead.name}</Detail>
+                <Detail term="Email">{selectedLead.email}</Detail>
+                <Detail term="Teléfono">
+                  <span className="adm-num">{selectedLead.phone}</span>
+                </Detail>
+                <Detail term="Empresa">{selectedLead.company}</Detail>
+                {selectedLead.industry && <Detail term="Industria">{selectedLead.industry}</Detail>}
+                <Detail term="Presupuesto">{selectedLead.budget}</Detail>
+                <Detail term="Fecha de compra">{selectedLead.purchaseDate}</Detail>
+                {selectedLead.message && <Detail term="Mensaje">{selectedLead.message}</Detail>}
+              </dl>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-4 border-t border-a-line pt-4">
+                <label htmlFor="lead-status" className="adm-field-label">
                   Cambiar Estado
                 </label>
                 <select
+                  id="lead-status"
                   value={selectedLead.status}
                   onChange={(e) => handleStatusUpdate(selectedLead.id, e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red"
+                  className="adm-input"
                 >
                   {statusOptions.map((status) => (
                     <option key={status} value={status}>
@@ -241,23 +201,17 @@ const Leads: React.FC = () => {
                 </select>
               </div>
 
-              <button
-                onClick={() => handleDelete(selectedLead)}
-                className="w-full mb-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100"
-              >
-                Eliminar lead
-              </button>
-              <button
-                onClick={() => setSelectedLead(null)}
-                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-              >
-                Cerrar
-              </button>
-            </div>
+              <div className="flex flex-col gap-2">
+                <button onClick={() => handleDelete(selectedLead)} className="adm-btn adm-btn-danger adm-btn-block">
+                  Eliminar lead
+                </button>
+                <button onClick={() => setSelectedLead(null)} className="adm-btn adm-btn-block">
+                  Cerrar
+                </button>
+              </div>
+            </Panel>
           ) : (
-            <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-              Selecciona un lead para ver sus detalles
-            </div>
+            <div className="adm-panel p-6 text-center text-a-muted">Selecciona un lead para ver sus detalles</div>
           )}
         </div>
       </div>
@@ -266,4 +220,3 @@ const Leads: React.FC = () => {
 };
 
 export default Leads;
-

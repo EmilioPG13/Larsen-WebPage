@@ -70,11 +70,16 @@ function AppContent() {
       <main
         id="main-content"
         key={displayLocation.pathname}
-        className={`page-transition-enter ${
-          transitionStage === 'fadeOut'
-            ? 'opacity-0 translate-y-2'
-            : 'opacity-100 translate-y-0'
-        } transition-all duration-400 ease-out`}
+        // The admin shell uses position: fixed; a transform on this ancestor would turn it into its containing block.
+        className={
+          isAdminRoute
+            ? ''
+            : `page-transition-enter ${
+                transitionStage === 'fadeOut'
+                  ? 'opacity-0 translate-y-2'
+                  : 'opacity-100 translate-y-0'
+              } transition-all duration-400 ease-out`
+        }
       >
         <Routes location={displayLocation}>
           <Route path="/" element={<HomePage />} />

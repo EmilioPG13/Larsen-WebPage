@@ -3,6 +3,7 @@ import { adminApi, type MonthlyReport, type ReportUnitRef } from '../services/ad
 import { apiErrorMessage } from '../services/apiError';
 import Select from '../components/ui/Select';
 import { monthOf } from '../utils/inventoryLabels';
+import { Alert, Mark, PageHeader, Panel } from '../components/ui/kit';
 
 const MONTHS_LISTED = 12;
 
@@ -35,24 +36,24 @@ const unitName = (unit: ReportUnitRef) => `${unit.brand} ${unit.model}`;
 const days = (value: number) => `${value} ${value === 1 ? 'día' : 'días'}`;
 
 const Card: React.FC<{ title: string; note?: string; children: React.ReactNode }> = ({ title, note, children }) => (
-  <section className="bg-white rounded-lg shadow-md p-5 sm:p-6">
-    <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-    {note && <p className="text-xs text-gray-500 mt-0.5">{note}</p>}
-    <div className="mt-4">{children}</div>
-  </section>
+  <Panel title={title} note={note}>
+    {children}
+  </Panel>
 );
 
 const Figure: React.FC<{ label: string; value: number; hint?: string }> = ({ label, value, hint }) => (
-  <div className="bg-white rounded-lg shadow-md p-5">
-    <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</div>
-    <div className="text-4xl font-bold text-larsen-blue mt-1">{value}</div>
-    {hint && <div className="text-xs text-gray-500 mt-1">{hint}</div>}
+  <div className="bg-a-surface p-5">
+    <div className="adm-label-sm">{label}</div>
+    <div className={`adm-num mt-1 text-[26px] font-medium leading-tight text-a-ink ${value === 0 ? 'adm-dim' : ''}`}>{value}</div>
+    {hint && <div className="mt-1 text-[13px] text-a-muted">{hint}</div>}
   </div>
 );
 
 const Empty: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="text-sm text-gray-500">{children}</p>
+  <p className="m-0 text-a-muted">{children}</p>
 );
+
+const Th: React.FC<{ children: React.ReactNode }> = ({ children }) => <th scope="col">{children}</th>;
 
 const Reports: React.FC = () => {
   const current = useMemo(() => monthOf(), []);
@@ -84,37 +85,41 @@ const Reports: React.FC = () => {
 
   const isCurrent = month === current;
 
-  return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reportes</h1>
-          <p className="text-sm text-gray-600 mt-1">Cierre mensual del inventario.</p>
-        </div>
-        <div className="w-full sm:w-56">
-          <label htmlFor="report-month" className="block text-sm font-medium text-gray-700 mb-1">
-            Mes
-          </label>
-          <Select
-            id="report-month"
-            value={month}
-            options={months.map((value) => ({ value, label: monthLabel(value) }))}
-            onChange={setMonth}
-          />
-        </div>
-      </div>
+  const sameDayCells = report
+    ? Math.min(report.responseTime.measured, 40)
+    : 0;
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
-          {error}
+  return (
+    <div className="adm-page">
+      <PageHeader
+        title="Reportes"
+        subtitle="Cierre mensual del inventario."
+        actions={
+          <div className="w-full sm:w-56">
+            <label htmlFor="report-month" className="adm-field-label">
+              Mes
+            </label>
+            <Select
+              id="report-month"
+              value={month}
+              options={months.map((value) => ({ value, label: monthLabel(value) }))}
+              onChange={setMonth}
+            />
+          </div>
+        }
+      />
+
+      {error && <Alert>{error}</Alert>}
+
+      {loading && !report && (
+        <div role="status" className="adm-label-sm">
+          Cargando reporte...
         </div>
       )}
 
-      {loading && !report && <div className="text-gray-600">Cargando reporte...</div>}
-
       {report && (
-        <div className={`space-y-6 transition-opacity ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={`space-y-5 transition-opacity ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
+          <div className="adm-panel grid grid-cols-1 gap-px bg-a-line sm:grid-cols-2 lg:grid-cols-4">
             <Figure label="Llegadas" value={report.summary.arrivals} hint="Unidades con fecha de llegada en el mes" />
             <Figure label="Ventas" value={report.summary.sales} hint="Unidades con fecha de venta en el mes" />
             <Figure label="Apartados" value={report.summary.reservations} hint="Veces que se apartó una unidad" />
@@ -130,25 +135,25 @@ const Reports: React.FC = () => {
               <Empty>No hay ventas con fecha en este mes.</Empty>
             ) : (
               <>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                <div className="-mx-4 overflow-x-auto sm:-mx-5">
+                  <table className="adm-table">
                     <thead>
-                      <tr className="text-left text-xs font-medium uppercase text-gray-500">
-                        <th className="py-2 pr-4">Unidad</th>
-                        <th className="py-2 pr-4">Serie</th>
-                        <th className="py-2 pr-4">Fecha de venta</th>
-                        <th className="py-2">Días en bodega</th>
+                      <tr>
+                        <Th>Unidad</Th>
+                        <Th>Serie</Th>
+                        <Th>Fecha de venta</Th>
+                        <Th>Días en bodega</Th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody>
                       {report.sales.map((sale) => (
                         <tr key={sale.id}>
-                          <td className="py-2 pr-4 text-gray-900">
-                            {unitName(sale)} <span className="text-gray-500">· galga {sale.gauge}</span>
+                          <td className="text-a-ink">
+                            {unitName(sale)} <span className="text-a-muted">· galga {sale.gauge}</span>
                           </td>
-                          <td className="py-2 pr-4 text-gray-700">{sale.serialNumber}</td>
-                          <td className="py-2 pr-4 text-gray-700">{formatDay(sale.soldAt)}</td>
-                          <td className="py-2 text-gray-700">
+                          <td className="adm-num text-[13px] text-a-text2">{sale.serialNumber}</td>
+                          <td className="adm-num text-[13px] text-a-text2">{formatDay(sale.soldAt)}</td>
+                          <td className="adm-num text-[13px] text-a-text2">
                             {sale.daysInStock === null ? 'Sin fecha de llegada' : days(sale.daysInStock)}
                           </td>
                         </tr>
@@ -157,7 +162,7 @@ const Reports: React.FC = () => {
                   </table>
                 </div>
                 {report.aging.averageDaysToSell !== null && (
-                  <p className="text-sm text-gray-700 mt-4">
+                  <p className="m-0 mt-4 text-a-text2">
                     Tardaron en venderse <strong>{days(report.aging.averageDaysToSell)}</strong> en promedio desde que
                     llegaron.
                   </p>
@@ -171,18 +176,33 @@ const Reports: React.FC = () => {
               <Empty>No hay ventas del mes que se puedan medir.</Empty>
             ) : (
               <div>
-                <div className="text-3xl font-bold text-larsen-blue">
+                <div className="adm-num text-[26px] font-medium text-a-ink">
                   {report.responseTime.sameDay} de {report.responseTime.measured}
-                  <span className="text-base font-medium text-gray-600"> registradas el mismo día</span>
+                  <span className="ml-1 font-sans text-[14px] font-normal text-a-muted"> registradas el mismo día</span>
                 </div>
-                <p className="text-sm text-gray-700 mt-2">
+                <ul
+                  role="img"
+                  aria-label={`${report.responseTime.sameDay} de ${report.responseTime.measured} ventas registradas el mismo día`}
+                  className="adm-chart mt-3"
+                  data-size="sm"
+                >
+                  {Array.from({ length: sameDayCells }, (_, index) => {
+                    const onTime = index < Math.round((report.responseTime.sameDay / report.responseTime.measured) * sameDayCells);
+                    return (
+                      <li key={index} data-mark={onTime ? 'dot' : 'ring'}>
+                        <Mark name={onTime ? 'dot' : 'ring'} size={14} />
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="m-0 mt-3 text-a-text2">
                   Promedio: <strong>{days(report.responseTime.averageDays ?? 0)}</strong> de retraso. El más tardado:{' '}
                   <strong>{days(report.responseTime.worstDays ?? 0)}</strong>.
                 </p>
               </div>
             )}
             {report.responseTime.notMeasurable > 0 && (
-              <p className="text-xs text-gray-500 mt-3">
+              <p className="adm-note mt-3">
                 {report.responseTime.notMeasurable === 1
                   ? '1 venta viene de la carga inicial del Excel y no se puede medir.'
                   : `${report.responseTime.notMeasurable} ventas vienen de la carga inicial del Excel y no se pueden medir.`}
@@ -195,7 +215,7 @@ const Reports: React.FC = () => {
               <Empty>No hay unidades en bodega.</Empty>
             ) : (
               <>
-                <p className="text-sm text-gray-700">
+                <p className="m-0 text-a-text2">
                   <strong>{report.aging.onHand}</strong> {report.aging.onHand === 1 ? 'unidad' : 'unidades'} en bodega
                   {report.aging.averageDays !== null && (
                     <>
@@ -205,20 +225,18 @@ const Reports: React.FC = () => {
                   .
                 </p>
                 {report.aging.oldest.length > 0 && (
-                  <div className="overflow-x-auto mt-4">
-                    <table className="min-w-full text-sm">
-                      <caption className="text-left text-xs font-medium uppercase text-gray-500 pb-2">
-                        Las más antiguas
-                      </caption>
-                      <tbody className="divide-y divide-gray-100">
+                  <div className="-mx-4 mt-4 overflow-x-auto sm:-mx-5">
+                    <table className="adm-table">
+                      <caption className="adm-label-sm px-4 pb-2 text-left sm:px-5">Las más antiguas</caption>
+                      <tbody>
                         {report.aging.oldest.map((unit) => (
                           <tr key={unit.id}>
-                            <td className="py-2 pr-4 text-gray-900">
-                              {unitName(unit)} <span className="text-gray-500">· galga {unit.gauge}</span>
+                            <td className="text-a-ink">
+                              {unitName(unit)} <span className="text-a-muted">· galga {unit.gauge}</span>
                             </td>
-                            <td className="py-2 pr-4 text-gray-700">{unit.serialNumber}</td>
-                            <td className="py-2 pr-4 text-gray-700">Llegó el {formatDay(unit.receivedAt)}</td>
-                            <td className="py-2 font-medium text-gray-900">{days(unit.days)}</td>
+                            <td className="adm-num text-[13px] text-a-text2">{unit.serialNumber}</td>
+                            <td className="adm-num text-[13px] text-a-text2">Llegó el {formatDay(unit.receivedAt)}</td>
+                            <td className="adm-num font-medium text-a-ink">{days(unit.days)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -226,7 +244,7 @@ const Reports: React.FC = () => {
                   </div>
                 )}
                 {report.aging.withoutReceivedDate > 0 && (
-                  <p className="text-xs text-gray-500 mt-3">
+                  <p className="adm-note mt-3">
                     {report.aging.withoutReceivedDate === 1
                       ? '1 unidad no tiene fecha de llegada'
                       : `${report.aging.withoutReceivedDate} unidades no tienen fecha de llegada`}
@@ -244,13 +262,16 @@ const Reports: React.FC = () => {
             {report.staleReservations.length === 0 ? (
               <Empty>Ninguna: todas las unidades apartadas están al día.</Empty>
             ) : (
-              <ul className="divide-y divide-gray-100 text-sm">
+              <ul className="adm-ledger">
                 {report.staleReservations.map((unit) => (
-                  <li key={unit.id} className="py-2 flex flex-wrap items-baseline justify-between gap-x-4">
-                    <span className="text-gray-900">
-                      {unitName(unit)} <span className="text-gray-500">· serie {unit.serialNumber}</span>
+                  <li key={unit.id} className="flex-wrap">
+                    <span className="text-a-ink">
+                      {unitName(unit)} <span className="adm-num text-[13px] text-a-muted">· serie {unit.serialNumber}</span>
                     </span>
-                    <span className="font-semibold text-amber-700">⚠ {days(unit.days)} apartada</span>
+                    <span className="flex items-center gap-1.5 font-semibold text-a-red">
+                      <Mark name="alert" size={15} />
+                      {days(unit.days)} apartada
+                    </span>
                   </li>
                 ))}
               </ul>

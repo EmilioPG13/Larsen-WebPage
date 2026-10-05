@@ -207,12 +207,12 @@ export const adminApi = {
     return response.data;
   },
 
-  createProduct: async (productData: any) => {
+  createProduct: async (productData: Record<string, unknown>) => {
     const response = await api.post('/products', productData);
     return response.data;
   },
 
-  updateProduct: async (id: string, productData: any) => {
+  updateProduct: async (id: string, productData: Record<string, unknown>) => {
     const response = await api.put(`/products/${id}`, productData);
     return response.data;
   },
@@ -232,12 +232,12 @@ export const adminApi = {
     return response.data;
   },
 
-  createMachine: async (machineData: any) => {
+  createMachine: async (machineData: Record<string, unknown>) => {
     const response = await api.post('/machines', machineData);
     return response.data;
   },
 
-  updateMachine: async (id: string, machineData: any) => {
+  updateMachine: async (id: string, machineData: Record<string, unknown>) => {
     const response = await api.put(`/machines/${id}`, machineData);
     return response.data;
   },
@@ -257,12 +257,12 @@ export const adminApi = {
     return response.data;
   },
 
-  createBrand: async (brandData: any) => {
+  createBrand: async (brandData: Record<string, unknown>) => {
     const response = await api.post('/brands', brandData);
     return response.data;
   },
 
-  updateBrand: async (id: string, brandData: any) => {
+  updateBrand: async (id: string, brandData: Record<string, unknown>) => {
     const response = await api.put(`/brands/${id}`, brandData);
     return response.data;
   },

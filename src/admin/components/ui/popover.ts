@@ -112,7 +112,7 @@ export function usePanelPosition(
 }
 
 /** Shared classes for the floating panel of every popover. Sits above the admin modals (z-50). */
-export const popoverClass = 'adm-pop z-[70] rounded-2xl bg-white p-1.5 shadow-xl ring-1 ring-black/5';
+export const popoverClass = 'adm-pop z-[70] p-1';
 
 export const triggerClass =
-  'flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-larsen-red disabled:cursor-not-allowed disabled:opacity-60';
+  'adm-input flex w-full items-center justify-between gap-2 text-left';

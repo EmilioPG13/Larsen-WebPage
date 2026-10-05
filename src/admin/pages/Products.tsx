@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../services/adminApi';
+import { apiErrorMessage } from '../services/apiError';
 import InventoryManager from '../components/InventoryManager';
+import { PageError, PageHeader, PageLoading, Tag } from '../components/ui/kit';
 import type { Product } from '../../types';
 
 const Products: React.FC = () => {
@@ -18,8 +20,8 @@ const Products: React.FC = () => {
       setLoading(true);
       const data = await adminApi.getProducts();
       setProducts(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cargar productos');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al cargar productos'));
     } finally {
       setLoading(false);
     }
@@ -30,113 +32,70 @@ const Products: React.FC = () => {
       await adminApi.updateProductStock(id, data);
       await fetchProducts(); // Refresh list
       setSelectedProduct(null);
-    } catch (err: any) {
-      alert('Error al actualizar inventario: ' + (err.response?.data?.error || err.message));
+    } catch (err) {
+      alert('Error al actualizar inventario: ' + apiErrorMessage(err, err instanceof Error ? err.message : ''));
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-gray-600">Cargando productos...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
-  }
+  if (loading) return <PageLoading>Cargando productos...</PageLoading>;
+  if (error) return <PageError>{error}</PageError>;
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Productos</h1>
-      </div>
+    <div className="adm-page">
+      <PageHeader title="Gestión de Productos" />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         {/* Products List */}
-        <div className="xl:col-span-2">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Producto
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Categoría
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.description.substring(0, 50)}...</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {product.category}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            product.inStock
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {product.inStock ? 'En Stock' : 'No disponible'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => setSelectedProduct(product)}
-                          className="text-larsen-blue hover:text-larsen-red font-medium"
-                        >
-                          Gestionar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div className="adm-panel self-start overflow-x-auto">
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Categoría</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id} data-selected={selectedProduct?.id === product.id}>
+                  <td className="whitespace-nowrap">
+                    <div className="font-semibold text-a-ink">{product.name}</div>
+                    <div className="text-[13px] text-a-muted">{product.description.substring(0, 50)}...</div>
+                  </td>
+                  <td className="whitespace-nowrap text-a-text2">{product.category}</td>
+                  <td className="whitespace-nowrap">
+                    <Tag mark={product.inStock ? 'ring' : 'cross'} tone={product.inStock ? 'navy' : 'plain'}>
+                      {product.inStock ? 'En Stock' : 'No disponible'}
+                    </Tag>
+                  </td>
+                  <td className="whitespace-nowrap">
+                    <button onClick={() => setSelectedProduct(product)} className="adm-link adm-brackets">
+                      Gestionar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Inventory Manager Sidebar */}
-        <div className="xl:col-span-1">
+        <div>
           {selectedProduct ? (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {selectedProduct.name}
-              </h2>
+              <h2 className="m-0 mb-3 text-[18px] font-semibold text-a-ink">{selectedProduct.name}</h2>
               <InventoryManager
                 currentStock={selectedProduct.inStock ?? true}
                 onUpdate={(data) => handleStockUpdate(selectedProduct.id, data)}
                 type="product"
               />
-              <button
-                onClick={() => setSelectedProduct(null)}
-                className="mt-4 w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-              >
+              <button onClick={() => setSelectedProduct(null)} className="adm-btn adm-btn-block mt-3">
                 Cerrar
               </button>
             </div>
           ) : (
-            <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
+            <div className="adm-panel p-6 text-center text-a-muted">
               Selecciona un producto para gestionar su inventario
             </div>
           )}
@@ -147,4 +106,3 @@ const Products: React.FC = () => {
 };
 
 export default Products;
-

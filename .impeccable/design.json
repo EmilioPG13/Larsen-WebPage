@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-02T00:00:00Z",
+  "title": "Design System: Larsen Admin",
+  "extensions": {
+    "colorMeta": {
+      "chart-navy": { "role": "primary", "displayName": "Chart Navy", "canonical": "#28327b", "tonalRamp": ["#0f1440", "#1d2562", "#28327b", "#4a55a0", "#6f79bd", "#a3aeff", "#c9cffa", "#e8ebfb"] },
+      "attention-red": { "role": "secondary", "displayName": "Attention Red", "canonical": "#c41c28", "tonalRamp": ["#4a0a0f", "#7d121a", "#c41c28", "#d9525b", "#ff7a83", "#f4a3a8", "#f9cfd1", "#fdecec"] },
+      "chart-paper": { "role": "neutral", "displayName": "Chart Paper", "canonical": "#eef0f5", "tonalRamp": ["#0b0e1c", "#131730", "#262c4d", "#5b6175", "#a9afc4", "#d6dae7", "#eef0f5", "#f5f6fa"] },
+      "plate": { "role": "neutral", "displayName": "Plate", "canonical": "#ffffff", "tonalRamp": ["#131730", "#0f1328", "#f5f6fa", "#ffffff"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#11131a", "tonalRamp": ["#11131a", "#3d4254", "#5b6175", "#767d99", "#8a90a8", "#a9afc4", "#d6dae7", "#eef0fa"] },
+      "rail": { "role": "neutral", "displayName": "Rail Navy", "canonical": "#141a47", "tonalRamp": ["#070914", "#141a47", "#28327b", "#8f96ba", "#a3aad6", "#c4c9de", "#e8ebf8", "#f3f5fc"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title", "purpose": "One per page in the page head, condensed Archivo (wdth 80)." },
+      "figure": { "displayName": "Figure", "purpose": "Large report and login figures (26px)." },
+      "dialog-title": { "displayName": "Dialog title", "purpose": "Modal heads (20px, wdth 82)." },
+      "body": { "displayName": "Body", "purpose": "Default text, buttons, table cells, inputs (14px)." },
+      "body-small": { "displayName": "Body small", "purpose": "Tags, field labels, notes, small buttons (13px)." },
+      "label": { "displayName": "Label", "purpose": "Panel titles, table heads, rail groups, definition terms (11px uppercase, condensed)." },
+      "numeral": { "displayName": "Numeral", "purpose": "Every number, serial and date in Red Hat Mono with tabular figures." }
+    },
+    "shadows": [
+      { "name": "dialog", "value": "0 18px 40px -12px rgba(5, 8, 30, 0.45)", "purpose": "Modal dialogs only; they leave the plane." },
+      { "name": "popover", "value": "0 14px 30px -10px rgba(5, 8, 30, 0.4)", "purpose": "Select, combobox, date picker and export menu popovers." }
+    ],
+    "motion": [
+      { "name": "state-fast", "value": "0.12s-0.15s ease", "purpose": "Background, border and color changes on hover; disabled under prefers-reduced-motion." },
+      { "name": "theme-swap", "value": "0.25s ease", "purpose": "Ground background and text color when the theme switches." },
+      { "name": "skeleton-sweep", "value": "2.2s linear infinite", "purpose": "Loading bars; disabled under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one filled action on a screen.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Guardar</button>",
+      "css": ".ds-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 16px; border: 1px solid var(--a-control); border-radius: 0; background: var(--a-surface); color: var(--a-ink); font: 500 14px/1.2 Archivo, system-ui, sans-serif; cursor: pointer; transition: background-color .15s ease, border-color .15s ease; } .ds-btn:hover { background: var(--a-navy-soft); border-color: var(--a-navy); } .ds-btn:focus-visible { outline: none; } .ds-btn:focus-visible::after { content: ''; position: absolute; inset: -4px; pointer-events: none; --b: var(--a-navy); background: linear-gradient(var(--b),var(--b)) top left/8px 2px no-repeat, linear-gradient(var(--b),var(--b)) top left/2px 8px no-repeat, linear-gradient(var(--b),var(--b)) top right/8px 2px no-repeat, linear-gradient(var(--b),var(--b)) top right/2px 8px no-repeat, linear-gradient(var(--b),var(--b)) bottom left/8px 2px no-repeat, linear-gradient(var(--b),var(--b)) bottom left/2px 8px no-repeat, linear-gradient(var(--b),var(--b)) bottom right/8px 2px no-repeat, linear-gradient(var(--b),var(--b)) bottom right/2px 8px no-repeat; } .ds-btn-primary { background: var(--a-navy); border-color: var(--a-navy); color: var(--a-on-navy); font-weight: 600; } .ds-btn-primary:hover { background: var(--a-navy-hover); border-color: var(--a-navy-hover); }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action; red text and line, wash on hover.",
+      "html": "<button class=\"ds-btn-danger\">Eliminar</button>",
+      "css": ".ds-btn-danger { min-height: 36px; padding: 0 16px; border: 1px solid var(--a-red-line); border-radius: 0; background: var(--a-surface); color: var(--a-red); font: 500 14px/1.2 Archivo, system-ui, sans-serif; cursor: pointer; transition: background-color .15s ease, border-color .15s ease; } .ds-btn-danger:hover { background: var(--a-red-soft); border-color: var(--a-red); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Square field with a 2px square focus outline.",
+      "html": "<input class=\"ds-input\" placeholder=\"Buscar serie\" />",
+      "css": ".ds-input { display: block; width: 240px; min-height: 38px; padding: 8px 12px; border: 1px solid var(--a-control); border-radius: 0; background: var(--a-surface); color: var(--a-ink); font: 14px Archivo, system-ui, sans-serif; transition: border-color .15s ease; } .ds-input::placeholder { color: var(--a-muted); opacity: 1; } .ds-input:hover { border-color: var(--a-muted); } .ds-input:focus { outline: 2px solid var(--a-navy); outline-offset: 2px; border-color: var(--a-navy); }"
+    },
+    {
+      "name": "Segmented Group",
+      "kind": "nav",
+      "refersTo": "segmented-cell-active",
+      "description": "Filters and state pickers sharing one hairline; the pressed cell is solid navy.",
+      "html": "<div class=\"ds-seg\"><button aria-pressed=\"true\">Todos 24</button><button aria-pressed=\"false\">Disponibles 18</button><button aria-pressed=\"false\">Reservados 6</button></div>",
+      "css": ".ds-seg { display: inline-flex; border: 1px solid var(--a-control); background: var(--a-surface); } .ds-seg > button { min-height: 34px; padding: 0 14px; background: transparent; border: 0; color: var(--a-text2); font: 500 14px Archivo, system-ui, sans-serif; font-variant-numeric: tabular-nums; cursor: pointer; transition: background-color .15s ease, color .15s ease; } .ds-seg > button + button { border-left: 1px solid var(--a-line); } .ds-seg > button:hover:not([aria-pressed='true']) { background: var(--a-navy-soft); } .ds-seg > button[aria-pressed='true'] { background: var(--a-navy); color: var(--a-on-navy); font-weight: 600; }"
+    },
+    {
+      "name": "Tag with Stitch Mark",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Square tag; the leading mark carries the state.",
+      "html": "<span class=\"ds-tag ds-tag-red\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"><rect x=\"2.5\" y=\"2.5\" width=\"11\" height=\"11\"/><path d=\"M8 5.2v3.6\"/><path d=\"M8 10.6v.9\"/></svg>Vencido</span>",
+      "css": ".ds-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 2px 6px; border: 1px solid var(--a-control); background: var(--a-surface); color: var(--a-text2); font: 600 13px/1.5 Archivo, system-ui, sans-serif; white-space: nowrap; } .ds-tag-red { border-color: var(--a-red-line); background: var(--a-red-soft); color: var(--a-red); }"
+    },
+    {
+      "name": "Plate with Ledger",
+      "kind": "card",
+      "refersTo": "plate",
+      "description": "Square white plate, tonal head band, label-style title, mono values.",
+      "html": "<section class=\"ds-plate\"><div class=\"ds-plate-head\"><h2>Leads</h2></div><ul class=\"ds-ledger\"><li><span>Nuevos</span><b>12</b></li><li><span>En proceso</span><b>7</b></li></ul></section>",
+      "css": ".ds-plate { background: var(--a-surface); border: 1px solid var(--a-line); color: var(--a-ink); font: 14px Archivo, system-ui, sans-serif; } .ds-plate-head { display: flex; align-items: center; min-height: 64px; padding: 12px 16px; border-bottom: 1px solid var(--a-line); background: var(--a-surface-2); } .ds-plate-head h2 { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; font-stretch: 92%; color: var(--a-text2); } .ds-ledger { margin: 0; padding: 0 16px; list-style: none; } .ds-ledger li { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--a-line); } .ds-ledger li:last-child { border-bottom: 0; } .ds-ledger span { color: var(--a-text2); } .ds-ledger b { font: 500 18px 'Red Hat Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Unit Chart",
+      "kind": "custom",
+      "refersTo": "plate",
+      "description": "Signature chart: 20px cells with 4px gaps on the 24px module, one stitch mark per unit state.",
+      "html": "<ul class=\"ds-chart\"><li><svg viewBox=\"0 0 16 16\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"8\" cy=\"8\" r=\"4.5\"/></svg></li><li class=\"ds-dot\"><svg viewBox=\"0 0 16 16\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"8\" cy=\"8\" r=\"4.5\" fill=\"currentColor\"/></svg></li><li class=\"ds-slash\"><svg viewBox=\"0 0 16 16\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"8\" cy=\"8\" r=\"4.5\"/><path d=\"M3.5 12.5 12.5 3.5\"/></svg></li></ul>",
+      "css": ".ds-chart { display: grid; grid-template-columns: repeat(auto-fill, 20px); gap: 4px; margin: 0; padding: 0; list-style: none; } .ds-chart > li { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid var(--a-line-strong); background: var(--a-surface); color: var(--a-navy); } .ds-chart > li.ds-dot { background: var(--a-navy-soft); } .ds-chart > li.ds-slash { background: var(--a-surface-2); }"
+    },
+    {
+      "name": "Rail Link",
+      "kind": "nav",
+      "refersTo": "rail-link-active",
+      "description": "Rail navigation; the active item is an inverted paper cell.",
+      "html": "<nav class=\"ds-rail\"><a href=\"#\" class=\"ds-rail-link\">Inventario</a><a href=\"#\" class=\"ds-rail-link\" aria-current=\"page\">Reportes</a></nav>",
+      "css": ".ds-rail { width: 256px; padding: 8px 0; background: var(--a-rail); color: var(--a-rail-ink); font: 14px Archivo, system-ui, sans-serif; } .ds-rail-link { display: flex; align-items: center; min-height: 40px; padding: 0 12px; color: var(--a-rail-ink); font-weight: 500; text-decoration: none; transition: background-color .15s ease, color .15s ease; } .ds-rail-link:hover { background: var(--a-rail-hover); } .ds-rail-link[aria-current='page'] { background: var(--a-rail-active); color: var(--a-rail-active-ink); font-weight: 600; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Knitting Chart",
+    "overview": "Every unit, lead and record is a cell on a visible technical grid, and its state is a drawn stitch symbol readable without color. The ground is cool paper carrying a faint 24px chart grid; work happens on solid white plates with 1px square hairlines; a deep-navy rail anchors the left edge. Navy is the only action color and red is reserved for destructive and overdue. The panel is an operating tool for Larsen staff (desktop admins, warehouse phones and tablets), so it is dense, legible and quiet, in Spanish.\n\nDark mode is a full second ground, not an inversion: an ink-blue paper with a periwinkle accent in place of navy and a soft coral in place of red.",
+    "keyCharacteristics": [
+      "Square everything: no radius, no soft card shadows; depth comes from hairlines and tonal plates.",
+      "State is drawn (stitch marks), never only colored.",
+      "Red Hat Mono for every numeral, serial and date; Archivo for everything else.",
+      "One action color (navy, periwinkle in dark); red means destructive or overdue only.",
+      "Focus is a printed bracket device, not a glow."
+    ],
+    "rules": [
+      { "name": "The Single Action Rule", "body": "Navy is the only action color. A second accent for \"variety\" is not allowed.", "section": "colors" },
+      { "name": "The Reserved Red Rule", "body": "Red appears only for destructive actions, errors and overdue state. It is never decoration or a category color.", "section": "colors" },
+      { "name": "The Shape-First Rule", "body": "Meaning is carried by a stitch mark; color only reinforces it.", "section": "colors" },
+      { "name": "The Mono Numeral Rule", "body": "Any number, serial, or date is set in Red Hat Mono with tabular figures. Never in Archivo.", "section": "typography" },
+      { "name": "The Five Sizes Rule", "body": "The ramp is 11 / 13 / 14 / 18 / 26 (plus 20 for dialogs and 28 for the page title). Do not add in-between sizes.", "section": "typography" },
+      { "name": "The Flat Plate Rule", "body": "Plates, buttons, tags and inputs never carry a shadow. Only dialogs and popovers do, because they leave the plane.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do express every state as a stitch mark first and a color second.",
+      "Do keep radius at 0 and borders at 1px hairlines.",
+      "Do set every number, serial and date in Red Hat Mono tabular.",
+      "Do use navy for all actions and red only for destructive and overdue.",
+      "Do keep control borders at `control-edge` so controls hold 3:1 against the plates.",
+      "Do give every new interactive element the bracket focus device (inputs: the 2px square outline).",
+      "Do keep dark mode in lockstep: every new color needs a `[data-theme=\"dark\"]` value."
+    ],
+    "donts": [
+      "Don't use a gray sidebar, white shadowed cards, colored pills or emoji icons.",
+      "Don't add shadows to plates, buttons or tags; only floating layers (dialogs, popovers) have one.",
+      "Don't add a second accent color or use red as a category color.",
+      "Don't draw icons with a different stroke weight, round caps, or fills beyond the mark vocabulary.",
+      "Don't introduce type sizes outside 11 / 13 / 14 / 18 / 20 / 26 / 28.",
+      "Don't reuse or restyle public-site tokens inside `/admin`, or admin tokens on the public site."
+    ]
+  }
+}
