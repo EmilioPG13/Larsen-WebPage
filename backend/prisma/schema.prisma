@@ -33,6 +33,17 @@ model User {
   @@map("users")
 }
 
+// One row per failed login, per client IP. Kept in the database (not in memory)
+// because each Vercel request can land on a different instance.
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  ip        String
+  createdAt DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@map("login_attempts")
+}
+
 model Brand {
   id          String   @id @default(uuid())
   name        String   @unique
