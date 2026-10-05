@@ -4,6 +4,7 @@ import { apiErrorMessage } from '../services/apiError';
 import { getStoredUser, type AdminRole } from '../services/session';
 import Select from '../components/ui/Select';
 import DeleteUserModal from '../components/DeleteUserModal';
+import { Alert, Notice, PageError, PageHeader, PageLoading, Tag } from '../components/ui/kit';
 
 const roleLabels: Record<AdminRole, string> = {
   ADMIN: 'Administrador',
@@ -14,8 +15,7 @@ const roleOptions = (['INVENTARIO', 'ADMIN'] as AdminRole[]).map((value) => ({ v
 
 const emptyForm = { email: '', name: '', role: 'INVENTARIO' as AdminRole, password: '' };
 
-const inputClass =
-  'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red';
+const inputClass = 'adm-input';
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<ManagedUser[]>([]);
@@ -114,160 +114,138 @@ const Users: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-gray-600">Cargando usuarios...</div>
-      </div>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-red-600">{loadError}</div>
-      </div>
-    );
-  }
+  if (loading) return <PageLoading>Cargando usuarios...</PageLoading>;
+  if (loadError) return <PageError>{loadError}</PageError>;
 
   return (
-    <div className="p-4 sm:p-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Gestión de Usuarios</h1>
+    <div className="adm-page">
+      <PageHeader title="Gestión de Usuarios" />
 
-      {actionError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
-          {actionError}
-        </div>
-      )}
-      {notice && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-          {notice}
-        </div>
-      )}
+      {actionError && <Alert>{actionError}</Alert>}
+      {notice && <Notice>{notice}</Notice>}
 
-      <form onSubmit={handleCreate} className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Crear usuario</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="user-email" className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico
-            </label>
-            <input
-              id="user-email"
-              type="email"
-              required
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="user-name" className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre
-            </label>
-            <input
-              id="user-name"
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="user-role" className="block text-sm font-medium text-gray-700 mb-1">
-              Rol
-            </label>
-            <Select
-              id="user-role"
-              value={form.role}
-              options={roleOptions}
-              onChange={(role) => setForm({ ...form, role: role as AdminRole })}
-            />
-          </div>
-          <div>
-            <label htmlFor="user-password" className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña temporal (mínimo 12 caracteres)
-            </label>
-            <input
-              id="user-password"
-              type="password"
-              required
-              minLength={12}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className={inputClass}
-            />
-          </div>
+      <form onSubmit={handleCreate} className="adm-panel mb-6">
+        <div className="adm-panel-head">
+          <h2 className="adm-panel-title">Crear usuario</h2>
         </div>
-        <button
-          type="submit"
-          disabled={creating}
-          className="mt-4 px-6 py-2 bg-larsen-red text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
-        >
-          {creating ? 'Creando...' : 'Crear usuario'}
-        </button>
+        <div className="adm-panel-body">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="user-email" className="adm-field-label">
+                Correo electrónico
+              </label>
+              <input
+                id="user-email"
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="user-name" className="adm-field-label">
+                Nombre
+              </label>
+              <input
+                id="user-name"
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="user-role" className="adm-field-label">
+                Rol
+              </label>
+              <Select
+                id="user-role"
+                value={form.role}
+                options={roleOptions}
+                onChange={(role) => setForm({ ...form, role: role as AdminRole })}
+              />
+            </div>
+            <div>
+              <label htmlFor="user-password" className="adm-field-label">
+                Contraseña temporal (mínimo 12 caracteres)
+              </label>
+              <input
+                id="user-password"
+                type="password"
+                required
+                minLength={12}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className={inputClass}
+              />
+            </div>
+          </div>
+          <button type="submit" disabled={creating} className="adm-btn adm-btn-primary mt-5">
+            {creating ? 'Creando...' : 'Crear usuario'}
+          </button>
+        </div>
       </form>
 
       {resetTarget && (
-        <form onSubmit={handleReset} className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            Restablecer contraseña de {resetTarget.email}
-          </h2>
-          <label htmlFor="reset-password" className="block text-sm font-medium text-gray-700 mb-1">
-            Nueva contraseña (mínimo 12 caracteres)
-          </label>
-          <input
-            id="reset-password"
-            type="password"
-            required
-            minLength={12}
-            value={resetPassword}
-            onChange={(e) => setResetPassword(e.target.value)}
-            className={`${inputClass} max-w-md`}
-          />
-          <div className="flex gap-3 mt-4">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-larsen-red text-white rounded-lg hover:opacity-90 transition-colors"
-            >
-              Restablecer
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setResetTarget(null);
-                setResetPassword('');
-              }}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Cancelar
-            </button>
+        <form onSubmit={handleReset} className="adm-panel mb-6">
+          <div className="adm-panel-head">
+            <h2 className="adm-panel-title">Restablecer contraseña de {resetTarget.email}</h2>
+          </div>
+          <div className="adm-panel-body">
+            <label htmlFor="reset-password" className="adm-field-label">
+              Nueva contraseña (mínimo 12 caracteres)
+            </label>
+            <input
+              id="reset-password"
+              type="password"
+              required
+              minLength={12}
+              value={resetPassword}
+              onChange={(e) => setResetPassword(e.target.value)}
+              className={`${inputClass} max-w-md`}
+            />
+            <div className="mt-5 flex gap-2">
+              <button type="submit" className="adm-btn adm-btn-primary">
+                Restablecer
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setResetTarget(null);
+                  setResetPassword('');
+                }}
+                className="adm-btn"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </form>
       )}
 
-      <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="adm-panel overflow-x-auto">
+        <table className="adm-table">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correo</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Correo</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {users.map((user) => {
               const isSelf = user.id === currentUserId;
               return (
                 <tr key={user.id}>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="text-a-ink">
                     {user.name || '—'}
-                    {isSelf && <span className="ml-2 text-xs text-gray-500">(tú)</span>}
+                    {isSelf && <span className="ml-2 text-[13px] text-a-muted">(tú)</span>}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                  <td className="px-6 py-4 text-sm">
+                  <td className="text-a-text2">{user.email}</td>
+                  <td className="min-w-44">
                     <Select
                       ariaLabel={`Rol de ${user.email}`}
                       value={user.role}
@@ -277,45 +255,43 @@ const Users: React.FC = () => {
                       onChange={(role) => handleUpdate(user, { role: role as AdminRole })}
                     />
                   </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700'
-                      }`}
-                    >
+                  <td>
+                    <Tag mark={user.active ? 'dot' : 'ring'} tone={user.active ? 'navy' : 'plain'}>
                       {user.active ? 'Activo' : 'Inactivo'}
-                    </span>
+                    </Tag>
                   </td>
-                  <td className="px-6 py-4 text-sm space-x-3">
-                    <button
-                      onClick={() => handleUpdate(user, { active: !user.active })}
-                      disabled={isSelf}
-                      className="text-larsen-red hover:underline disabled:opacity-40 disabled:no-underline"
-                    >
-                      {user.active ? 'Desactivar' : 'Activar'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        clearMessages();
-                        setResetTarget(user);
-                        setResetPassword('');
-                      }}
-                      className="text-gray-700 hover:underline"
-                    >
-                      Restablecer contraseña
-                    </button>
-                    <button
-                      onClick={() => {
-                        clearMessages();
-                        setDeleteError('');
-                        setDeleteTarget(user);
-                      }}
-                      disabled={isSelf}
-                      title={isSelf ? 'No puedes eliminar tu propia cuenta' : undefined}
-                      className="text-red-600 hover:underline disabled:opacity-40 disabled:no-underline"
-                    >
-                      Eliminar
-                    </button>
+                  <td>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      <button
+                        onClick={() => handleUpdate(user, { active: !user.active })}
+                        disabled={isSelf}
+                        className="adm-link adm-brackets"
+                      >
+                        {user.active ? 'Desactivar' : 'Activar'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          clearMessages();
+                          setResetTarget(user);
+                          setResetPassword('');
+                        }}
+                        className="adm-link adm-link-muted adm-brackets"
+                      >
+                        Restablecer contraseña
+                      </button>
+                      <button
+                        onClick={() => {
+                          clearMessages();
+                          setDeleteError('');
+                          setDeleteTarget(user);
+                        }}
+                        disabled={isSelf}
+                        title={isSelf ? 'No puedes eliminar tu propia cuenta' : undefined}
+                        className="adm-link adm-link-danger adm-brackets"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

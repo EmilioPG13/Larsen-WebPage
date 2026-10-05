@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../services/adminApi';
+import { apiErrorMessage } from '../services/apiError';
 import { roleHome } from '../services/session';
+import { useOptionalTheme } from '../../context/ThemeContext';
+import { Alert, CellMark, Icon, Mark, type MarkName } from '../components/ui/kit';
+
+// A fixed chart for the side panel: the same stitch vocabulary the panel uses for states.
+const CHART: (MarkName | null)[] = [
+  'dot', 'dot', 'ring', null, 'slash', 'ring', 'dot', null,
+  'ring', 'dot', 'dot', 'ring', null, 'dot', 'slash', 'ring',
+  null, 'ring', 'slash', 'dot', 'dot', 'ring', null, 'dot',
+  'dot', null, 'ring', 'dot', 'ring', 'slash', 'dot', 'ring',
+  'slash', 'dot', null, 'ring', 'dot', 'dot', 'ring', null,
+  'ring', 'ring', 'dot', 'slash', null, 'ring', 'dot', 'dot',
+];
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useOptionalTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,73 +32,124 @@ const Login: React.FC = () => {
     try {
       const { user } = await adminApi.login(email, password);
       navigate(roleHome(user?.role ?? 'ADMIN'));
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al iniciar sesión'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Panel de Administración
-          </h1>
-          <p className="text-gray-600">Larsen Italiana</p>
+    <div className="adm grid min-h-screen lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <aside className="adm-rail relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
+        <div className="flex items-center gap-3">
+          <CellMark size={36} />
+          <div className="leading-tight">
+            <div className="text-[26px] font-bold tracking-tight">Larsen</div>
+            <div className="text-[13px] text-(--a-rail-muted)">Italiana · Panel interno</div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
+        <ul
+          aria-hidden="true"
+          className="m-0 grid max-w-md list-none grid-cols-8 gap-1 p-0 text-(--a-rail-ink)"
+        >
+          {CHART.map((mark, index) => (
+            <li
+              key={index}
+              className="flex aspect-square items-center justify-center border border-(--a-rail-line)"
+              style={mark === 'dot' ? { background: 'var(--a-rail-hover)' } : undefined}
+            >
+              {mark && <Mark name={mark} size={22} />}
+            </li>
+          ))}
+        </ul>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
-              placeholder="admin@larsenitaliana.com"
-            />
-          </div>
+        <p className="m-0 max-w-sm text-[13px] text-(--a-rail-muted)">
+          Acceso del equipo de Larsen Italiana: inventario, leads y reportes.
+        </p>
+      </aside>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-larsen-red focus:border-transparent"
-              placeholder="••••••••"
-            />
-          </div>
-
+      <main className="relative flex items-center justify-center px-4 py-10 sm:px-8">
+        {theme && (
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-larsen-red to-larsen-blue text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={theme.toggleTheme}
+            aria-label={theme.isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            className="adm-btn adm-btn-sm absolute right-4 top-4 sm:right-8 sm:top-8"
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            <Icon name={theme.isDark ? 'sun' : 'moon'} size={16} />
+            {theme.isDark ? 'Claro' : 'Oscuro'}
           </button>
-        </form>
-      </div>
+        )}
+
+        <div className="w-full max-w-md">
+        <div className="mb-6 text-a-navy lg:hidden">
+          <div className="flex items-center gap-3">
+            <CellMark size={34} />
+            <div className="leading-tight text-a-ink">
+              <div className="text-[26px] font-bold tracking-tight">Larsen</div>
+              <div className="text-[13px] text-a-muted">Italiana · Panel interno</div>
+            </div>
+          </div>
+          <ul aria-hidden="true" className="adm-chart mt-4">
+            {CHART.slice(0, 8).map((mark, index) => (
+              <li key={index} data-mark={mark ?? undefined}>
+                {mark && <Mark name={mark} size={14} />}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="adm-panel">
+          <div className="adm-dialog-head">
+            <h1 className="adm-dialog-title">Panel de Administración</h1>
+            <p className="adm-note">Larsen Italiana</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="adm-dialog-body space-y-5">
+            {error && <Alert className="mb-0">{error}</Alert>}
+
+            <div>
+              <label htmlFor="email" className="adm-field-label">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="username"
+                className="adm-input"
+                placeholder="admin@larsenitaliana.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="adm-field-label">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="adm-input"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="adm-btn adm-btn-primary adm-btn-block">
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            </button>
+          </form>
+        </div>
+        </div>
+      </main>
     </div>
   );
 };
 
 export default Login;
-
-

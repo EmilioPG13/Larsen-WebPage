@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../services/adminApi';
+import { Alert, PageError, PageHeader, PageLoading } from '../components/ui/kit';
 import { apiErrorMessage } from '../services/apiError';
 import type { Machine } from '../../types';
 
@@ -45,79 +46,52 @@ const Machines: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-gray-600">Cargando máquinas...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
-  }
+  if (loading) return <PageLoading>Cargando máquinas...</PageLoading>;
+  if (error) return <PageError>{error}</PageError>;
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Máquinas</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Las unidades disponibles se administran en Inventario. Aquí solo se marca qué modelos se venden bajo pedido.
-        </p>
-      </div>
+    <div className="adm-page">
+      <PageHeader
+        title="Gestión de Máquinas"
+        subtitle="Las unidades disponibles se administran en Inventario. Aquí solo se marca qué modelos se venden bajo pedido."
+      />
 
-      {actionError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert">
-          {actionError}
-        </div>
-      )}
+      {actionError && <Alert>{actionError}</Alert>}
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Máquina
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Marca
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bajo pedido
-                </th>
+      <div className="adm-panel overflow-x-auto">
+        <table className="adm-table">
+          <thead>
+            <tr>
+              <th scope="col">Máquina</th>
+              <th scope="col">Marca</th>
+              <th scope="col">Bajo pedido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {machines.map((machine) => (
+              <tr key={machine.id}>
+                <td>
+                  <div className="font-semibold text-a-ink">{machine.name}</div>
+                  <div className="text-[13px] text-a-muted">{machine.description.substring(0, 50)}...</div>
+                </td>
+                <td className="whitespace-nowrap text-a-text2">{machine.brand}</td>
+                <td className="whitespace-nowrap">
+                  <label className="inline-flex min-h-8 items-center gap-2.5 text-a-text2">
+                    <input
+                      type="checkbox"
+                      checked={machine.onOrder ?? false}
+                      disabled={savingId === machine.id}
+                      onChange={(e) => handleOnOrderChange(machine, e.target.checked)}
+                      aria-label={`${machine.name} se vende bajo pedido`}
+                      className="adm-check"
+                    />
+                    Se vende bajo pedido
+                  </label>
+                </td>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {machines.map((machine) => (
-                <tr key={machine.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{machine.name}</div>
-                    <div className="text-sm text-gray-500">{machine.description.substring(0, 50)}...</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{machine.brand}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <label className="inline-flex items-center gap-2 text-gray-700">
-                      <input
-                        type="checkbox"
-                        checked={machine.onOrder ?? false}
-                        disabled={savingId === machine.id}
-                        onChange={(e) => handleOnOrderChange(machine, e.target.checked)}
-                        aria-label={`${machine.name} se vende bajo pedido`}
-                        className="h-4 w-4 rounded border-gray-300"
-                      />
-                      Se vende bajo pedido
-                    </label>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

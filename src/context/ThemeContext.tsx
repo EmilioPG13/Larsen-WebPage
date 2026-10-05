@@ -43,6 +43,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Like `useTheme`, but returns undefined outside a provider so shared UI can hide its toggle. */
+// eslint-disable-next-line react-refresh/only-export-components
+export function useOptionalTheme(): ThemeContextValue | undefined {
+  return useContext(ThemeContext);
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);

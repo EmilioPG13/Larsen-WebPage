@@ -20,14 +20,14 @@ const options: { format: ExportFormat; title: string; detail: string; badge: str
     title: 'Excel (.xlsx)',
     detail: 'Hoja de cálculo con resumen',
     badge: 'XLS',
-    badgeClass: 'bg-green-100 text-green-700',
+    badgeClass: 'border-a-navy text-a-navy',
   },
   {
     format: 'pdf',
     title: 'PDF',
     detail: 'Para imprimir o compartir',
     badge: 'PDF',
-    badgeClass: 'bg-red-100 text-red-700',
+    badgeClass: 'border-a-line-strong text-a-text2',
   },
 ];
 
@@ -74,8 +74,6 @@ const ExportMenu: React.FC<ExportMenuProps> = ({ busy, disabled, onExport }) => 
     }
   };
 
-  const base =
-    'bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-larsen-red';
 
   return (
     <div ref={rootRef} className="inline-flex">
@@ -83,7 +81,7 @@ const ExportMenu: React.FC<ExportMenuProps> = ({ busy, disabled, onExport }) => 
         type="button"
         onClick={() => onExport('xlsx')}
         disabled={disabled || busy}
-        className={`${base} rounded-l-lg px-4 py-2`}
+        className="adm-btn"
       >
         {busy ? 'Exportando...' : 'Exportar Excel'}
       </button>
@@ -96,7 +94,7 @@ const ExportMenu: React.FC<ExportMenuProps> = ({ busy, disabled, onExport }) => 
         aria-controls={menuId}
         disabled={disabled || busy}
         onClick={() => setOpen((current) => !current)}
-        className={`${base} flex items-center rounded-r-lg border-l border-gray-300 px-2.5`}
+        className="adm-btn -ml-px px-2.5"
       >
         <ChevronIcon open={open} />
       </button>
@@ -121,17 +119,17 @@ const ExportMenu: React.FC<ExportMenuProps> = ({ busy, disabled, onExport }) => 
                 role="menuitem"
                 onClick={() => choose(option.format)}
                 style={{ '--i': index } as React.CSSProperties}
-                className="adm-opt flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                className="adm-opt flex w-full items-center gap-3 border-0 bg-transparent px-3 py-2.5 text-left transition-colors relative adm-brackets-in hover:bg-a-navy-soft focus:bg-a-navy-soft"
               >
                 <span
                   aria-hidden="true"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tracking-wide ${option.badgeClass}`}
+                  className={`adm-num flex h-9 w-9 shrink-0 items-center justify-center border text-[11px] font-semibold tracking-wide ${option.badgeClass}`}
                 >
                   {option.badge}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-medium text-gray-900">{option.title}</span>
-                  <span className="block text-xs text-gray-500">{option.detail}</span>
+                  <span className="block text-[14px] font-medium text-a-ink">{option.title}</span>
+                  <span className="block text-[13px] text-a-muted">{option.detail}</span>
                 </span>
               </button>
             ))}

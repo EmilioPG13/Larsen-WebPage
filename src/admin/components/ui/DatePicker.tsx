@@ -195,7 +195,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         onClick={() => (open ? setOpen(false) : openPanel())}
         className={triggerClass}
       >
-        <span className={`truncate ${value ? 'text-gray-900' : 'text-gray-400'}`}>
+        <span className={`truncate ${value ? 'text-a-ink' : 'text-a-muted'}`}>
           {value ? shortFormat.format(utcDate(value)) : placeholder}
         </span>
         <CalendarIcon />
@@ -218,24 +218,24 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 type="button"
                 aria-label="Mes anterior"
                 onClick={() => shiftMonth(-1)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-larsen-red"
+                className="flex h-8 w-8 items-center justify-center border border-a-line bg-transparent text-a-muted transition-colors hover:border-a-navy hover:text-a-navy relative adm-brackets-in"
               >
                 <ArrowIcon direction="left" />
               </button>
-              <span className="text-sm font-semibold text-gray-900" aria-live="polite">
+              <span className="text-[14px] font-semibold text-a-ink" aria-live="polite">
                 {monthLabel(view)}
               </span>
               <button
                 type="button"
                 aria-label="Mes siguiente"
                 onClick={() => shiftMonth(1)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-larsen-red"
+                className="flex h-8 w-8 items-center justify-center border border-a-line bg-transparent text-a-muted transition-colors hover:border-a-navy hover:text-a-navy relative adm-brackets-in"
               >
                 <ArrowIcon direction="right" />
               </button>
             </div>
 
-            <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium text-gray-400" aria-hidden="true">
+            <div className="mb-1 grid grid-cols-7 text-center text-[13px] font-medium text-a-muted" aria-hidden="true">
               {WEEKDAYS.map((weekday, index) => (
                 <span key={index} className="py-1">
                   {weekday}
@@ -264,14 +264,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     aria-current={isToday ? 'date' : undefined}
                     onClick={() => choose(iso)}
                     onKeyDown={handleDayKeyDown}
-                    className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-larsen-red ${
+                    className={`adm-num mx-auto flex h-9 w-9 items-center justify-center border text-[13px] transition-colors duration-150 relative adm-brackets-in ${
                       isSelected
-                        ? 'bg-larsen-red font-semibold text-white shadow-sm'
+                        ? 'border-a-navy bg-a-navy font-semibold text-(--a-on-navy)'
                         : isToday
-                          ? 'font-semibold text-larsen-red ring-1 ring-larsen-red/40 hover:bg-red-50'
+                          ? 'border-a-navy font-semibold text-a-navy hover:bg-a-navy-soft'
                           : inMonth
-                            ? 'text-gray-700 hover:bg-gray-100'
-                            : 'text-gray-300 hover:bg-gray-50'
+                            ? 'border-transparent text-a-text2 hover:bg-a-navy-soft'
+                            : 'border-transparent text-a-muted opacity-60 hover:bg-a-navy-soft'
                     }`}
                   >
                     {parseIso(iso)!.day}
@@ -280,11 +280,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
               })}
             </div>
 
-            <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
+            <div className="mt-2 flex items-center justify-between border-t border-a-line pt-2">
               <button
                 type="button"
                 onClick={() => choose(today)}
-                className="rounded-full px-3 py-1 text-sm font-medium text-larsen-red transition-colors hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-larsen-red"
+                className="adm-link"
               >
                 Hoy
               </button>
@@ -292,7 +292,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <button
                   type="button"
                   onClick={() => choose('')}
-                  className="rounded-full px-3 py-1 text-sm text-gray-500 transition-colors hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-larsen-red"
+                  className="adm-link adm-link-muted"
                 >
                   Borrar
                 </button>

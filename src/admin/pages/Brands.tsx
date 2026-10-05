@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../services/adminApi';
+import { apiErrorMessage } from '../services/apiError';
+import { PageError, PageHeader, PageLoading } from '../components/ui/kit';
 
 interface Brand {
   id: string;
@@ -25,8 +27,8 @@ const Brands: React.FC = () => {
       setLoading(true);
       const data = await adminApi.getBrands();
       setBrands(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cargar marcas');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Error al cargar marcas'));
     } finally {
       setLoading(false);
     }
@@ -43,64 +45,41 @@ const Brands: React.FC = () => {
     try {
       await adminApi.deleteBrand(brand.id);
       await fetchBrands();
-    } catch (err: any) {
-      alert('Error al eliminar marca: ' + (err.response?.data?.error || err.message));
+    } catch (err) {
+      alert('Error al eliminar marca: ' + apiErrorMessage(err, err instanceof Error ? err.message : ''));
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-gray-600">Cargando marcas...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 sm:p-8">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
-  }
+  if (loading) return <PageLoading>Cargando marcas...</PageLoading>;
+  if (error) return <PageError>{error}</PageError>;
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Marcas</h1>
-      </div>
+    <div className="adm-page">
+      <PageHeader title="Gestión de Marcas" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {brands.map((brand) => (
-          <div key={brand.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <img
-                  src={brand.image}
-                  alt={brand.name}
-                  className="w-16 h-16 object-contain"
-                />
-                <h3 className="text-xl font-bold text-gray-900">{brand.name}</h3>
+          <article key={brand.id} className="adm-panel flex flex-col">
+            <div className="flex items-center gap-4 border-b border-a-line p-5">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-a-line bg-white p-1.5">
+                <img src={brand.image} alt={brand.name} className="max-h-full max-w-full object-contain" />
               </div>
-              <p className="text-gray-600 text-sm mb-4">{brand.description}</p>
-              <div className="flex flex-wrap gap-2">
+              <h3 className="m-0 text-[18px] font-semibold text-a-ink">{brand.name}</h3>
+            </div>
+            <div className="flex flex-1 flex-col gap-4 p-5">
+              <p className="m-0 text-a-text2">{brand.description}</p>
+              <div className="flex flex-wrap gap-1.5">
                 {brand.specialties.map((specialty, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex px-2 py-1 text-xs font-medium bg-larsen-red/10 text-larsen-red rounded-full"
-                  >
+                  <span key={idx} className="adm-tag">
                     {specialty}
                   </span>
                 ))}
               </div>
-              <button
-                onClick={() => handleDelete(brand)}
-                className="mt-4 px-3 py-1.5 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
-              >
+              <button onClick={() => handleDelete(brand)} className="adm-btn adm-btn-sm adm-btn-danger mt-auto self-start">
                 Eliminar marca
               </button>
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </div>
@@ -108,4 +87,3 @@ const Brands: React.FC = () => {
 };
 
 export default Brands;
-

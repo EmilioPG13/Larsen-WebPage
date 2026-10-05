@@ -67,7 +67,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
 
   if (status === 'checking') {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600" role="status">
+      <div className="adm adm-label-sm flex min-h-screen items-center justify-center" role="status">
         Verificando sesión...
       </div>
     );

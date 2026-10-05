@@ -1,0 +1,1009 @@
+/* ============================================================
+   Admin panel — "knit chart" system.
+   Tokens are prefixed --a- so they never collide with the public
+   site's tokens. Light and dark follow html[data-theme].
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  /* Ground, plates */
+  --a-bg: #eef0f5;
+  --a-grid: rgba(40, 50, 123, 0.075);
+  --a-surface: #ffffff;
+  --a-surface-2: #f5f6fa;
+
+  /* Text */
+  --a-ink: #11131a;
+  --a-text2: #3d4254;
+  --a-muted: #5b6175;
+
+  /* Hairlines */
+  --a-line: #d6dae7;
+  --a-line-strong: #a9afc4;
+  --a-control: #767d99; /* borders of interactive controls, 3:1 on the plates */
+  --a-sel: rgba(40, 50, 123, 0.28);
+  --a-faint: #8a90a8;
+
+  /* Accent (the only action color) */
+  --a-navy: #28327b;
+  --a-navy-hover: #1d2562;
+  --a-on-navy: #ffffff;
+  --a-navy-soft: rgba(40, 50, 123, 0.08);
+
+  /* Attention: destructive and overdue only */
+  --a-red: #c41c28;
+  --a-red-soft: rgba(196, 28, 40, 0.08);
+  --a-red-line: rgba(196, 28, 40, 0.45);
+
+  /* Rail */
+  --a-rail: #141a47;
+  --a-rail-ink: #e8ebf8;
+  --a-rail-muted: #a3aad6;
+  --a-rail-line: rgba(255, 255, 255, 0.12);
+  --a-rail-hover: rgba(255, 255, 255, 0.07);
+  --a-rail-active: #f3f5fc;
+  --a-rail-active-ink: #141a47;
+
+  --a-scrim: rgba(10, 12, 30, 0.5);
+}
+
+[data-theme="dark"] {
+  --a-bg: #0b0e1c;
+  --a-grid: rgba(159, 170, 245, 0.06);
+  --a-surface: #131730;
+  --a-surface-2: #0f1328;
+
+  --a-ink: #eef0fa;
+  --a-text2: #c4c9de;
+  --a-muted: #9aa0ba;
+
+  --a-line: #262c4d;
+  --a-line-strong: #454d7c;
+  --a-control: #7580b8;
+  --a-sel: rgba(163, 174, 255, 0.36);
+  --a-faint: #6a7298;
+
+  --a-navy: #a3aeff;
+  --a-navy-hover: #bcc4ff;
+  --a-on-navy: #0b0e1c;
+  --a-navy-soft: rgba(163, 174, 255, 0.12);
+
+  --a-red: #ff7a83;
+  --a-red-soft: rgba(255, 122, 131, 0.12);
+  --a-red-line: rgba(255, 122, 131, 0.5);
+
+  --a-rail: #070914;
+  --a-rail-ink: #e4e7f7;
+  --a-rail-muted: #8f96ba;
+  --a-rail-line: rgba(255, 255, 255, 0.1);
+  --a-rail-hover: rgba(255, 255, 255, 0.07);
+  --a-rail-active: #e4e7f7;
+  --a-rail-active-ink: #070914;
+
+  --a-scrim: rgba(2, 3, 10, 0.68);
+}
+
+@theme {
+  --font-data: 'Red Hat Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --color-a-bg: var(--a-bg);
+  --color-a-surface: var(--a-surface);
+  --color-a-surface-2: var(--a-surface-2);
+  --color-a-ink: var(--a-ink);
+  --color-a-text2: var(--a-text2);
+  --color-a-muted: var(--a-muted);
+  --color-a-line: var(--a-line);
+  --color-a-line-strong: var(--a-line-strong);
+  --color-a-navy: var(--a-navy);
+  --color-a-navy-soft: var(--a-navy-soft);
+  --color-a-red: var(--a-red);
+  --color-a-red-soft: var(--a-red-soft);
+  --color-a-rail: var(--a-rail);
+}
+
+@layer components {
+/* ------------------------------------------------------------
+   Shell
+   ------------------------------------------------------------ */
+.adm {
+  min-height: 100vh;
+  background-color: var(--a-bg);
+  background-image:
+    linear-gradient(var(--a-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--a-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+  color: var(--a-ink);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.adm :where(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+
+.adm :where(button) {
+  cursor: pointer;
+}
+
+.adm ::selection {
+  background: var(--a-sel);
+}
+[data-theme='dark'] .adm,
+[data-theme='dark'] .adm-pop {
+  color-scheme: dark;
+}
+.adm {
+  scrollbar-color: var(--a-line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.adm-num {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Small caps-style label: the chart legend voice */
+.adm-label-sm {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-stretch: 92%;
+  color: var(--a-muted);
+}
+
+/* Keyboard focus: four printed corner brackets drawn around the control */
+.adm-brackets {
+  position: relative;
+}
+.adm-brackets:focus-visible {
+  outline: none;
+}
+.adm-brackets:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  --b: var(--a-navy);
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 2px 8px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 2px 8px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 2px 8px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 2px 8px no-repeat;
+}
+.adm-rail .adm-brackets:focus-visible::after {
+  --b: var(--a-rail-ink);
+}
+
+.adm-brackets-in {
+  position: relative;
+}
+.adm-brackets-in:focus-visible {
+  outline: none;
+}
+.adm-brackets-in:focus-visible::after,
+.adm-option[data-active='true']::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  pointer-events: none;
+  --b: var(--a-navy);
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 2px 6px no-repeat;
+}
+
+/* ------------------------------------------------------------
+   Rail
+   ------------------------------------------------------------ */
+.adm-rail {
+  background: var(--a-rail);
+  color: var(--a-rail-ink);
+}
+.adm-rail-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--a-rail-ink);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.adm-rail-nav-link:hover {
+  background: var(--a-rail-hover);
+}
+.adm-rail-nav-link[aria-current='page'] {
+  background: var(--a-rail-active);
+  color: var(--a-rail-active-ink);
+  font-weight: 600;
+}
+.adm-rail-group {
+  padding: 18px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-stretch: 92%;
+  color: var(--a-rail-muted);
+}
+.adm-rail-action {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  min-height: 38px;
+  padding: 0 12px;
+  background: transparent;
+  border: 0;
+  color: var(--a-rail-ink);
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+.adm-rail-action:hover {
+  background: var(--a-rail-hover);
+}
+
+/* Theme switch: two cells, the live one is filled */
+.adm-theme {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--a-rail-line);
+}
+.adm-theme button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  background: transparent;
+  border: 0;
+  color: var(--a-rail-muted);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.adm-theme button + button {
+  border-left: 1px solid var(--a-rail-line);
+}
+.adm-theme button[aria-pressed='true'] {
+  background: var(--a-rail-active);
+  color: var(--a-rail-active-ink);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------
+   Page structure
+   ------------------------------------------------------------ */
+.adm-page {
+  padding: 20px 16px 48px;
+  max-width: 1600px;
+}
+@media (min-width: 640px) {
+  .adm-page {
+    padding: 28px 32px 56px;
+  }
+}
+
+.adm-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--a-line-strong);
+}
+@media (min-width: 640px) {
+  .adm-head {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+}
+.adm-title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 650;
+  font-stretch: 80%;
+  letter-spacing: -0.005em;
+  color: var(--a-ink);
+}
+.adm-sub {
+  margin: 6px 0 0;
+  max-width: 62ch;
+  color: var(--a-muted);
+  font-size: 14px;
+}
+.adm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adm-panel {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  min-width: 0;
+}
+.adm-panel-head {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--a-line);
+  background: var(--a-surface-2);
+}
+.adm-panel-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-stretch: 92%;
+  color: var(--a-text2);
+}
+.adm-panel-body {
+  padding: 16px;
+}
+@media (min-width: 640px) {
+  .adm-panel-body {
+    padding: 20px;
+  }
+}
+.adm-note {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--a-muted);
+}
+
+/* ------------------------------------------------------------
+   Controls
+   ------------------------------------------------------------ */
+.adm-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--a-control);
+  border-radius: 0;
+  background: var(--a-surface);
+  color: var(--a-ink);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.adm-btn:hover:not(:disabled) {
+  background: var(--a-navy-soft);
+  border-color: var(--a-navy);
+}
+.adm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.adm-btn:focus-visible {
+  outline: none;
+}
+.adm-btn:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  --b: var(--a-navy);
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 2px 8px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 2px 8px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 2px 8px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 8px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 2px 8px no-repeat;
+}
+.adm-btn-primary {
+  background: var(--a-navy);
+  border-color: var(--a-navy);
+  color: var(--a-on-navy);
+  font-weight: 600;
+}
+.adm-btn-primary:hover:not(:disabled) {
+  background: var(--a-navy-hover);
+  border-color: var(--a-navy-hover);
+}
+.adm-btn-danger {
+  color: var(--a-red);
+  border-color: var(--a-red-line);
+}
+.adm-btn-danger:hover:not(:disabled) {
+  background: var(--a-red-soft);
+  border-color: var(--a-red);
+}
+.adm-btn-danger-solid {
+  background: var(--a-red);
+  border-color: var(--a-red);
+  color: #fff;
+  font-weight: 600;
+}
+.adm-btn-danger-solid:hover:not(:disabled) {
+  background: var(--a-red);
+  border-color: var(--a-red);
+  filter: brightness(0.92);
+}
+[data-theme='dark'] .adm-btn-danger-solid {
+  color: #1a0507;
+}
+.adm-btn-sm {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.adm-btn-block {
+  width: 100%;
+}
+
+/* Text-only row action */
+.adm-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  color: var(--a-navy);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+.adm-link:hover:not(:disabled) {
+  text-decoration-color: currentColor;
+}
+.adm-link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.adm-link:focus-visible {
+  outline: none;
+}
+.adm-link:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: -3px -5px;
+  pointer-events: none;
+  --b: var(--a-navy);
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 2px 6px no-repeat;
+}
+.adm-link-danger {
+  color: var(--a-red);
+}
+.adm-link-muted {
+  color: var(--a-text2);
+}
+
+@media (pointer: coarse) {
+  .adm-btn {
+    min-height: 44px;
+  }
+  .adm-btn-sm {
+    min-height: 40px;
+  }
+  .adm-link {
+    min-height: 40px;
+    padding: 0 6px;
+  }
+  .adm-rail-nav-link {
+    min-height: 46px;
+  }
+}
+
+.adm-input {
+  display: block;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--a-control);
+  border-radius: 0;
+  background: var(--a-surface);
+  color: var(--a-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+[data-theme='dark'] .adm-input {
+  background: var(--a-surface-2);
+}
+.adm-input::placeholder {
+  color: var(--a-muted);
+  opacity: 1;
+}
+.adm-input:hover:not(:disabled) {
+  border-color: var(--a-muted);
+}
+.adm-input:focus {
+  outline: 2px solid var(--a-navy);
+  outline-offset: 2px;
+  border-color: var(--a-navy);
+}
+select.adm-input {
+  appearance: none;
+  padding-right: 36px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--a-muted) 50%),
+    linear-gradient(135deg, var(--a-muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+.adm-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (pointer: coarse) {
+  .adm-input {
+    min-height: 44px;
+  }
+}
+.adm-field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--a-text2);
+}
+
+.adm-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--a-navy);
+}
+
+/* Segmented group: filters and state pickers share the hairline */
+.adm-seg {
+  display: inline-flex;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  border: 1px solid var(--a-control);
+  background: var(--a-surface);
+}
+.adm-seg > button {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 14px;
+  background: transparent;
+  border: 0;
+  color: var(--a-text2);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.adm-seg > button + button {
+  border-left: 1px solid var(--a-line);
+}
+.adm-seg > button:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--a-navy-soft);
+}
+.adm-seg > button[aria-pressed='true'] {
+  background: var(--a-navy);
+  color: var(--a-on-navy);
+  font-weight: 600;
+}
+.adm-seg > button[data-zero='true']:not([aria-pressed='true']) {
+  color: var(--a-faint);
+}
+.adm-seg > button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.adm-seg > button:focus-visible {
+  outline: none;
+}
+.adm-seg > button:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  --b: currentColor;
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 2px 6px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 6px 2px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 2px 6px no-repeat;
+}
+@media (max-width: 639px) {
+  /* edge fade says the row scrolls; no default scrollbar under the tabs */
+  .adm-seg:not(.adm-seg-fill) {
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+}
+/* Equal cells: the per-row state picker on narrow screens */
+.adm-seg-fill {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+}
+.adm-seg-fill > button {
+  justify-content: center;
+  gap: 6px;
+  padding: 0 6px;
+}
+@media (min-width: 768px) {
+  .adm-seg-fill {
+    display: inline-grid;
+    width: auto;
+  }
+  .adm-seg-fill > button {
+    gap: 8px;
+    padding: 0 14px;
+  }
+}
+@media (pointer: coarse) {
+  .adm-seg > button {
+    min-height: 44px;
+  }
+}
+
+/* ------------------------------------------------------------
+   Messages and tags
+   ------------------------------------------------------------ */
+.adm-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border: 1px solid var(--a-red-line);
+  background: var(--a-red-soft);
+  color: var(--a-red);
+  font-size: 14px;
+}
+.adm-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border: 1px solid var(--a-navy);
+  background: var(--a-navy-soft);
+  color: var(--a-navy);
+  font-size: 14px;
+}
+
+.adm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 6px;
+  border: 1px solid var(--a-control);
+  background: var(--a-surface);
+  color: var(--a-text2);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.adm-tag-navy {
+  border-color: var(--a-navy);
+  color: var(--a-navy);
+}
+.adm-tag-red {
+  border-color: var(--a-red-line);
+  background: var(--a-red-soft);
+  color: var(--a-red);
+}
+.adm-rail .adm-tag {
+  background: transparent;
+  border-color: var(--a-rail-muted);
+  color: var(--a-rail-ink);
+}
+.adm-tag-solid {
+  background: var(--a-navy);
+  border-color: var(--a-navy);
+  color: var(--a-on-navy);
+}
+
+/* ------------------------------------------------------------
+   Tables
+   ------------------------------------------------------------ */
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.adm-table th {
+  padding: 10px 16px;
+  background: var(--a-surface-2);
+  border-bottom: 1px solid var(--a-line-strong);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-stretch: 92%;
+  color: var(--a-muted);
+  white-space: nowrap;
+}
+.adm-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--a-line);
+  vertical-align: middle;
+}
+.adm-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+.adm-table tbody tr:hover {
+  background: var(--a-navy-soft);
+}
+.adm-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.adm-table tbody tr[data-selected='true'] {
+  background: var(--a-navy-soft);
+}
+
+/* Definition list as a ledger: label left, value right */
+.adm-ledger {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-ledger > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--a-line);
+}
+.adm-ledger > li:last-child {
+  border-bottom: 0;
+}
+.adm-ledger-term {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--a-text2);
+}
+.adm-ledger-value {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--a-ink);
+}
+
+/* Detail list: stacked label over value */
+.adm-detail dt {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-stretch: 92%;
+  color: var(--a-muted);
+}
+.adm-detail dd {
+  margin: 2px 0 14px;
+  color: var(--a-ink);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------
+   Unit chart (Dashboard)
+   ------------------------------------------------------------ */
+.adm-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 20px);
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-chart > li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--a-line-strong);
+  background: var(--a-surface);
+  color: var(--a-navy);
+}
+.adm-chart > li[data-mark='dot'] {
+  background: var(--a-navy-soft);
+}
+.adm-chart > li[data-mark='slash'] {
+  background: var(--a-surface-2);
+}
+
+/* ------------------------------------------------------------
+   Skeleton and modal
+   ------------------------------------------------------------ */
+@keyframes adm-sweep {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.adm-skel {
+  height: 14px;
+  background: linear-gradient(90deg, var(--a-line) 25%, var(--a-surface-2) 50%, var(--a-line) 75%);
+  background-size: 200% 100%;
+  animation: adm-sweep 2.2s linear infinite;
+}
+
+.adm-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--a-scrim);
+}
+.adm-dialog {
+  width: 100%;
+  background: var(--a-surface);
+  border: 1px solid var(--a-line-strong);
+  box-shadow: 0 18px 40px -12px rgba(5, 8, 30, 0.45);
+  color: var(--a-ink);
+}
+.adm-dialog-head {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--a-line);
+  background: var(--a-surface-2);
+}
+.adm-dialog-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  font-stretch: 82%;
+  letter-spacing: 0;
+}
+.adm-dialog-body {
+  padding: 20px;
+}
+.adm-dialog-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--a-line);
+  background: var(--a-surface-2);
+}
+
+/* History timeline: a rail of ticks, no colored side borders */
+.adm-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-timeline > li {
+  position: relative;
+  padding: 0 0 18px 24px;
+}
+.adm-timeline > li::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  bottom: 0;
+  width: 1px;
+  background: var(--a-line-strong);
+}
+.adm-timeline > li:last-child::before {
+  display: none;
+}
+.adm-timeline > li::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--a-navy);
+  background: var(--a-surface);
+}
+.adm-timeline > li:first-child::after {
+  background: var(--a-navy);
+}
+
+/* ------------------------------------------------------------
+   Popovers (select, combobox, date picker, export menu)
+   ------------------------------------------------------------ */
+.adm-pop {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line-strong);
+  box-shadow: 0 14px 30px -10px rgba(5, 8, 30, 0.4);
+  color: var(--a-ink);
+}
+.adm-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--a-text2);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.adm-option[data-active='true'] {
+  background: var(--a-navy-soft);
+}
+.adm-option[data-selected='true'] {
+  color: var(--a-navy);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm,
+  .adm-btn,
+  .adm-seg > button,
+  .adm-rail-nav-link,
+  .adm-table tbody tr {
+    transition: none;
+  }
+  .adm-skel {
+    animation: none;
+  }
+}
+}
+
+/* Zero values recede: color only, unlayered so it beats the text utilities on the same element */
+.adm-dim {
+  color: var(--a-faint);
+}
+
+/* The page scrollbar belongs to the viewport, not .adm */
+:root:has(.adm) {
+  scrollbar-color: var(--a-line-strong) var(--a-bg);
+  scrollbar-width: thin;
+}
+[data-theme='dark']:has(.adm) {
+  color-scheme: dark;
+}
