@@ -31,6 +31,13 @@ const QuotePage = () => {
   useDocumentMeta(t.meta.quote.title, t.meta.quote.desc);
   const [params] = useSearchParams();
   const preMachine = params.get('machine') ?? '';
+  // Set when the visitor arrives from one unit of the catalog.
+  const unit = {
+    id: params.get('unit') ?? '',
+    serial: params.get('serial') ?? '',
+    brand: params.get('brand') ?? '',
+    gauge: params.get('gauge') ?? '',
+  };
 
   const [machineOptions, setMachineOptions] = useState<string[]>([]);
   const [form, setForm] = useState<QuoteForm>({ ...EMPTY, machine: preMachine });
@@ -38,6 +45,8 @@ const QuotePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
   const [reference, setReference] = useState<string | null>(null);
+  // The unit only applies while the visitor still asks about that machine.
+  const unitApplies = Boolean(unit.serial) && form.machine === preMachine;
 
   useEffect(() => {
     (async () => {
@@ -89,6 +98,7 @@ const QuotePage = () => {
     try {
       const lines = [
         form.machine && `${t.qpage.machine}: ${form.machine}`,
+        unitApplies && `${t.qpage.unitLabel}: ${unit.serial}${unit.gauge ? ` (${t.mpage.gauge} ${unit.gauge})` : ''}`,
         form.mtype && `${t.qpage.mtypeLabel}: ${form.mtype}`,
         form.volume && `${t.qpage.volumeLabel}: ${form.volume}`,
         form.message,
@@ -100,9 +110,22 @@ const QuotePage = () => {
         phone: form.phone,
         machine: form.machine,
         message: lines.join('\n'),
-        source: 'quote-page',
+        source: unitApplies ? 'catalog-unit' : 'quote-page',
+        ...(unitApplies && {
+          serialNumber: unit.serial,
+          ...(unit.id && { inventoryUnitId: unit.id }),
+        }),
       });
-      track('submit_quote', { machine: form.machine || 'none', source: 'quote' });
+      track('submit_quote', {
+        machine: form.machine || 'none',
+        source: 'quote',
+        ...(unitApplies && {
+          brand: unit.brand,
+          model: preMachine,
+          gauge: unit.gauge,
+          serial_number: unit.serial,
+        }),
+      });
       setReference(`LZ-${Date.now().toString(36).toUpperCase()}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -137,6 +160,14 @@ const QuotePage = () => {
         </h1>
         <p className="text-[15px] leading-[1.6] text-text2 m-0">{t.qpage.s}</p>
       </header>
+
+      {unitApplies && !reference && (
+        <p className="border border-line bg-surface-2 px-4 py-3 m-0 mb-6 text-[13px] text-text2">
+          <span className={`${kicker} text-deep`}>{t.qpage.unitLabel}</span>{' '}
+          {[unit.brand, preMachine].filter(Boolean).join(' ')} · {t.mpage.serial} {unit.serial}
+          {unit.gauge && ` · ${t.mpage.gauge} ${unit.gauge}`}
+        </p>
+      )}
 
       {reference ? (
         <div className="border border-line bg-surface px-8 py-12 text-center">

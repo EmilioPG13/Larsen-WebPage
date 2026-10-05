@@ -1,8 +1,7 @@
 import { useT } from '../i18n/useT';
 import { track } from '../services/analytics';
 import { Whatsapp } from './ui/icons';
-
-const WHATSAPP_NUMBER = '527753650376';
+import { WHATSAPP_NUMBER } from '../utils/whatsapp';
 
 /** Floating WhatsApp button, shown site-wide on public pages. */
 const WhatsAppButton = () => {

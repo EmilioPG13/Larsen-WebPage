@@ -51,6 +51,33 @@ describe('sendQuoteLead', () => {
     expect(mockEmailjsSend).not.toHaveBeenCalled();
   });
 
+  it('sends the unit and the source as their own fields, and only when present', async () => {
+    const { sendQuoteLead } = await loadService(false);
+
+    await sendQuoteLead({ ...payload, source: 'catalog-unit', serialNumber: '7429', inventoryUnitId: 'u-1' });
+    await sendQuoteLead({ ...payload, source: undefined });
+
+    expect(mockSubmitLead.mock.calls[0][0]).toMatchObject({
+      source: 'catalog-unit',
+      serialNumber: '7429',
+      inventoryUnitId: 'u-1',
+    });
+    expect(mockSubmitLead.mock.calls[1][0]).toMatchObject({
+      source: undefined,
+      serialNumber: undefined,
+      inventoryUnitId: undefined,
+    });
+  });
+
+  it('passes the serial number to the EmailJS fallback', async () => {
+    mockSubmitLead.mockRejectedValue(new Error('backend down'));
+    const { sendQuoteLead } = await loadService(true);
+
+    await sendQuoteLead({ ...payload, serialNumber: '7429' });
+
+    expect(mockEmailjsSend.mock.calls[0][2]).toMatchObject({ serial_number: '7429' });
+  });
+
   it('falls back to EmailJS when the backend fails', async () => {
     mockSubmitLead.mockRejectedValue(new Error('backend down'));
     const { sendQuoteLead } = await loadService(true);

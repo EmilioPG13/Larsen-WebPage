@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { submitLead } from '../services/api';
+import { getCatalog, submitLead } from '../services/api';
 
 // Use vi.hoisted to define mocks before vi.mock is hoisted
 const { mockPost, mockGet, mockPut, mockDelete, mockInterceptors } = vi.hoisted(() => {
@@ -30,6 +30,18 @@ vi.mock('axios', () => ({
 describe('API Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('getCatalog', () => {
+    it('reads the live catalog and does not fall back to static data when it fails', async () => {
+      const catalog = [{ brand: 'Steiger', model: 'Vesta Multi', units: [] }];
+      mockGet.mockResolvedValueOnce({ data: catalog });
+      await expect(getCatalog()).resolves.toEqual(catalog);
+      expect(mockGet).toHaveBeenCalledWith('/catalog');
+
+      mockGet.mockRejectedValueOnce(new Error('network'));
+      await expect(getCatalog()).rejects.toThrow('network');
+    });
   });
 
   describe('submitLead', () => {
