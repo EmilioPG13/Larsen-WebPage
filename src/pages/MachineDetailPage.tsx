@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import SpecSheetModal from '../components/SpecSheetModal';
 import { Check, MessageCircle } from '../components/ui/icons';
+import MachineImage from '../components/ui/MachineImage';
 import { useT } from '../i18n/useT';
 import { useLanguage } from '../i18n/LanguageContext';
 import { localizeMachine } from '../i18n/localizeMachine';
@@ -111,9 +112,8 @@ const MachineDetailPage = () => {
   const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`${t.detail.waPrefill} ${machine.name}`)}`;
   const quoteHref = `/cotizacion?machine=${encodeURIComponent(machine.name)}`;
 
-  const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
   const ghostBtn =
-    `${kicker} inline-flex items-center gap-2 h-11 px-4 border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`;
+    'inline-flex items-center gap-2 h-12 px-5 border border-line-strong text-ink text-[14px] font-semibold transition-colors hover:border-deep hover:text-deep';
 
   return (
     <>
@@ -130,15 +130,16 @@ const MachineDetailPage = () => {
           {/* IMAGE — sticky on desktop */}
           <div className="lg:sticky lg:top-24 order-first lg:order-last">
             <div className="relative bg-surface-2 border border-line flex items-center justify-center p-8 min-h-[320px]">
-              <img
+              <MachineImage
                 src={machine.image}
                 alt={`${machine.brand} ${machine.name}`}
                 decoding="async"
                 className="w-full max-h-[460px] object-contain"
+                style={{ filter: 'drop-shadow(0 24px 20px rgba(19, 26, 79, 0.18))' }}
               />
               <span
-                className={`absolute top-4 left-4 ${kicker} px-2 py-1 border ${
-                  inStock ? 'text-deep border-deep-line' : 'text-faint border-line'
+                className={`absolute top-4 left-4 text-[12px] font-semibold px-2.5 py-1 ${
+                  inStock ? 'bg-deep text-on-deep' : 'bg-surface text-text2 border border-line'
                 }`}
               >
                 {inStock ? t.detail.stock : t.detail.outOfStock}
@@ -148,17 +149,17 @@ const MachineDetailPage = () => {
 
           {/* SPECS + CTA */}
           <div>
-            <div className={`${kicker} text-deep mb-3`}>{machine.brand}</div>
-            <h1 className="font-serif font-medium text-[clamp(34px,4.4vw,54px)] leading-[1.03] tracking-[-0.01em] text-ink m-0 mb-4">
+            <h1 className="display text-[clamp(38px,4.8vw,62px)] text-ink m-0 mb-1">
               {machine.name}
             </h1>
+            <p className="text-[17px] font-semibold text-deep m-0 mb-4">{machine.brand}</p>
             <p className="text-[15px] leading-[1.6] text-text2 max-w-[52ch] m-0 mb-8">{machine.description}</p>
 
-            <div className={`${kicker} text-muted mb-2`}>{t.detail.specs}</div>
+            <h2 className="display text-[22px] text-ink m-0 mb-3">{t.detail.specs}</h2>
             <dl className="m-0 mb-8 border-t border-line">
               {specs.map((s) => (
                 <div key={s.label} className="grid grid-cols-[auto_1fr] gap-6 py-3 border-b border-line-soft">
-                  <dt className={`${kicker} text-muted pt-0.5`}>{s.label}</dt>
+                  <dt className="text-[13px] font-semibold text-muted pt-0.5">{s.label}</dt>
                   <dd className="m-0 text-[15px] text-ink text-right">{s.value}</dd>
                 </div>
               ))}
@@ -167,7 +168,7 @@ const MachineDetailPage = () => {
             <div className="flex flex-wrap gap-3 mb-10">
               <button
                 onClick={() => { window.scrollTo(0, 0); navigate(quoteHref); }}
-                className="inline-flex items-center bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] h-12 px-7 transition-colors"
+                className="inline-flex items-center bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[15px] h-12 px-8 transition-colors"
               >
                 {t.detail.ctaQuote}
               </button>
@@ -188,12 +189,13 @@ const MachineDetailPage = () => {
 
             {stock && (
               <section className="mb-10">
-                <h2 className="font-serif font-medium text-[20px] text-ink m-0 mb-4">{t.mpage.unitsTitle}</h2>
+                <h2 className="display text-[22px] text-ink m-0 mb-4">{t.mpage.unitsTitle}</h2>
                 <ul className="m-0 p-0 list-none border-t border-line">
                   {stock.units.map((u) => (
                     <li key={u.id} className="flex items-center justify-between gap-3 py-3 border-b border-line-soft">
                       <span className="text-[14px] text-ink">
-                        <span className={`${kicker} text-muted`}>{t.mpage.serial}</span> {u.serialNumber}
+                        <span className="text-muted">{t.mpage.serial}</span>{' '}
+                        <span className="font-mono">{u.serialNumber}</span>
                         <span className="text-muted"> · {t.mpage.gauge} {u.gauge}</span>
                       </span>
                       <Link
@@ -208,7 +210,7 @@ const MachineDetailPage = () => {
                           window.scrollTo(0, 0);
                         }}
                         aria-label={`${t.mpage.quoteUnit} ${stock.model} ${t.mpage.serial} ${u.serialNumber}`}
-                        className={`${kicker} shrink-0 h-9 px-3 inline-flex items-center border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`}
+                        className="shrink-0 h-9 px-4 inline-flex items-center bg-larsen-red hover:bg-larsen-dark-red text-white text-[13px] font-semibold transition-colors"
                       >
                         {t.mpage.quoteUnit}
                       </Link>
@@ -218,7 +220,7 @@ const MachineDetailPage = () => {
               </section>
             )}
 
-            <h2 className="font-serif font-medium text-[20px] text-ink m-0 mb-4">{t.detail.includedTitle}</h2>
+            <h2 className="display text-[22px] text-ink m-0 mb-4">{t.detail.includedTitle}</h2>
             <ul className="flex flex-col gap-2.5 m-0 p-0 list-none">
               {t.detail.includedItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-[14px] leading-[1.55] text-text2">
@@ -233,7 +235,7 @@ const MachineDetailPage = () => {
         {/* RELATED — same brand, ruled row */}
         {related.length > 0 && (
           <section className="mt-16 md:mt-[88px] pt-10 border-t border-line">
-            <div className={`${kicker} text-muted mb-6`}>{t.detail.related}</div>
+            <h2 className="display text-[24px] text-ink m-0 mb-6">{t.detail.related}</h2>
             <div
               className={`grid gap-px bg-line border border-line ${
                 related.length >= 3
@@ -251,10 +253,10 @@ const MachineDetailPage = () => {
                   className="bg-surface p-6 flex flex-col group"
                 >
                   <div className="bg-surface-2 flex items-center justify-center h-[150px] mb-4">
-                    <img src={m.image} alt={m.name} loading="lazy" decoding="async" className="max-h-[130px] max-w-full object-contain" />
+                    <MachineImage src={m.image} alt={m.name} loading="lazy" decoding="async" className="max-h-[130px] max-w-full object-contain" />
                   </div>
-                  <div className={`${kicker} text-deep mb-1.5`}>{m.brand}</div>
-                  <h3 className="font-serif font-medium text-[18px] text-ink m-0 group-hover:text-deep transition-colors">{m.name}</h3>
+                  <h3 className="display text-[22px] text-ink m-0 group-hover:text-deep transition-colors">{m.name}</h3>
+                  <p className="text-[14px] font-semibold text-deep m-0 mt-1">{m.brand}</p>
                 </Link>
               ))}
             </div>

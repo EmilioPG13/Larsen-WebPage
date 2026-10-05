@@ -7,6 +7,9 @@ import { brands } from '../data/brands';
 import { getMachines } from '../services/api';
 import { sendQuoteLead } from '../services/leads';
 import { track } from '../services/analytics';
+import MachineImage from '../components/ui/MachineImage';
+import { Check, Phone, Whatsapp } from '../components/ui/icons';
+import { WHATSAPP_NUMBER } from '../utils/whatsapp';
 import type { Machine } from '../types';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -166,19 +169,21 @@ const HomePage = () => {
   };
 
   // ---- shared class fragments ---------------------------------------------
-  const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
   const fieldBase =
     'w-full px-3 bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep';
   const field = `${fieldBase} h-11`;
-  const labelCls = `${kicker} text-muted mb-1.5 block`;
+  const labelCls = 'text-[13px] font-medium text-text2 mb-1.5 block';
   const errCls = 'block text-[12px] text-larsen-red mt-1';
+  const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    current ? `${t.detail.waPrefill} ${current.name}` : t.whatsapp.prefill,
+  )}`;
 
   return (
     <>
       {/* ================= HERO PLATE: carousel + inline quote form ================= */}
       <section className="border-b border-line bg-surface">
         <div
-          className={`${PLATE} pt-12 md:pt-[72px] pb-14 md:pb-[88px]`}
+          className={`${PLATE} pt-10 md:pt-[56px] pb-14 md:pb-[88px]`}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           onFocusCapture={() => setPaused(true)}
@@ -189,7 +194,7 @@ const HomePage = () => {
             <div
               role="tablist"
               aria-label={t.home.carouselHint}
-              className="flex flex-wrap gap-x-7 gap-y-2 border-b border-line-soft mb-10"
+              className="flex flex-wrap gap-x-8 gap-y-2 border-b border-line-soft mb-10"
             >
               {machines.map((m, i) => (
                 <button
@@ -201,9 +206,9 @@ const HomePage = () => {
                   aria-controls="carousel-panel"
                   tabIndex={i === active ? 0 : -1}
                   onClick={() => setActive(i)}
-                  className={`${kicker} pb-3 -mb-px border-b-2 transition-colors ${
+                  className={`text-[15px] font-semibold pb-3 -mb-px border-b-[3px] transition-colors ${
                     i === active
-                      ? 'text-ink border-deep'
+                      ? 'text-ink border-larsen-red'
                       : 'text-muted border-transparent hover:text-ink'
                   }`}
                 >
@@ -225,35 +230,54 @@ const HomePage = () => {
               className="grid lg:grid-cols-[1.02fr_0.98fr] gap-10 lg:gap-14 items-center"
             >
               <div>
-                <div className={`${kicker} text-deep mb-5`}>
-                  {current.brand} · {t.home.kicker}
-                </div>
-                <h1 className="font-serif font-medium text-[clamp(38px,5.2vw,68px)] leading-[1.02] tracking-[-0.01em] text-ink m-0 mb-5">
+                <h1 className="display text-[clamp(40px,5.6vw,76px)] text-ink m-0 mb-2">
                   {current.name}
                 </h1>
-                <p className="text-[15px] leading-[1.6] text-text2 max-w-[46ch] m-0 mb-8">
+                <p className="text-[17px] font-semibold text-deep m-0 mb-5">{current.brand}</p>
+                <p className="text-[16px] leading-[1.6] text-text2 max-w-[46ch] m-0 mb-8">
                   {current.description}
                 </p>
-                <button
-                  type="button"
-                  onClick={scrollToForm}
-                  className="inline-flex items-center bg-deep text-white font-semibold text-[14px] px-6 h-12 transition-transform hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                >
-                  {t.detail.ctaQuote}
-                </button>
+                <div className="flex flex-wrap gap-3 mb-8">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      track('click_quote_cta', { source: 'home_hero', machine: current.name });
+                      scrollToForm();
+                    }}
+                    className="inline-flex items-center bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[15px] px-8 h-[52px] transition-colors"
+                  >
+                    {t.detail.ctaQuote}
+                  </button>
+                  <a
+                    href={waHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => track('click_whatsapp', { source: 'home_hero', machine: current.name })}
+                    className="inline-flex items-center gap-2 h-[52px] px-5 border border-line-strong text-ink font-semibold text-[14px] transition-colors hover:border-deep hover:text-deep"
+                  >
+                    <Whatsapp size={18} />
+                    WhatsApp
+                  </a>
+                </div>
+                <ul className="flex flex-wrap gap-x-6 gap-y-2 m-0 p-0 list-none">
+                  {t.home.trust.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-[13px] text-text2">
+                      <span className="text-deep shrink-0">
+                        <Check size={15} strokeWidth={2.2} />
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="relative">
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-[6%] pointer-events-none"
-                  style={{ background: 'radial-gradient(circle at 50% 45%, var(--deep-soft), transparent 70%)' }}
-                />
-                <img
+              <div className="bg-surface-2 border border-line-soft px-6 py-10 md:px-10 md:py-14">
+                <MachineImage
                   src={current.image}
                   alt={`${current.brand} ${current.name}`}
                   decoding="async"
                   fetchPriority="high"
-                  className="relative w-full max-w-[560px] mx-auto block object-contain"
+                  className="w-full max-w-[560px] mx-auto block object-contain"
+                  style={{ filter: 'drop-shadow(0 26px 22px rgba(19, 26, 79, 0.2))' }}
                 />
               </div>
             </div>
@@ -267,21 +291,37 @@ const HomePage = () => {
           <div ref={formRef} className="mt-14 md:mt-[72px] pt-12 border-t border-line scroll-mt-24">
             <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-10">
               <div>
-                <div className={`${kicker} text-deep mb-4`}>{t.qpage.k}</div>
-                <h2 className="font-serif font-medium text-[clamp(26px,3vw,36px)] tracking-[-0.01em] text-ink m-0 mb-3">
+                <h2 className="display text-[clamp(30px,3.6vw,44px)] text-ink m-0 mb-3">
                   {t.home.formTitle}
                 </h2>
-                <p className="text-[14px] leading-[1.6] text-muted m-0">{t.home.formNote}</p>
+                <p className="text-[15px] leading-[1.6] text-text2 m-0 mb-8">{t.home.formNote}</p>
+                <div className="flex flex-col gap-3 text-[14px]">
+                  <a
+                    href="tel:+527753650376"
+                    onClick={() => track('click_phone', { source: 'home_form' })}
+                    className="inline-flex items-center gap-3 text-ink font-semibold transition-colors hover:text-deep"
+                  >
+                    <Phone size={17} />
+                    +52 775 365 0376
+                  </a>
+                  <a
+                    href={waHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => track('click_whatsapp', { source: 'home_form' })}
+                    className="inline-flex items-center gap-3 text-ink font-semibold transition-colors hover:text-deep"
+                  >
+                    <Whatsapp size={17} />
+                    {t.whatsapp.label}
+                  </a>
+                </div>
               </div>
 
               {reference ? (
                 <div className="border border-line bg-surface-2 px-8 py-10">
-                  <div className={`${kicker} text-deep mb-3`}>{t.qpage.sentT}</div>
-                  <h3 className="font-serif font-medium text-[26px] leading-snug text-ink m-0 mb-3">
-                    {t.qpage.sentS}
-                  </h3>
+                  <h3 className="display text-[28px] text-ink m-0 mb-3">{t.qpage.sentS}</h3>
                   {reference !== '—' && (
-                    <p className="font-mono text-[12px] tracking-[0.12em] text-muted m-0">REF · {reference}</p>
+                    <p className="font-mono text-[12px] tracking-[0.08em] text-muted m-0">REF · {reference}</p>
                   )}
                   <button
                     onClick={resetForm}
@@ -291,7 +331,11 @@ const HomePage = () => {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form
+                  onSubmit={handleSubmit}
+                  noValidate
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface-2 border border-line p-6 sm:p-8"
+                >
                   <div>
                     <label className={labelCls}>{t.qpage.name}</label>
                     <input
@@ -370,10 +414,11 @@ const HomePage = () => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] h-12 transition-colors disabled:opacity-60"
+                    className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[15px] h-[52px] transition-colors disabled:opacity-60"
                   >
                     {submitting ? t.qpage.sending : t.qpage.submit}
                   </button>
+                  <p className="sm:col-span-2 text-[12px] text-muted m-0 text-center">{t.home.formPromise}</p>
                 </form>
               )}
             </div>
@@ -381,13 +426,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ================= CAPABILITY STRIP ================= */}
+      {/* ================= CAPABILITIES — a ruled row, not a card grid ================= */}
       <section className={`${PLATE} py-14 md:py-[88px]`}>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-10">
           {t.home.caps.map((c) => (
-            <div key={c.k} className="bg-bg p-6">
-              <div className={`${kicker} text-deep mb-3`}>{c.k}</div>
-              <p className="text-[14px] leading-[1.55] text-text2 m-0">{c.t}</p>
+            <div key={c.k} className="border-t-[3px] border-deep pt-5">
+              <h3 className="display text-[22px] text-ink m-0 mb-2">{c.k}</h3>
+              <p className="text-[14px] leading-[1.6] text-text2 m-0">{c.t}</p>
             </div>
           ))}
         </div>
@@ -396,7 +441,7 @@ const HomePage = () => {
       {/* ================= BRAND MARQUEE ================= */}
       <section className="border-t border-line py-14 md:py-[72px] overflow-hidden">
         <div className={`${PLATE} mb-8`}>
-          <div className={`${kicker} text-muted`}>{t.home.marquee}</div>
+          <p className="text-[14px] font-semibold text-muted m-0">{t.home.marquee}</p>
         </div>
         <div className="flex w-max lz-marquee">
           {[0, 1].map((dup) => (

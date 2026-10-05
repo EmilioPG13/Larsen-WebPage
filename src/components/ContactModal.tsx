@@ -9,8 +9,8 @@ interface ContactModalProps {
   product?: Product;
 }
 
-const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
-const labelCls = `${kicker} text-muted mb-1.5 block`;
+const kicker = 'text-[13px] font-semibold';
+const labelCls = 'text-[13px] font-medium text-text2 mb-1.5 block';
 const fieldCls =
   'w-full px-3 h-11 bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep';
 const textareaCls =
@@ -143,7 +143,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, product })
         {/* Header */}
         <div className="p-6 border-b border-line">
           <div className="flex items-start justify-between gap-4">
-            <h2 className="font-serif font-medium text-[22px] text-ink m-0">Solicitar información</h2>
+            <h2 className="display text-[24px] text-ink m-0">Solicitar información</h2>
             <button
               onClick={handleClose}
               aria-label="Cerrar"

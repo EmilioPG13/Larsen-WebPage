@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import QuoteBand from './components/QuoteBand';
 import WhatsAppButton from './components/WhatsAppButton';
 import HomePage from './pages/HomePage';
 import BrandsPage from './pages/BrandsPage';
@@ -92,6 +93,7 @@ function AppContent() {
         </Routes>
       </main>
 
+      {!isAdminRoute && <QuoteBand />}
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <WhatsAppButton />}
     </div>

@@ -12,8 +12,8 @@ const NAV: { key: 'home' | 'machines' | 'brands' | 'quote' | 'about'; path: stri
   { key: 'about', path: '/nosotros' },
 ];
 
-const kickerClass = 'font-mono text-[11px] tracking-[0.14em] uppercase text-white/45 mb-[18px]';
-const linkClass = 'text-[14px] text-white/60 transition-colors duration-200 hover:text-white';
+const headingClass = 'text-[14px] font-semibold text-white m-0 mb-[18px]';
+const linkClass = 'text-[14px] text-white/70 transition-colors duration-200 hover:text-white';
 
 const Footer = () => {
   const t = useT();
@@ -31,7 +31,7 @@ const Footer = () => {
             className="h-9 w-auto object-contain mb-5"
             style={{ filter: 'brightness(0) invert(1)' }}
           />
-          <p className="text-[14px] leading-[1.62] text-white/55 mb-[22px] max-w-[320px]">{t.foot.blurb}</p>
+          <p className="text-[14px] leading-[1.62] text-white/70 mb-[22px] max-w-[320px]">{t.foot.blurb}</p>
           <div className="flex items-center gap-2.5">
             <a
               href="https://www.linkedin.com/company/larsen-italiana-soc-arl"
@@ -56,7 +56,7 @@ const Footer = () => {
 
         {/* Navigation */}
         <div>
-          <h4 className={kickerClass}>{t.foot.prod}</h4>
+          <h4 className={headingClass}>{t.foot.prod}</h4>
           <div className="flex flex-col gap-[11px]">
             {NAV.map((item) => (
               <Link
@@ -73,7 +73,7 @@ const Footer = () => {
 
         {/* Brands */}
         <div>
-          <h4 className={kickerClass}>{t.bpage.k}</h4>
+          <h4 className={headingClass}>{t.bpage.k}</h4>
           <div className="flex flex-col gap-[11px]">
             {brands.map((b) => (
               <Link
@@ -90,28 +90,28 @@ const Footer = () => {
 
         {/* Contact */}
         <div>
-          <h4 className={kickerClass}>{t.foot.contact}</h4>
-          <div className="flex flex-col gap-[15px] text-[14px] text-white/60">
+          <h4 className={headingClass}>{t.foot.contact}</h4>
+          <div className="flex flex-col gap-[15px] text-[14px] text-white/70">
             <a
               href="tel:+527753650376"
               onClick={() => track('click_phone', { source: 'footer' })}
               className="flex items-start gap-3 transition-colors duration-200 hover:text-white"
             >
-              <Phone size={16} className="shrink-0 mt-[3px] text-white/40" />
+              <Phone size={16} className="shrink-0 mt-[3px] text-white/50" />
               <span className="flex flex-col gap-[3px]">
                 <span>+52 775 365 0376</span>
-                <span className="text-white/35 text-[13px]">+39 348 6907430</span>
+                <span className="text-white/55 text-[13px]">+39 348 6907430</span>
               </span>
             </a>
             <a href="mailto:admin@larsenitaliana.com" className="flex items-center gap-3 transition-colors duration-200 hover:text-white">
-              <Mail size={16} className="shrink-0 text-white/40" />
+              <Mail size={16} className="shrink-0 text-white/50" />
               <span>admin@larsenitaliana.com</span>
             </a>
             <div className="flex items-start gap-3">
-              <MapPin size={16} className="shrink-0 mt-[3px] text-white/40" />
+              <MapPin size={16} className="shrink-0 mt-[3px] text-white/50" />
               <span className="flex flex-col gap-[3px]">
                 <span>{t.contact.office}: {t.contact.mexico}</span>
-                <span className="text-white/35 text-[13px]">{t.contact.workshop}: {t.contact.italy}</span>
+                <span className="text-white/55 text-[13px]">{t.contact.workshop}: {t.contact.italy}</span>
               </span>
             </div>
           </div>
@@ -119,7 +119,7 @@ const Footer = () => {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="max-w-[1280px] mx-auto px-7 pr-24 py-[22px] pb-24 md:pb-[22px] flex flex-wrap justify-between items-center gap-3.5 font-mono text-[11px] tracking-[0.08em] uppercase text-white/40">
+        <div className="max-w-[1280px] mx-auto px-7 pr-24 py-[22px] pb-24 md:pb-[22px] flex flex-wrap justify-between items-center gap-3.5 text-[12px] text-white/55">
           <p className="m-0">© {new Date().getFullYear()} Larsen Italiana · {t.foot.rights}</p>
           <div className="flex gap-[26px]">
             <a href="#" className="transition-colors duration-200 hover:text-white">{t.foot.privacy}</a>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Archivo:wdth,wght@62..125,400..700&family=Red+Hat+Mono:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Red+Hat+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @import "./admin/admin.css";
 
@@ -12,7 +12,8 @@
   --bg-blur: rgba(236, 237, 240, 0.93); /* sticky header backdrop */
   --surface: #ffffff;                   /* plates, cards, form fields */
   --surface-2: #F6F7F9;                 /* recessed / alternate plate */
-  --footer: #1b1c20;                    /* footer field */
+  --footer: #131a4f;                    /* footer field — deep Larsen navy */
+  --nav: #1e276b;                       /* header bar — Larsen navy, a step lighter than the footer */
 
   /* Text */
   --ink: #1b1c20;   /* primary text */
@@ -29,6 +30,7 @@
   --deep: #28327B;
   --deep-soft: rgba(40, 50, 123, 0.06); /* navy tint fill */
   --deep-line: rgba(40, 50, 123, 0.32); /* navy border */
+  --on-deep: #ffffff;                   /* text on a solid navy fill */
 
   /* Text selection */
   --select: rgba(40, 50, 123, 0.18);
@@ -47,7 +49,8 @@
   --bg-blur: rgba(18, 19, 24, 0.90);
   --surface: #1d1e26;
   --surface-2: #23242e;
-  --footer: #0d0e12;
+  --footer: #070a1f;
+  --nav: #0d1236;
 
   /* Text */
   --ink: #F2EFE9;
@@ -64,6 +67,7 @@
   --deep: #94A0F0;
   --deep-soft: rgba(148, 160, 240, 0.12);
   --deep-line: rgba(148, 160, 240, 0.34);
+  --on-deep: #0d1236;
 
   /* Text selection */
   --select: rgba(148, 160, 240, 0.24);
@@ -82,13 +86,13 @@
    ============================================================ */
 @theme {
   --font-sans: 'Archivo', sans-serif;
-  --font-serif: 'IBM Plex Serif', serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-mono: 'Red Hat Mono', ui-monospace, monospace;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-footer: var(--footer);
+  --color-nav: var(--nav);
   --color-field: var(--field);
   --color-ink: var(--ink);
   --color-text2: var(--text2);
@@ -101,6 +105,7 @@
   --color-deep: var(--deep);
   --color-deep-soft: var(--deep-soft);
   --color-deep-line: var(--deep-line);
+  --color-on-deep: var(--on-deep);
 
   --color-larsen-blue: #28327B;
   --color-larsen-red: #D81E2A;
@@ -127,7 +132,7 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Serif display headings: let the browser balance wraps */
+  /* Display headings: let the browser balance wraps */
   h1, h2, h3, h4, h5, h6 {
     text-wrap: pretty;
   }
@@ -136,6 +141,12 @@
   :focus-visible {
     outline: 2px solid var(--deep);
     outline-offset: 2px;
+  }
+
+  /* The header and footer sit on navy, where the navy ring would vanish */
+  header :focus-visible,
+  footer :focus-visible {
+    outline-color: #fff;
   }
 
   ::selection {
@@ -307,6 +318,15 @@
   /* Canonical content wrapper — 1280px max, flat 28px gutters (design tokens) */
   .container {
     @apply max-w-[1280px] mx-auto px-7;
+  }
+
+  /* Display voice: Archivo at a condensed width, the same cut the panel uses for titles */
+  .display {
+    font-family: 'Archivo', sans-serif;
+    font-variation-settings: 'wdth' 84;
+    font-weight: 650;
+    letter-spacing: -0.005em;
+    line-height: 1.06;
   }
 
   .line-clamp-2 {

@@ -77,8 +77,8 @@ const SpecSheetModal = ({ machine, isOpen, onClose }: SpecSheetModalProps) => {
           <X size={18} strokeWidth={1.5} />
         </button>
 
-        <div className="font-mono text-[11px] tracking-[0.14em] text-larsen-red uppercase mb-2">{machine.name}</div>
-        <h2 className="font-serif font-medium text-[22px] text-ink m-0 mb-2">{t.specSheet.title}</h2>
+        <div className="text-[13px] font-semibold text-larsen-red mb-1">{machine.name}</div>
+        <h2 className="display text-[24px] text-ink m-0 mb-2">{t.specSheet.title}</h2>
         <p className="text-[14px] leading-[1.5] text-muted m-0 mb-6">{t.specSheet.sub}</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

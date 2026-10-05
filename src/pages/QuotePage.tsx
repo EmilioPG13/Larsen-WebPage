@@ -143,8 +143,7 @@ const QuotePage = () => {
     setReference(null);
   };
 
-  const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
-  const labelCls = `${kicker} text-muted mb-1.5 block`;
+  const labelCls = 'text-[13px] font-medium text-text2 mb-1.5 block';
   const fieldBase =
     'w-full px-3 bg-surface border border-line text-[14px] text-ink outline-none transition-colors focus:border-deep';
   const field = `${fieldBase} h-11`;
@@ -154,8 +153,7 @@ const QuotePage = () => {
   return (
     <div className="max-w-[720px] mx-auto px-7 pt-14 md:pt-[72px] pb-14 md:pb-[88px]">
       <header className="mb-10">
-        <div className={`${kicker} text-deep mb-4`}>{t.qpage.k}</div>
-        <h1 className="font-serif font-medium text-[clamp(34px,4.4vw,52px)] tracking-[-0.01em] text-ink m-0 mb-4">
+        <h1 className="display text-[clamp(38px,4.8vw,60px)] text-ink m-0 mb-4">
           {t.qpage.t}
         </h1>
         <p className="text-[15px] leading-[1.6] text-text2 m-0">{t.qpage.s}</p>
@@ -163,7 +161,7 @@ const QuotePage = () => {
 
       {unitApplies && !reference && (
         <p className="border border-line bg-surface-2 px-4 py-3 m-0 mb-6 text-[13px] text-text2">
-          <span className={`${kicker} text-deep`}>{t.qpage.unitLabel}</span>{' '}
+          <span className="font-semibold text-deep">{t.qpage.unitLabel}</span>{' '}
           {[unit.brand, preMachine].filter(Boolean).join(' ')} · {t.mpage.serial} {unit.serial}
           {unit.gauge && ` · ${t.mpage.gauge} ${unit.gauge}`}
         </p>
@@ -171,16 +169,15 @@ const QuotePage = () => {
 
       {reference ? (
         <div className="border border-line bg-surface px-8 py-12 text-center">
-          <div className={`${kicker} text-deep mb-4`}>{t.qpage.sentT}</div>
-          <h2 className="font-serif font-medium text-[clamp(24px,3vw,32px)] leading-snug text-ink m-0 mb-4 max-w-[34ch] mx-auto">
+          <h2 className="display text-[clamp(28px,3.4vw,38px)] text-ink m-0 mb-4 max-w-[34ch] mx-auto">
             {t.qpage.sentS}
           </h2>
           {reference !== '—' && (
-            <p className="font-mono text-[12px] tracking-[0.14em] text-muted m-0">REF · {reference}</p>
+            <p className="font-mono text-[12px] tracking-[0.08em] text-muted m-0">REF · {reference}</p>
           )}
           <button
             onClick={resetForm}
-            className={`${kicker} mt-8 h-11 px-5 border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`}
+            className="mt-8 h-11 px-5 border border-line-strong text-ink text-[14px] font-semibold transition-colors hover:border-deep hover:text-deep"
           >
             {t.qpage.again}
           </button>
@@ -248,7 +245,7 @@ const QuotePage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[14px] h-12 transition-colors disabled:opacity-60"
+            className="sm:col-span-2 bg-larsen-red hover:bg-larsen-dark-red text-white font-semibold text-[15px] h-[52px] transition-colors disabled:opacity-60"
           >
             {submitting ? t.qpage.sending : t.qpage.submit}
           </button>

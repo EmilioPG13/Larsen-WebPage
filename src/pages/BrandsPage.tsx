@@ -5,7 +5,6 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { brands } from '../data/brands';
 
 const PLATE = 'max-w-[1280px] mx-auto px-7';
-const kicker = 'font-mono text-[11px] tracking-[0.14em] uppercase';
 
 const BrandsPage = () => {
   const t = useT();
@@ -16,8 +15,7 @@ const BrandsPage = () => {
     <>
       <section className="border-b border-line bg-surface">
         <div className={`${PLATE} pt-14 md:pt-[72px] pb-10 md:pb-14`}>
-          <div className={`${kicker} text-deep mb-4`}>{t.bpage.k}</div>
-          <h1 className="font-serif font-medium text-[clamp(38px,5vw,56px)] leading-[1.02] tracking-[-0.01em] text-ink m-0 mb-4">
+          <h1 className="display text-[clamp(40px,5.4vw,68px)] text-ink m-0 mb-4">
             {t.bpage.t}
           </h1>
           <p className="text-[15px] leading-[1.6] text-text2 max-w-[52ch] m-0">{t.bpage.s}</p>
@@ -47,13 +45,13 @@ const BrandsPage = () => {
                 />
               </div>
               <div className="p-6 flex flex-col flex-1">
-                <div className={`${kicker} text-faint`}>{b.origin[lang]}</div>
-                <h2 className="font-serif font-medium text-[22px] text-ink m-0 mt-2 mb-2 transition-colors group-hover:text-deep">
+                <h2 className="display text-[26px] text-ink m-0 transition-colors group-hover:text-deep">
                   {b.name}
                 </h2>
-                <p className="text-[13.5px] leading-[1.6] text-muted m-0">{b.blurb[lang]}</p>
+                <p className="text-[13px] font-semibold text-muted m-0 mt-1 mb-2">{b.origin[lang]}</p>
+                <p className="text-[14px] leading-[1.6] text-text2 m-0">{b.blurb[lang]}</p>
                 <span
-                  className={`${kicker} text-ink mt-4 inline-flex items-center gap-1.5 transition-colors group-hover:text-deep`}
+                  className="text-[14px] font-semibold text-ink mt-4 inline-flex items-center gap-1.5 transition-colors group-hover:text-deep"
                 >
                   {t.bpage.cta} <span aria-hidden="true">→</span>
                 </span>
