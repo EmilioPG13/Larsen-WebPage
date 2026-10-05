@@ -121,7 +121,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="adm">
       {/* Top bar (below lg the sidebar becomes a drawer) */}
-      <header className="adm-rail lg:hidden sticky top-0 z-30 flex h-14 items-center gap-2 px-2">
+      <header className="adm-rail lg:hidden sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-(--a-rail-line) px-2">
         <button
           onClick={() => setMenuOpen(true)}
           aria-label="Abrir menú"
@@ -130,7 +130,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <Icon name="menu" size={22} />
         </button>
         <Link to={homePath} aria-label="Ir al inicio del panel" className="flex items-center">
-          <AdminLogo height={24} onDark />
+          <AdminLogo height={24} onDark={Boolean(theme?.isDark)} />
         </Link>
         {theme && (
           <button
@@ -165,7 +165,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               aria-label="Ir al inicio del panel"
               className="adm-brackets self-start"
             >
-              <AdminLogo height={32} onDark />
+              <AdminLogo height={32} onDark={Boolean(theme?.isDark)} />
             </Link>
             <div className="text-[13px] text-(--a-rail-muted)">Panel interno</div>
           </div>

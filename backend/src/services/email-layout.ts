@@ -4,7 +4,7 @@
  * value that reaches the markup goes through `escapeHtml`; nothing here executes or loads
  * anything except the logo.
  *
- * The look follows the public site: a white header band so the logo keeps its official colors (blue on navy would not read), red rule, navy footer, square
+ * The look follows the public site: a light navy-tinted header band (not white: it would vanish into the card) so the logo keeps its official colors (blue on navy would not read), red rule, navy footer, square
  * corners, 1px hairlines and red reserved for the one action that matters.
  */
 
@@ -45,6 +45,7 @@ export const COLOR = {
   blue: '#28327B',
   red: '#D81E2A',
   ground: '#ECEDF0',
+  band: '#E9ECF6',
   surface: '#ffffff',
   plate: '#f5f6fa',
   ink: '#1b1c20',
@@ -178,7 +179,7 @@ export const emailShell = ({ lang, title, preheader, siteUrl, headerNote, body, 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="em-ground" style="background-color:${COLOR.ground};">
 <tr><td align="center" class="em-outer" style="padding:28px 12px;">
   <table role="presentation" width="${CARD_WIDTH}" cellpadding="0" cellspacing="0" border="0" class="em-card" style="width:100%;max-width:${CARD_WIDTH}px;background-color:${COLOR.surface};border:1px solid ${COLOR.line};">
-    <tr><td bgcolor="${COLOR.surface}" class="em-head" style="background-color:${COLOR.surface};padding:22px 28px;border-bottom:3px solid ${COLOR.red};">
+    <tr><td bgcolor="${COLOR.band}" class="em-head" style="background-color:${COLOR.band};padding:22px 28px;border-bottom:3px solid ${COLOR.red};">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
         <td valign="middle"><a href="${escapeHtml(siteUrl)}" style="text-decoration:none;"><img src="${escapeHtml(logoUrl(siteUrl))}" width="132" height="59" alt="Larsen Italiana" style="display:block;border:0;width:132px;height:auto;font-family:${FONT};font-size:16px;line-height:22px;font-weight:700;color:${COLOR.blue};"></a></td>
         ${headerNote ? `<td valign="middle" align="right" style="font-family:${FONT};font-size:13px;line-height:18px;color:${COLOR.muted};">${escapeHtml(headerNote)}</td>` : ''}

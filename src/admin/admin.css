@@ -35,13 +35,13 @@
   --a-red-line: rgba(196, 28, 40, 0.45);
 
   /* Rail */
-  --a-rail: #141a47;
-  --a-rail-ink: #e8ebf8;
-  --a-rail-muted: #a3aad6;
-  --a-rail-line: rgba(255, 255, 255, 0.12);
-  --a-rail-hover: rgba(255, 255, 255, 0.07);
-  --a-rail-active: #f3f5fc;
-  --a-rail-active-ink: #141a47;
+  --a-rail: #ffffff;
+  --a-rail-ink: #11131a;
+  --a-rail-muted: #5b6175;
+  --a-rail-line: #d6dae7;
+  --a-rail-hover: rgba(40, 50, 123, 0.08);
+  --a-rail-active: #28327b;
+  --a-rail-active-ink: #ffffff;
 
   --a-scrim: rgba(10, 12, 30, 0.5);
 }

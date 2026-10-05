@@ -327,23 +327,17 @@ export const Empty: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   <p className="m-0 py-6 text-center text-a-muted">{children}</p>
 );
 
-/** The outlined variant is this much taller than the logo itself (its outline is margin). */
-const OUTLINE_SCALE = 928 / 880;
-
 /**
  * The company wordmark, traced to a vector, in its official colors. On a dark surface
- * (`onDark`) it uses the variant with a white die-cut outline, the same one the public
- * header uses, so the blue half never disappears into the navy rail.
+ * (`onDark`) it switches to the white reversed version, because the official blue does
+ * not read on navy.
  */
-export const AdminLogo: React.FC<{ height?: number; onDark?: boolean }> = ({ height = 28, onDark = false }) => {
-  const shown = onDark ? Math.round(height * OUTLINE_SCALE) : height;
-  return (
-    <img
-      src={onDark ? '/images/logo/larsen-logo-outline.svg' : '/images/logo/larsen-logo.svg'}
-      alt="Larsen Italiana"
-      height={shown}
-      style={{ height: shown, width: 'auto', alignSelf: 'flex-start' }}
-      className="block shrink-0 object-contain"
-    />
-  );
-};
+export const AdminLogo: React.FC<{ height?: number; onDark?: boolean }> = ({ height = 28, onDark = false }) => (
+  <img
+    src={onDark ? '/images/logo/larsen-logo-white.svg' : '/images/logo/larsen-logo.svg'}
+    alt="Larsen Italiana"
+    height={height}
+    style={{ height, width: 'auto', alignSelf: 'flex-start' }}
+    className="block shrink-0 object-contain"
+  />
+);

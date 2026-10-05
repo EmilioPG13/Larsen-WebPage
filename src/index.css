@@ -15,6 +15,16 @@
   --footer: #131a4f;                    /* footer field — deep Larsen navy */
   --nav: #1e276b;                       /* header bar — Larsen navy, a step lighter than the footer */
 
+  /* Header and footer bars. A light navy tint (not white, which would vanish into the page) so the logo
+     keeps its official colors, since its blue does not read on navy. */
+  --bar: #E9ECF6;
+  --bar-footer: #DFE3F0;
+  --bar-ink: #1b1c20;
+  --bar-ink-2: #3d4254;
+  --bar-ink-3: #5d6171;
+  --bar-line: rgba(40, 50, 123, 0.16);
+  --bar-edge: rgba(40, 50, 123, 0.35);
+
   /* Text */
   --ink: #1b1c20;   /* primary text */
   --text2: #4c4f55; /* secondary text */
@@ -51,6 +61,15 @@
   --surface-2: #23242e;
   --footer: #070a1f;
   --nav: #0d1236;
+
+  /* Dark bars: navy, with the logo in its white reversed version */
+  --bar: #0d1236;
+  --bar-footer: #070a1f;
+  --bar-ink: #ffffff;
+  --bar-ink-2: rgba(255, 255, 255, 0.70);
+  --bar-ink-3: rgba(255, 255, 255, 0.55);
+  --bar-line: rgba(255, 255, 255, 0.10);
+  --bar-edge: rgba(255, 255, 255, 0.25);
 
   /* Text */
   --ink: #F2EFE9;

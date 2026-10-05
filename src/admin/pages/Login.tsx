@@ -43,7 +43,7 @@ const Login: React.FC = () => {
     <div className="adm grid min-h-screen lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <aside className="adm-rail relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
         <div className="flex flex-col gap-2">
-          <AdminLogo height={44} onDark />
+          <AdminLogo height={44} onDark={Boolean(theme?.isDark)} />
           <div className="text-[13px] text-(--a-rail-muted)">Panel interno</div>
         </div>
 

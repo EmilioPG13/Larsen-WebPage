@@ -30,13 +30,13 @@ colors:
   on-navy-dark: "#0b0e1c"
   attention-red: "#c41c28"
   attention-red-dark: "#ff7a83"
-  rail: "#141a47"
+  rail: "#ffffff"
   rail-dark: "#070914"
-  rail-ink: "#e8ebf8"
+  rail-ink: "#11131a"
   rail-ink-dark: "#e4e7f7"
-  rail-muted: "#a3aad6"
+  rail-muted: "#5b6175"
   rail-muted-dark: "#8f96ba"
-  rail-active: "#f3f5fc"
+  rail-active: "#28327b"
   rail-active-dark: "#e4e7f7"
 typography:
   title:
@@ -167,7 +167,7 @@ Scope: this system applies only to `/admin`. The public site keeps its own look 
 
 **Creative North Star: "The Knitting Chart"**
 
-Every unit, lead and record is a cell on a visible technical grid, and its state is a drawn stitch symbol readable without color. The ground is cool paper carrying a faint 24px chart grid; work happens on solid white plates with 1px square hairlines; a deep-navy rail anchors the left edge. Navy is the only action color and red is reserved for destructive and overdue. The panel is an operating tool for Larsen staff (desktop admins, warehouse phones and tablets), so it is dense, legible and quiet, in Spanish.
+Every unit, lead and record is a cell on a visible technical grid, and its state is a drawn stitch symbol readable without color. The ground is cool paper carrying a faint 24px chart grid; work happens on solid white plates with 1px square hairlines; a white rail anchors the left edge in light mode (deep ink-navy in dark mode). Navy is the only action color and red is reserved for destructive and overdue. The panel is an operating tool for Larsen staff (desktop admins, warehouse phones and tablets), so it is dense, legible and quiet, in Spanish.
 
 Dark mode is a full second ground, not an inversion: an ink-blue paper with a periwinkle accent in place of navy and a soft coral in place of red.
 
@@ -194,7 +194,7 @@ A cool paper-and-navy palette with one attention red; everything else is an ink-
 - **Ink / Secondary / Muted / Faint**: primary text; table body secondary and field labels; labels and placeholders; zero values (`.adm-dim`, color only).
 - **Hairline / Hairline Strong**: row and plate dividers; page-head rule, table head rule, chart cell edge, dialog and popover edge.
 - **Control Edge** (`control-edge`): borders of every interactive control, held at 3:1 on the plates.
-- **Rail family** (`rail`, `rail-ink`, `rail-muted`, `rail-active`): the left rail and mobile top bar. The active item is an inverted paper cell (`rail-active` fill, `rail` text).
+- **Rail family** (`rail`, `rail-ink`, `rail-muted`, `rail-active`): the left rail and mobile top bar. In light mode the rail is white so the logo keeps its official colors, and the active item is a solid navy cell with white text; in dark mode the rail is ink-navy and the active item is an inverted paper cell (`rail-active` fill, `rail` text).
 
 ### Named Rules
 **The Single Action Rule.** Navy is the only action color. A second accent for "variety" is not allowed.
@@ -223,7 +223,7 @@ A cool paper-and-navy palette with one attention red; everything else is an ink-
 
 ## Layout
 
-A 256px left rail (below the `lg` breakpoint it becomes a drawer opened from a 56px navy top bar with 44px touch buttons) and a main column capped at 1600px. Page padding is 16px/20px on mobile and 32px/28px from 640px, with 48-56px of bottom room. The page head is flex (stacked on mobile, row from 640px) with a 24px gap to content and a 1px strong hairline beneath. Plates stack with 16-24px gaps; plate bodies pad 16px (20px from 640px); panel heads are 64px tall. Spacing runs on 4/8/12/16/20/24, anchored to the 24px chart module of the background grid. Tables become stacked rows on narrow screens; the segmented filter row scrolls horizontally with an edge fade. On coarse pointers, controls grow to 44px (small buttons 40px, rail links 46px).
+A 256px left rail (below the `lg` breakpoint it becomes a drawer opened from a 56px top bar (white in light mode, ink-navy in dark) with 44px touch buttons) and a main column capped at 1600px. Page padding is 16px/20px on mobile and 32px/28px from 640px, with 48-56px of bottom room. The page head is flex (stacked on mobile, row from 640px) with a 24px gap to content and a 1px strong hairline beneath. Plates stack with 16-24px gaps; plate bodies pad 16px (20px from 640px); panel heads are 64px tall. Spacing runs on 4/8/12/16/20/24, anchored to the 24px chart module of the background grid. Tables become stacked rows on narrow screens; the segmented filter row scrolls horizontally with an edge fade. On coarse pointers, controls grow to 44px (small buttons 40px, rail links 46px).
 
 ## Elevation & Depth
 
@@ -242,7 +242,7 @@ Radius is 0 everywhere. Forms are squares, hairline rectangles and drawn geometr
 The state vocabulary, drawn in a 16px box (rendered 14-18px) in `currentColor`: **ring** (circle outline), **slash** (ring crossed by a diagonal), **dot** (filled circle), **cross** (an X), **sq** (filled square), **sqslash**, **sqcheck**, **sqdash** (square outlines with a diagonal, check or dash), **alert** (square outline with an exclamation), and **check**. Each state of a unit or record gets one fixed mark; tags and table rows carry the mark beside the text.
 
 ### Rail
-Navy-ink column with the company wordmark (`AdminLogo`, the logo traced to a vector, in its official colors with a white die-cut outline over the dark rail) over "Panel interno", grouped nav under 11px uppercase group labels, 40px links with 20px drawn icons, the active link an inverted paper cell, then a user cell and the theme switch (two equal cells, the live one filled paper) at the bottom.
+Column with the company wordmark (`AdminLogo`: the logo traced to a vector, in its official colors on the white light-mode rail, and its white reversed version on the dark one, because the official blue does not read on navy) over "Panel interno", grouped nav under 11px uppercase group labels, 40px links with 20px drawn icons, the active link a solid navy cell in light mode (inverted paper cell in dark), then a user cell and the theme switch (two equal cells, the live one filled paper) at the bottom.
 
 ### Plates
 White squares with a 1px hairline. Optional head band (64px, plate-header tone, label-style title, 13px note beneath) and body padding 16-20px. A ledger variant lists label-left, mono-value-right rows separated by hairlines.
