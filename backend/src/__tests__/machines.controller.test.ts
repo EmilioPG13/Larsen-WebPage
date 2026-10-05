@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { updateMachineStock } from '../controllers/machines.controller';
-import { AppError } from '../middleware/error.middleware';
+import prisma from '../config/database';
 
 // Mock Prisma
 jest.mock('../config/database', () => ({
@@ -13,9 +13,7 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const prisma = require('../config/database').default;
-const mockUpdate = prisma.machine.update;
-const mockFindUnique = prisma.machine.findUnique;
+const mockUpdate = prisma.machine.update as unknown as jest.Mock;
 
 describe('Machines Controller - Stock Updates', () => {
   let mockRequest: Partial<Request>;

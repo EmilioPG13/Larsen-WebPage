@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { createLead, getLeads, getLeadById, updateLeadStatus, deleteLead, getStats } from '../controllers/leads.controller';
 import { AppError } from '../middleware/error.middleware';
+import prisma from '../config/database';
+import { notifyNewLead, sendLeadConfirmation } from '../services/notify';
 
 // Mock the notification service (no SMTP in tests)
 jest.mock('../services/notify', () => ({
@@ -26,22 +28,19 @@ jest.mock('../config/database', () => ({
   },
 }));
 
-const {
-  notifyNewLead: mockNotifyNewLead,
-  sendLeadConfirmation: mockSendLeadConfirmation,
-} = require('../services/notify');
-const prisma = require('../config/database').default;
-const mockCreate = prisma.lead.create;
-const mockFindMany = prisma.lead.findMany;
-const mockFindUnique = prisma.lead.findUnique;
-const mockUpdate = prisma.lead.update;
-const mockDelete = prisma.lead.delete;
-const mockCount = prisma.lead.count;
-const mockProductCount = prisma.product.count;
-const mockMachineCount = prisma.machine.count;
-const mockUnitGroupBy = prisma.inventoryUnit.groupBy;
-const mockUnitFindUnique = prisma.inventoryUnit.findUnique;
-const mockUnitFindMany = prisma.inventoryUnit.findMany;
+const mockNotifyNewLead = notifyNewLead as jest.Mock;
+const mockSendLeadConfirmation = sendLeadConfirmation as jest.Mock;
+const mockCreate = prisma.lead.create as unknown as jest.Mock;
+const mockFindMany = prisma.lead.findMany as unknown as jest.Mock;
+const mockFindUnique = prisma.lead.findUnique as unknown as jest.Mock;
+const mockUpdate = prisma.lead.update as unknown as jest.Mock;
+const mockDelete = prisma.lead.delete as unknown as jest.Mock;
+const mockCount = prisma.lead.count as unknown as jest.Mock;
+const mockProductCount = prisma.product.count as unknown as jest.Mock;
+const mockMachineCount = prisma.machine.count as unknown as jest.Mock;
+const mockUnitGroupBy = prisma.inventoryUnit.groupBy as unknown as jest.Mock;
+const mockUnitFindUnique = prisma.inventoryUnit.findUnique as unknown as jest.Mock;
+const mockUnitFindMany = prisma.inventoryUnit.findMany as unknown as jest.Mock;
 
 describe('Leads Controller', () => {
   let mockRequest: Partial<Request>;

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
-import { AppError } from '../middleware/error.middleware';
+import { AppError, isRecordNotFound } from '../middleware/error.middleware';
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -94,7 +94,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
 
     res.json(product);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Product not found', 404));
     }
     next(error);
@@ -111,7 +111,7 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
 
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Product not found', 404));
     }
     next(error);
@@ -144,7 +144,7 @@ export const updateProductStock = async (req: Request, res: Response, next: Next
 
     res.json(product);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Product not found', 404));
     }
     next(error);

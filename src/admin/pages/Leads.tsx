@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '../services/adminApi';
 import { apiErrorMessage } from '../services/apiError';
 import { PageError, PageHeader, PageLoading, Panel, Tag, type MarkName } from '../components/ui/kit';
@@ -26,11 +26,7 @@ const Leads: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  useEffect(() => {
-    fetchLeads();
-  }, [statusFilter]);
-
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       setLoading(true);
       const params = statusFilter !== 'all' ? { status: statusFilter } : {};
@@ -41,7 +37,11 @@ const Leads: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchLeads();
+  }, [fetchLeads]);
 
   const handleStatusUpdate = async (id: string, status: string) => {
     try {

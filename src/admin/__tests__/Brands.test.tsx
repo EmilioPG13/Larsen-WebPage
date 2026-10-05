@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Brands from '../pages/Brands';
@@ -11,7 +11,7 @@ vi.mock('../services/adminApi', () => ({
   },
 }));
 
-const mockAdminApi = adminApi.adminApi as any;
+const mockAdminApi = adminApi.adminApi as unknown as Record<string, Mock>;
 
 const mockBrands = [
   {

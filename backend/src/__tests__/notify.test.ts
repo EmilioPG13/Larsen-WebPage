@@ -1,9 +1,9 @@
 const mockSendMail = jest.fn();
-const mockCreateTransport = jest.fn(() => ({ sendMail: mockSendMail }));
+const mockCreateTransport = jest.fn((..._args: unknown[]) => ({ sendMail: mockSendMail }));
 
 jest.mock('nodemailer', () => ({
   __esModule: true,
-  default: { createTransport: (...args: unknown[]) => (mockCreateTransport as any)(...args) },
+  default: { createTransport: (...args: unknown[]) => mockCreateTransport(...args) },
 }));
 
 const baseEnv = {
@@ -33,6 +33,8 @@ const lead = {
 function loadNotify(): typeof import('../services/notify') {
   let mod!: typeof import('../services/notify');
   jest.isolateModules(() => {
+    // require() is required here: isolateModules only isolates synchronous loads.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     mod = require('../services/notify');
   });
   return mod;

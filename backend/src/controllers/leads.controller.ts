@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../config/database';
-import { AppError } from '../middleware/error.middleware';
+import { AppError, isRecordNotFound } from '../middleware/error.middleware';
 import { NotifiableLead, notifyNewLead, sendLeadConfirmation } from '../services/notify';
 import { EmailLang, parseEmailLang } from '../services/email-layout';
 
@@ -142,8 +143,8 @@ export const getLeads = async (req: Request, res: Response, next: NextFunction) 
     const limitNum = parseInt(limit as string, 10);
     const skip = (pageNum - 1) * limitNum;
 
-    const where: any = {};
-    if (status) {
+    const where: Prisma.LeadWhereInput = {};
+    if (typeof status === 'string' && status) {
       where.status = status;
     }
 
@@ -207,7 +208,7 @@ export const updateLeadStatus = async (req: Request, res: Response, next: NextFu
 
     res.json(lead);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Lead not found', 404));
     }
     next(error);
@@ -224,7 +225,7 @@ export const deleteLead = async (req: Request, res: Response, next: NextFunction
 
     res.json({ message: 'Lead deleted successfully' });
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Lead not found', 404));
     }
     next(error);

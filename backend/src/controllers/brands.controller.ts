@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
-import { AppError } from '../middleware/error.middleware';
+import { AppError, isRecordNotFound } from '../middleware/error.middleware';
 
 export const getBrands = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -71,7 +71,7 @@ export const updateBrand = async (req: Request, res: Response, next: NextFunctio
 
     res.json(brand);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Brand not found', 404));
     }
     next(error);
@@ -88,7 +88,7 @@ export const deleteBrand = async (req: Request, res: Response, next: NextFunctio
 
     res.json({ message: 'Brand deleted successfully' });
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Brand not found', 404));
     }
     next(error);

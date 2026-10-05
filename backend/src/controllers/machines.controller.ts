@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
-import { AppError } from '../middleware/error.middleware';
+import { AppError, isRecordNotFound } from '../middleware/error.middleware';
 
 export const getMachines = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -110,7 +110,7 @@ export const updateMachine = async (req: Request, res: Response, next: NextFunct
 
     res.json(machine);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Machine not found', 404));
     }
     next(error);
@@ -127,7 +127,7 @@ export const deleteMachine = async (req: Request, res: Response, next: NextFunct
 
     res.json({ message: 'Machine deleted successfully' });
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Machine not found', 404));
     }
     next(error);
@@ -160,7 +160,7 @@ export const updateMachineStock = async (req: Request, res: Response, next: Next
 
     res.json(machine);
   } catch (error) {
-    if ((error as any).code === 'P2025') {
+    if (isRecordNotFound(error)) {
       return next(new AppError('Machine not found', 404));
     }
     next(error);

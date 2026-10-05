@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
+/** True when Prisma reports that the record to update or delete does not exist (P2025). */
+export const isRecordNotFound = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2025';
+
 export class AppError extends Error {
   status: number;
   isOperational: boolean;
@@ -17,9 +21,9 @@ export class AppError extends Error {
 
 export const errorHandler = (
   err: Error | AppError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   if (err instanceof AppError) {
     if (err.retryAfterSeconds !== undefined) {

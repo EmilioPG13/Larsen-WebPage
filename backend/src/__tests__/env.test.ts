@@ -2,6 +2,7 @@
 // variables first (a plain `import` would be hoisted above these lines).
 process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- must load after the variables above
 const { envSchema } = require('../config/env') as typeof import('../config/env');
 
 const required = { DATABASE_URL: 'postgresql://x', JWT_SECRET: 'secret' };

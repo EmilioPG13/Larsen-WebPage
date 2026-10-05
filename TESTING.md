@@ -73,5 +73,5 @@ npm run test:coverage
 ## 8. Before a release
 
 - Chrome, Firefox, Safari and Edge: sections 1 and 2.
-- `npm run build` passes in the root and in `backend/`.
+- `npm run lint` and `npm run build` pass in the root, and `npm run build` passes in `backend/`.
 - No secrets in the diff; `.env` files are untracked.
