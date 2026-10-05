@@ -21,6 +21,7 @@ jest.mock('../config/database', () => ({
     },
     product: { count: jest.fn() },
     machine: { count: jest.fn() },
+    inventoryUnit: { groupBy: jest.fn() },
   },
 }));
 
@@ -34,6 +35,7 @@ const mockDelete = prisma.lead.delete;
 const mockCount = prisma.lead.count;
 const mockProductCount = prisma.product.count;
 const mockMachineCount = prisma.machine.count;
+const mockUnitGroupBy = prisma.inventoryUnit.groupBy;
 
 describe('Leads Controller', () => {
   let mockRequest: Partial<Request>;
@@ -470,6 +472,11 @@ describe('Leads Controller', () => {
       mockProductCount.mockResolvedValueOnce(5).mockResolvedValueOnce(3).mockResolvedValueOnce(2);
       // machine.count: total, in stock, out of stock
       mockMachineCount.mockResolvedValueOnce(6).mockResolvedValueOnce(4).mockResolvedValueOnce(2);
+      // inventoryUnit.groupBy by status; a status with no units is simply absent
+      mockUnitGroupBy.mockResolvedValueOnce([
+        { status: 'DISPONIBLE', _count: { _all: 16 } },
+        { status: 'VENDIDA', _count: { _all: 3 } },
+      ]);
 
       await getStats(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -478,6 +485,7 @@ describe('Leads Controller', () => {
         leads: { total: 10, newToday: 2, new: 4 },
         products: { total: 5, inStock: 3, outOfStock: 2 },
         machines: { total: 6, inStock: 4, outOfStock: 2 },
+        inventory: { available: 16, reserved: 0, sold: 3 },
       });
     });
 

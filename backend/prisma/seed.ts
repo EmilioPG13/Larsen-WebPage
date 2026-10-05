@@ -168,6 +168,8 @@ async function main() {
         ...(machineData.en ? { en: machineData.en } : {}),
         brandId,
         inStock: true, // All existing machines are in stock by default
+        // Only set on create so a re-seed never overwrites the admin's choice.
+        onOrder: ['aries-3', 'aries-6'].includes(machineData.id),
       },
     });
     console.log(`  ✓ Created/Updated machine: ${machineData.name}`);

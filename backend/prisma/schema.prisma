@@ -28,6 +28,8 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  inventoryMovements InventoryMovement[]
+
   @@map("users")
 }
 
@@ -42,6 +44,7 @@ model Brand {
 
   products Product[]
   machines Machine[] @relation("MachineBrandRelation")
+  inventoryUnits InventoryUnit[]
 
   @@map("brands")
 }
@@ -88,10 +91,14 @@ model Machine {
   en              Json?
   brandId         String?
   inStock         Boolean  @default(true)
+  // Sold to order from Italy (e.g. Aries): listed in the catalog without
+  // physical units. InventoryUnit only holds machines with a serial number.
+  onOrder         Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   brandRelation Brand? @relation("MachineBrandRelation", fields: [brandId], references: [id], onDelete: SetNull)
+  inventoryUnits InventoryUnit[]
 
   @@map("machines")
 }
@@ -101,16 +108,26 @@ model Lead {
   name            String
   email           String
   phone           String
-  company         String
+  // company, budget and purchaseDate are optional so a per-unit quote request
+  // can be as short as name, email and phone.
+  company         String?
   industry        String?
   productionVolume String?
-  budget          String
-  purchaseDate    String
+  budget          String?
+  purchaseDate    String?
   message         String?
   status          String   @default("new") // new, contacted, converted, archived
+  // Set when the quote is for one physical unit of the inventory.
+  inventoryUnitId String?
+  serialNumber    String?
+  // Where the request came from (e.g. "quote_form", "machine_interest").
+  source          String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id], onDelete: SetNull)
+
+  @@index([inventoryUnitId])
   @@map("leads")
 }
 
@@ -129,4 +146,62 @@ model ContactSubmission {
   @@map("contact_submissions")
 }
 
+enum UnitStatus {
+  DISPONIBLE
+  APARTADA
+  VENDIDA
+}
 
+enum UnitModality {
+  EN_BODEGA
+  BAJO_PEDIDO
+}
+
+// One physical machine identified by its serial number.
+model InventoryUnit {
+  id           String       @id @default(uuid())
+  brand        String // Normalized display name: "Steiger" | "Shima Seiki"
+  brandId      String?
+  model        String // e.g. "Vesta 130E"
+  gauge        String // String because some machines are "5/7"
+  serialNumber String
+  status       UnitStatus   @default(DISPONIBLE)
+  modality     UnitModality @default(EN_BODEGA)
+  receivedAt   DateTime?
+  soldAt       DateTime? // Real sale date, editable
+  notes        String? // Internal only, never exposed by the public API
+  machineId    String? // Spec sheet this unit belongs to, when there is one
+  // Stage 2: id of the unit in the ERP (Odoo).
+  externalId   String?      @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  brandRelation Brand?               @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  machine       Machine?             @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  movements     InventoryMovement[]
+  leads         Lead[]
+
+  // Shima uses short serials (298, 333), so a serial is only unique per brand.
+  @@unique([brand, serialNumber])
+  @@index([status])
+  @@map("inventory_units")
+}
+
+// Audit trail: who changed which unit and when. It also measures the
+// "sale -> site updated" indicator (movement createdAt vs the unit's soldAt).
+model InventoryMovement {
+  id         String      @id @default(uuid())
+  unitId     String
+  userId     String? // null = import script
+  action     String // CREATE | UPDATE | STATUS | IMPORT
+  fromStatus UnitStatus?
+  toStatus   UnitStatus?
+  changes    Json? // { field: [before, after] }
+  createdAt  DateTime    @default(now())
+
+  unit InventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([unitId, createdAt])
+  @@map("inventory_movements")
+}
