@@ -47,13 +47,8 @@ const Header = () => {
     >
       <div className="max-w-[1280px] mx-auto px-7 h-16 flex items-center justify-between gap-6">
         {/* Logo */}
-        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center shrink-0">
-          <img
-            src="/images/logo/larsen-logo-1.png"
-            alt="Larsen Italiana"
-            className="h-[26px] w-auto object-contain"
-            style={{ filter: 'brightness(0) invert(1)' }}
-          />
+        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center shrink-0 bg-white px-3 py-2">
+          <img src="/images/logo/larsen-logo-1.png" alt="Larsen Italiana" className="h-[26px] w-auto object-contain" />
         </Link>
 
         {/* Desktop nav */}
