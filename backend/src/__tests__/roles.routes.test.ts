@@ -30,7 +30,6 @@ jest.mock('../config/database', () => {
       product: model(),
       machine: model(),
       lead: model(),
-      contactSubmission: model(),
       $transaction: jest.fn(),
     },
   };
@@ -38,7 +37,7 @@ jest.mock('../config/database', () => {
 
 const prisma = prismaClient as unknown as Record<string, Record<string, jest.Mock>>;
 
-const DATA_MODELS = ['brand', 'product', 'machine', 'lead', 'contactSubmission', 'user'];
+const DATA_MODELS = ['brand', 'product', 'machine', 'lead', 'user'];
 
 const tokenFor = (userId: string) =>
   jwt.sign({ userId, email: `${userId}@example.com` }, 'test-secret');

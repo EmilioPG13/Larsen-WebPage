@@ -231,31 +231,6 @@ export const deleteLead = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const createContactSubmission = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name, email, phone, company, message, productId } = req.body;
-
-    if (!name || !email || !message) {
-      throw new AppError('Missing required fields', 400);
-    }
-
-    const submission = await prisma.contactSubmission.create({
-      data: {
-        name,
-        email,
-        phone: phone || null,
-        company: company || null,
-        message,
-        productId: productId || null,
-      },
-    });
-
-    res.status(201).json(submission);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const [

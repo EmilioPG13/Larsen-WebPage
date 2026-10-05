@@ -66,16 +66,6 @@ export interface CatalogModel {
   units: CatalogUnit[];
 }
 
-export interface ContactFormData {
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  message: string;
-  productId?: string;
-  productName?: string;
-}
-
 export type SearchResultType = 'machine' | 'product' | 'page';
 
 export interface SearchResult {

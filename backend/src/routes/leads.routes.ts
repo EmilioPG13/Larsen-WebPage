@@ -5,7 +5,6 @@ import {
   getLeadById,
   updateLeadStatus,
   deleteLead,
-  createContactSubmission,
   getStats,
 } from '../controllers/leads.controller';
 import { authenticateToken, requireRole } from '../middleware/auth.middleware';

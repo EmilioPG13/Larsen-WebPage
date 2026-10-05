@@ -104,7 +104,6 @@ Data model: [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma).
 - The admin panel is Spanish only; the public site is ES/EN.
 - Migrations are applied by hand with `prisma migrate deploy`, not on deploy.
 - The monthly inventory report is still a plain-text email.
-- `POST /api/contact` is legacy and no longer used by the UI.
 - The ERP sync is a schema hook only; nothing talks to Odoo yet.
 
 ## About

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Product, Machine, CatalogModel, ContactFormData } from '../types';
+import type { Product, Machine, CatalogModel } from '../types';
 import machinesData from '../data/machines.json';
 import { clearSession } from '../admin/services/session';
 
@@ -111,19 +111,6 @@ export const submitLead = async (leadData: {
   language?: 'es' | 'en';
 }) => {
   const response = await api.post('/leads', leadData);
-  return response.data;
-};
-
-// Contact API
-export const submitContact = async (contactData: ContactFormData) => {
-  const response = await api.post('/contact', {
-    name: contactData.name,
-    email: contactData.email,
-    phone: contactData.phone,
-    company: contactData.company,
-    message: contactData.message,
-    productId: contactData.productId,
-  });
   return response.data;
 };
 
