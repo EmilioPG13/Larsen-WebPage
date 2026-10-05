@@ -11,6 +11,9 @@ export interface QuoteLeadPayload {
   message: string;
   /** Where the lead came from, e.g. 'quote-form' | 'spec-download'. */
   source?: string;
+  /** Set when the quote is for one unit of the catalog. */
+  inventoryUnitId?: string;
+  serialNumber?: string;
 }
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined;
@@ -33,6 +36,7 @@ async function sendViaEmailjs(p: QuoteLeadPayload): Promise<void> {
       email: p.email,
       phone: p.phone,
       machine: p.machine || '—',
+      serial_number: p.serialNumber || '—',
       source: p.source || 'quote-form',
       message: p.message,
     },
@@ -50,6 +54,9 @@ async function sendViaBackend(p: QuoteLeadPayload): Promise<void> {
     budget: 'No especificado',
     purchaseDate: 'No especificado',
     message: `${sourceLine}${p.message}`.trim() || undefined,
+    inventoryUnitId: p.inventoryUnitId || undefined,
+    serialNumber: p.serialNumber || undefined,
+    source: p.source || undefined,
   });
 }
 

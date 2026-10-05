@@ -47,6 +47,25 @@ export interface Machine {
   en?: MachineI18n;
 }
 
+/** One physical unit offered in the public catalog (never carries notes or sale data). */
+export interface CatalogUnit {
+  id: string;
+  gauge: string;
+  serialNumber: string;
+}
+
+/** A model in `GET /api/catalog`: its available units, or a made-to-order machine with none. */
+export interface CatalogModel {
+  brand: string;
+  model: string;
+  /** Spec sheet id when the model has one, which `/maquinas/:id` can open. */
+  machineId: string | null;
+  image: string | null;
+  modality: 'EN_BODEGA' | 'BAJO_PEDIDO';
+  gauges: string[];
+  units: CatalogUnit[];
+}
+
 export interface ContactFormData {
   name: string;
   email: string;

@@ -3,6 +3,37 @@ import prisma from '../config/database';
 import { AppError } from '../middleware/error.middleware';
 import { notifyNewLead } from '../services/notify';
 
+const MAX_TAG_LENGTH = 60;
+
+/** A trimmed, length-capped string, or null when the value is not usable text. */
+const optionalText = (value: unknown): string | null =>
+  typeof value === 'string' && value.trim() ? value.trim().slice(0, MAX_TAG_LENGTH) : null;
+
+/**
+ * The inventory unit a quote is about. The catalog sends the unit id; a bare
+ * serial number links only when exactly one unit has it (serials repeat across
+ * brands). Never throws on a miss: an unknown unit must not lose the lead.
+ */
+const resolveUnit = async (inventoryUnitId: unknown, serialNumber: string | null) => {
+  const id = optionalText(inventoryUnitId);
+  if (id) {
+    const unit = await prisma.inventoryUnit.findUnique({
+      where: { id },
+      select: { id: true, serialNumber: true },
+    });
+    if (unit) return unit;
+  }
+  if (serialNumber) {
+    const matches = await prisma.inventoryUnit.findMany({
+      where: { serialNumber },
+      select: { id: true, serialNumber: true },
+      take: 2,
+    });
+    if (matches.length === 1) return matches[0];
+  }
+  return null;
+};
+
 export const createLead = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {
@@ -15,11 +46,18 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
       budget,
       purchaseDate,
       message,
+      inventoryUnitId,
+      serialNumber,
+      source,
     } = req.body;
 
     if (!name || !email || !phone) {
       throw new AppError('Missing required fields', 400);
     }
+
+    const unit = await resolveUnit(inventoryUnitId, optionalText(serialNumber));
+    const leadSerial = unit?.serialNumber ?? optionalText(serialNumber);
+    const leadSource = optionalText(source);
 
     const lead = await prisma.lead.create({
       data: {
@@ -33,6 +71,11 @@ export const createLead = async (req: Request, res: Response, next: NextFunction
         purchaseDate: purchaseDate || 'No especificado',
         message: message || null,
         status: 'new',
+        // Only sent when there is something to store, so a plain quote writes
+        // exactly what it did before the inventory columns existed.
+        ...(unit && { inventoryUnitId: unit.id }),
+        ...(leadSerial && { serialNumber: leadSerial }),
+        ...(leadSource && { source: leadSource }),
       },
     });
 

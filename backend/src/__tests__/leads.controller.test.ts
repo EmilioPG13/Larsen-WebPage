@@ -21,7 +21,7 @@ jest.mock('../config/database', () => ({
     },
     product: { count: jest.fn() },
     machine: { count: jest.fn() },
-    inventoryUnit: { groupBy: jest.fn() },
+    inventoryUnit: { groupBy: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
   },
 }));
 
@@ -36,6 +36,8 @@ const mockCount = prisma.lead.count;
 const mockProductCount = prisma.product.count;
 const mockMachineCount = prisma.machine.count;
 const mockUnitGroupBy = prisma.inventoryUnit.groupBy;
+const mockUnitFindUnique = prisma.inventoryUnit.findUnique;
+const mockUnitFindMany = prisma.inventoryUnit.findMany;
 
 describe('Leads Controller', () => {
   let mockRequest: Partial<Request>;
@@ -59,6 +61,94 @@ describe('Leads Controller', () => {
   });
 
   describe('createLead', () => {
+    describe('quote for one inventory unit', () => {
+      const base = { name: 'Ana', email: 'ana@example.com', phone: '555' };
+
+      beforeEach(() => {
+        mockCreate.mockResolvedValue({ id: 'lead-1', ...base });
+      });
+
+      it('links the unit by id and stores its serial and the source', async () => {
+        mockUnitFindUnique.mockResolvedValue({ id: 'unit-1', serialNumber: '6212/05' });
+        mockRequest.body = { ...base, inventoryUnitId: 'unit-1', serialNumber: 'ignored', source: 'catalog-unit' };
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockUnitFindUnique).toHaveBeenCalledWith({
+          where: { id: 'unit-1' },
+          select: { id: true, serialNumber: true },
+        });
+        const data = mockCreate.mock.calls[0][0].data;
+        expect(data).toMatchObject({
+          inventoryUnitId: 'unit-1',
+          serialNumber: '6212/05',
+          source: 'catalog-unit',
+        });
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+      });
+
+      it('keeps the lead, without a link, when the unit id does not exist', async () => {
+        mockUnitFindUnique.mockResolvedValue(null);
+        mockRequest.body = { ...base, inventoryUnitId: 'gone', serialNumber: '333' };
+        mockUnitFindMany.mockResolvedValue([]);
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        const data = mockCreate.mock.calls[0][0].data;
+        expect(data).not.toHaveProperty('inventoryUnitId');
+        expect(data.serialNumber).toBe('333');
+        expect(mockResponse.status).toHaveBeenCalledWith(201);
+      });
+
+      it('links by serial number only when exactly one unit has it', async () => {
+        mockUnitFindMany.mockResolvedValue([{ id: 'unit-9', serialNumber: '298' }]);
+        mockRequest.body = { ...base, serialNumber: '298' };
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockCreate.mock.calls[0][0].data).toMatchObject({ inventoryUnitId: 'unit-9', serialNumber: '298' });
+      });
+
+      it('does not guess when the serial number is shared by several units', async () => {
+        mockUnitFindMany.mockResolvedValue([
+          { id: 'a', serialNumber: '333' },
+          { id: 'b', serialNumber: '333' },
+        ]);
+        mockRequest.body = { ...base, serialNumber: '333' };
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        const data = mockCreate.mock.calls[0][0].data;
+        expect(data).not.toHaveProperty('inventoryUnitId');
+        expect(data.serialNumber).toBe('333');
+      });
+
+      it('ignores non-text values and caps the length of what it stores', async () => {
+        mockRequest.body = { ...base, inventoryUnitId: { $ne: null }, serialNumber: 42, source: 'x'.repeat(200) };
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockUnitFindUnique).not.toHaveBeenCalled();
+        const data = mockCreate.mock.calls[0][0].data;
+        expect(data).not.toHaveProperty('inventoryUnitId');
+        expect(data).not.toHaveProperty('serialNumber');
+        expect(data.source).toHaveLength(60);
+      });
+
+      it('writes nothing extra for a plain quote', async () => {
+        mockRequest.body = base;
+
+        await createLead(mockRequest as Request, mockResponse as Response, mockNext);
+
+        expect(mockUnitFindUnique).not.toHaveBeenCalled();
+        expect(mockUnitFindMany).not.toHaveBeenCalled();
+        const data = mockCreate.mock.calls[0][0].data;
+        expect(data).not.toHaveProperty('inventoryUnitId');
+        expect(data).not.toHaveProperty('serialNumber');
+        expect(data).not.toHaveProperty('source');
+      });
+    });
+
     it('should create a lead with all required fields', async () => {
       const leadData = {
         name: 'John Doe',

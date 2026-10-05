@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Product, Machine, ContactFormData } from '../types';
+import type { Product, Machine, CatalogModel, ContactFormData } from '../types';
 import machinesData from '../data/machines.json';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -58,6 +58,13 @@ export const getMachines = async (): Promise<Machine[]> => {
   }
 };
 
+// Catalog API: live stock grouped by model. Deliberately no static fallback:
+// stock that cannot be confirmed must not be shown, so callers handle the failure.
+export const getCatalog = async (): Promise<CatalogModel[]> => {
+  const response = await api.get('/catalog');
+  return response.data;
+};
+
 export const getMachineById = async (id: string): Promise<Machine> => {
   try {
     const response = await api.get(`/machines/${id}`);
@@ -86,6 +93,10 @@ export const submitLead = async (leadData: {
   budget: string;
   purchaseDate: string;
   message?: string;
+  /** Set when the quote is for one unit of the catalog. */
+  inventoryUnitId?: string;
+  serialNumber?: string;
+  source?: string;
 }) => {
   const response = await api.post('/leads', leadData);
   return response.data;

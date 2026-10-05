@@ -90,6 +90,16 @@ describe('notifyNewLead', () => {
     expect(mail.text).toContain('https://larsenitaliana.com/admin/leads');
   });
 
+  it('names the unit serial when the quote is for one unit, and omits the line otherwise', async () => {
+    const { notifyNewLead } = loadNotify();
+
+    await notifyNewLead({ ...lead, serialNumber: '6212/05\nBcc: x@evil.test' });
+    await notifyNewLead(lead);
+
+    expect(mockSendMail.mock.calls[0][0].text).toContain('Unidad (serie): 6212/05 Bcc: x@evil.test');
+    expect(mockSendMail.mock.calls[1][0].text).not.toContain('Unidad (serie)');
+  });
+
   it('uses dashes for missing company, source and message', async () => {
     const { notifyNewLead } = loadNotify();
 

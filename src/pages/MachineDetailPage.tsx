@@ -6,11 +6,12 @@ import { useT } from '../i18n/useT';
 import { useLanguage } from '../i18n/LanguageContext';
 import { localizeMachine } from '../i18n/localizeMachine';
 import { useDocumentMeta } from '../i18n/useDocumentMeta';
-import { getMachines } from '../services/api';
+import { getCatalog, getMachines } from '../services/api';
 import { track } from '../services/analytics';
-import type { Machine } from '../types';
+import { WHATSAPP_NUMBER } from '../utils/whatsapp';
+import { unitQuoteHref } from '../utils/unitQuote';
+import type { CatalogModel, Machine } from '../types';
 
-const WHATSAPP_NUMBER = '527753650376';
 const PLATE = 'max-w-[1280px] mx-auto px-7';
 
 const MachineDetailPage = () => {
@@ -38,6 +39,20 @@ const MachineDetailPage = () => {
   );
 
   const [sheetOpen, setSheetOpen] = useState(false);
+  // Units of this model that are in stock right now. Optional: when the catalog
+  // cannot be reached the page simply shows no unit list.
+  const [stock, setStock] = useState<CatalogModel | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const catalog = await getCatalog();
+        setStock(catalog.find((m) => m.machineId === id && m.units.length > 0) ?? null);
+      } catch {
+        setStock(null);
+      }
+    })();
+  }, [id]);
 
   useEffect(() => {
     (async () => {
@@ -56,7 +71,15 @@ const MachineDetailPage = () => {
   );
 
   useEffect(() => {
-    if (machine) track('view_machine_detail', { machine_id: machine.id, machine_name: machine.name });
+    if (machine) {
+      track('view_machine_detail', {
+        machine_id: machine.id,
+        machine_name: machine.name,
+        brand: machine.brand,
+        model: machine.name,
+        gauge: machine.gauge,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- rawMachine identity is stable per id; localized `machine` is not
   }, [rawMachine]);
 
@@ -162,6 +185,38 @@ const MachineDetailPage = () => {
                 {t.detail.download}
               </button>
             </div>
+
+            {stock && (
+              <section className="mb-10">
+                <h2 className="font-serif font-medium text-[20px] text-ink m-0 mb-4">{t.mpage.unitsTitle}</h2>
+                <ul className="m-0 p-0 list-none border-t border-line">
+                  {stock.units.map((u) => (
+                    <li key={u.id} className="flex items-center justify-between gap-3 py-3 border-b border-line-soft">
+                      <span className="text-[14px] text-ink">
+                        <span className={`${kicker} text-muted`}>{t.mpage.serial}</span> {u.serialNumber}
+                        <span className="text-muted"> · {t.mpage.gauge} {u.gauge}</span>
+                      </span>
+                      <Link
+                        to={unitQuoteHref(stock, u)}
+                        onClick={() => {
+                          track('select_unit', {
+                            brand: stock.brand,
+                            model: stock.model,
+                            gauge: u.gauge,
+                            serial_number: u.serialNumber,
+                          });
+                          window.scrollTo(0, 0);
+                        }}
+                        aria-label={`${t.mpage.quoteUnit} ${stock.model} ${t.mpage.serial} ${u.serialNumber}`}
+                        className={`${kicker} shrink-0 h-9 px-3 inline-flex items-center border border-line-strong text-ink transition-colors hover:border-deep hover:text-deep`}
+                      >
+                        {t.mpage.quoteUnit}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <h2 className="font-serif font-medium text-[20px] text-ink m-0 mb-4">{t.detail.includedTitle}</h2>
             <ul className="flex flex-col gap-2.5 m-0 p-0 list-none">

@@ -8,6 +8,7 @@ import { es } from '../../i18n/dictionary';
 import type { Machine } from '../../types';
 import * as api from '../../services/api';
 import * as leads from '../../services/leads';
+import * as analytics from '../../services/analytics';
 
 vi.mock('../../services/api', () => ({ getMachines: vi.fn() }));
 vi.mock('../../services/leads', () => ({ sendQuoteLead: vi.fn() }));
@@ -15,6 +16,7 @@ vi.mock('../../services/analytics', () => ({ track: vi.fn() }));
 
 const mockGetMachines = vi.mocked(api.getMachines);
 const mockSendQuoteLead = vi.mocked(leads.sendQuoteLead);
+const mockTrack = vi.mocked(analytics.track);
 
 const machine = (id: string, name: string): Machine => ({
   id,
@@ -67,6 +69,75 @@ describe('QuotePage', () => {
     await waitFor(() =>
       expect(screen.getByRole('combobox', { name: es.qpage.machine })).toHaveValue('Aries.3'),
     );
+  });
+
+  describe('quote for one unit', () => {
+    const unitPath = '/cotizacion?machine=Gemini&brand=Steiger&gauge=10&serial=7429&unit=u-7429';
+
+    const fillAndSend = async () => {
+      await screen.findByRole('button', { name: es.qpage.submit });
+      fireEvent.change(screen.getByRole('textbox', { name: es.qpage.name }), { target: { value: 'Ana' } });
+      fireEvent.change(screen.getByRole('textbox', { name: es.qpage.email }), { target: { value: 'ana@acme.com' } });
+      fireEvent.change(screen.getByRole('textbox', { name: es.qpage.phone }), { target: { value: '5551234' } });
+      fireEvent.click(screen.getByRole('button', { name: es.qpage.submit }));
+      await waitFor(() => expect(screen.getByText(es.qpage.sentS)).toBeInTheDocument());
+    };
+
+    it('shows which unit the quote is for', async () => {
+      renderAt(unitPath);
+
+      expect(await screen.findByText(/Steiger Gemini · Serie 7429 · Galga 10/)).toBeInTheDocument();
+    });
+
+    it('sends the unit id, serial and source with the lead and tracks it', async () => {
+      renderAt(unitPath);
+      await fillAndSend();
+
+      const sent = mockSendQuoteLead.mock.calls[0][0];
+      expect(sent).toMatchObject({
+        machine: 'Gemini',
+        source: 'catalog-unit',
+        serialNumber: '7429',
+        inventoryUnitId: 'u-7429',
+      });
+      expect(sent.message).toContain('Unidad: 7429 (Galga 10)');
+      expect(mockTrack).toHaveBeenCalledWith('submit_quote', {
+        machine: 'Gemini',
+        source: 'quote',
+        brand: 'Steiger',
+        model: 'Gemini',
+        gauge: '10',
+        serial_number: '7429',
+      });
+    });
+
+    it('drops the unit when the visitor picks a different machine', async () => {
+      renderAt(unitPath);
+      await screen.findByRole('button', { name: es.qpage.submit });
+
+      fireEvent.change(screen.getByRole('combobox', { name: es.qpage.machine }), { target: { value: 'Aries.3' } });
+      expect(screen.queryByText(/Serie 7429/)).not.toBeInTheDocument();
+
+      fireEvent.change(screen.getByRole('textbox', { name: es.qpage.name }), { target: { value: 'Ana' } });
+      fireEvent.change(screen.getByRole('textbox', { name: es.qpage.email }), { target: { value: 'ana@acme.com' } });
+      fireEvent.change(screen.getByRole('textbox', { name: es.qpage.phone }), { target: { value: '5551234' } });
+      fireEvent.click(screen.getByRole('button', { name: es.qpage.submit }));
+      await waitFor(() => expect(screen.getByText(es.qpage.sentS)).toBeInTheDocument());
+
+      const sent = mockSendQuoteLead.mock.calls[0][0];
+      expect(sent.source).toBe('quote-page');
+      expect(sent).not.toHaveProperty('serialNumber');
+      expect(sent).not.toHaveProperty('inventoryUnitId');
+    });
+
+    it('does not mention a unit on a plain quote', async () => {
+      renderAt('/cotizacion?machine=Aries.3');
+      await fillAndSend();
+
+      const sent = mockSendQuoteLead.mock.calls[0][0];
+      expect(sent).not.toHaveProperty('serialNumber');
+      expect(sent.message).not.toContain('Unidad');
+    });
   });
 
   it('validates required fields and email format on blur', async () => {
