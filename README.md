@@ -1,5 +1,7 @@
 # Larsen Italiana
 
+[![CI](https://github.com/EmilioPG13/Larsen-WebPage/actions/workflows/ci.yml/badge.svg)](https://github.com/EmilioPG13/Larsen-WebPage/actions/workflows/ci.yml)
+
 A bilingual (ES/EN) lead-generation site and inventory back office for Larsen Italiana, a distributor of rebuilt industrial knitting machines. Visitors browse the catalog and request a quote; the sales team gets an email, and staff manage leads and physical stock from a private panel.
 
 [![A visitor fills in the quote form and gets a confirmation](assets/readme/quote-flow.gif)](assets/readme/quote-flow.gif)
@@ -84,6 +86,8 @@ SMTP is optional. Without it, leads are still saved and the emails are skipped w
 npm test             # 249 tests, Vitest + Testing Library
 cd backend && npm test   # 385 tests, Jest + Supertest
 ```
+
+634 tests in total. GitHub Actions runs lint, build and both suites on every push and pull request.
 
 Manual QA steps are in [TESTING.md](TESTING.md).
 

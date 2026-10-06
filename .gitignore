@@ -34,8 +34,5 @@ docs
 # graphify knowledge-graph output (regenerable local cache)
 graphify-out/
 
-# Impeccable session artifacts (review screenshots, mocks, build state)
-.impeccable/review/
-.impeccable/mocks/
-.impeccable/build/
-.impeccable/questions/
+# Impeccable design tooling (session artifacts and local design notes)
+.impeccable/
